@@ -21,8 +21,7 @@ class CNT:
     __name__ = "Carbon Nanotube"
 
     def __init__(self, n:int, m:int, Trepeat, a_cc=1.4, *, nonideal=False):
-        assert n > 0 and m >= 0, "n should be larger than 0, m should be larger or equal to 0!"
-        #assert m >= n, "n should not be smaller than m"
+        assert m >= 0 and n > m, "Condition 0 <= m < n does not fill!"
 
         self.__n = n
         self.__m = m
