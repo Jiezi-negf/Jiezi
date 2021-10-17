@@ -20,11 +20,10 @@ def nonideal():
 class CNT:
     __name__ = "Carbon Nanotube"
 
-    def __init__(self, n, m, Trepeat, a_cc=1.4, *, nonideal=False):
-        if not (isinstance(n, int) and isinstance(m, int)):
-            raise ValueError("chilarity must be integer")
-        if n < m:
-            raise ValueError("(n, m) n can't be lesser than m")
+    def __init__(self, n:int, m:int, Trepeat, a_cc=1.4, *, nonideal=False):
+        assert n > 0 and m >= 0, "n should be larger than 0, m should be larger or equal to 0!"
+        #assert m >= n, "n should not be smaller than m"
+
         self.__n = n
         self.__m = m
         self.__radius = 0.0
