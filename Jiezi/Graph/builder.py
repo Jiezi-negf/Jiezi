@@ -21,7 +21,7 @@ class CNT:
     __name__ = "Carbon Nanotube"
 
     def __init__(self, n:int, m:int, Trepeat:int, a_cc=1.4, *, nonideal=False):
-        assert m >= 0 and n >= m, "Condition 0 <= m =< n does not fill!"
+        assert m >= 0 and n >= m, "Condition 0 <= m <= n does not fill!"
         assert Trepeat >= 0, "Repeatation must be positive!"
 
         self.__n = n
@@ -114,7 +114,7 @@ class CNT:
             b_y.append(point[1])
         plt.scatter(a_x, a_y, c="red")
         plt.scatter(b_x, b_y, c="blue")
-        plt.gca().set_aspect('equal', adjustable='box')
+        plt.gca().set_aspect('auto', adjustable='box')
         plt.show()
 
 

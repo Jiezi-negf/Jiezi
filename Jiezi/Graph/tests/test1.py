@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 
 import Graph
 
-cnt = Graph.builder.CNT(1, 1, 1, nonideal=False)
+cnt = Graph.builder.CNT(3, 1, 1, nonideal=False)
 cnt.construct()
 cnt.data_print()
 cnt.data_plot()
