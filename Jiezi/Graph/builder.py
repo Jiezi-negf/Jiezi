@@ -7,8 +7,8 @@
 # ==============================================================================
 import numpy as np
 import matplotlib.pyplot as plt
-import cell
-import extend
+from . import cell
+from . import extend
 
 """ CNT class """
 
@@ -117,7 +117,7 @@ class CNT:
         plt.show()
 
 
-cnt = CNT(4, 2, 2, nonideal=False)
-cnt.construct()
-cnt.data_print()
-cnt.data_plot()
+#cnt = CNT(4, 2, 2, nonideal=False)
+#cnt.construct()
+#cnt.data_print()
+#cnt.data_plot()
