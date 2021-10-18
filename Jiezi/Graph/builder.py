@@ -10,8 +10,8 @@ import matplotlib.pyplot as plt
 from . import cell
 from . import extend
 
-""" CNT class """
 
+""" CNT class """
 
 def nonideal():
     print("system has some non-ideal factors")
@@ -20,8 +20,9 @@ def nonideal():
 class CNT:
     __name__ = "Carbon Nanotube"
 
-    def __init__(self, n:int, m:int, Trepeat, a_cc=1.4, *, nonideal=False):
-        assert m >= 0 and n > m, "Condition 0 <= m < n does not fill!"
+    def __init__(self, n:int, m:int, Trepeat:int, a_cc=1.4, *, nonideal=False):
+        assert m >= 0 and n >= m, "Condition 0 <= m =< n does not fill!"
+        assert Trepeat >= 0, "Repeatation must be positive!"
 
         self.__n = n
         self.__m = m
@@ -117,7 +118,3 @@ class CNT:
         plt.show()
 
 
-#cnt = CNT(4, 2, 2, nonideal=False)
-#cnt.construct()
-#cnt.data_print()
-#cnt.data_plot()
