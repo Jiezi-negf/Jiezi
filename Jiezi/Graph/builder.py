@@ -9,9 +9,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 from . import cell
 from . import extend
-
+from . import visual
+from mayavi import mlab
 
 """ CNT class """
+
 
 def nonideal():
     print("system has some non-ideal factors")
@@ -20,8 +22,8 @@ def nonideal():
 class CNT:
     __name__ = "Carbon Nanotube"
 
-    def __init__(self, n:int, m:int, Trepeat:int, a_cc=1.4, *, nonideal=False):
-        assert m >= 0 and n >= m, "Condition 0 <= m <= n does not fill!"
+    def __init__(self, n: int, m: int, Trepeat: int, a_cc=1.4, *, nonideal=False):
+        assert 0 <= m <= n, "Condition 0 <= m <= n does not fill!"
         assert Trepeat >= 0, "Repeatation must be positive!"
 
         self.__n = n
@@ -32,9 +34,9 @@ class CNT:
         # the suffix "number" means it contains number
         # the suffix "index" means there is only (p,q) but not number
         # {1: (0, 0), 2: (1, -1),...}
-        self.__a_set_number = {}
+        self.__a_set_cell = {}
         # {29: (1, -2), 30: (1, -1),...}
-        self.__b_set_number = {}
+        self.__b_set_cell = {}
 
         # [[(4, 1)], [(4, 1), (1, -2), (1, -1)],...]
         self.__a_link_index = []
@@ -59,7 +61,6 @@ class CNT:
         self.__nonideal = nonideal
 
     def construct(self):
-
         shape_para = cell.shape_parameter(self.__n, self.__m, self.__a_cc)
         circumstance = shape_para[0]
         self.__radius = shape_para[1]
@@ -67,30 +68,30 @@ class CNT:
         # both set_a and set_b are [(),(),...]
         set_a, set_b = cell.atom_ocean(self.__n, self.__m, self.__a_cc)
         set_a, set_b, a_right, b_right = cell.screen(set_a, set_b, self.__n, self.__m, t_1, t_2)
-        set_a, set_b, self.__a_link_index, self.__b_link_index, self.__a_link_map_index, self.__b_link_map_index = \
+        self.__a_set_cell, self.__b_set_cell, self.__a_link_index, self.__b_link_index, self.__a_link_map_index, self.__b_link_map_index = \
             cell.neighbor(set_a, set_b, a_right, b_right, self.__n, self.__m)
+
         self.__a_set_number, self.__b_set_number, self.__total_link_number, self.__hamilton_cell, \
-        self.__hamilton_hopping = extend.define_hamiltion(set_a, set_b, self.__a_link_index, self.__b_link_index,
-                                                          self.__n, self.__m, t_1, t_2, 1, 2)
-        count = len(self.__total_link_number)
-        self.__coord_a, self.__coord_b, self.__planar_a, self.__planar_b = extend.coordinate(self.__a_set_number,
-                                                                                             self.__b_set_number,
-                                                                                             self.__n, self.__m,
-                                                                                             circumstance, t_1, t_2,
-                                                                                             count,
-                                                                                             self.__Trepeat,
-                                                                                             self.__a_cc)
+        self.__hamilton_hopping = extend.define_hamiltion(self.__a_set_cell, self.__b_set_cell, self.__a_link_index, self.__b_link_index,
+                                                          self.__n, self.__m, t_1, t_2, self.__Trepeat, 1, 2)
+
+        self.__coord_a, self.__coord_b = extend.coordinate(self.__a_set_number, self.__b_set_number, self.__n, self.__m,
+                                                           circumstance, self.__a_cc, self.__radius)
         if self.__nonideal:
             nonideal()
 
     def data_print(self):
-        print("a:")
+        print("A in first cell:")
+        print(self.__a_set_cell)
+        print("B in first cell:")
+        print(self.__b_set_cell)
+        print("A in whole tube:")
         print(self.__a_set_number)
-        print("b:")
+        print("B in whole tube:")
         print(self.__b_set_number)
-        print("neighbors of A are:")
+        print("neighbors of A in one cell are:")
         print(self.__a_link_map_index)
-        print("neighbors of B are:")
+        print("neighbors of B in one cell are:")
         print(self.__b_link_map_index)
         print("total link relation is:")
         print(self.__total_link_number)
@@ -102,19 +103,5 @@ class CNT:
         print(self.__hamilton_hopping)
 
     def data_plot(self):
-        a_x = []
-        a_y = []
-        b_x = []
-        b_y = []
-        for point in self.__planar_a:
-            a_x.append(point[0])
-            a_y.append(point[1])
-        for point in self.__planar_b:
-            b_x.append(point[0])
-            b_y.append(point[1])
-        plt.scatter(a_x, a_y, c="red")
-        plt.scatter(b_x, b_y, c="blue")
-        plt.gca().set_aspect('auto', adjustable='box')
-        plt.show()
-
-
+        visual.visual(self.__coord_a, self.__coord_b, self.__total_link_number)
+        mlab.show()

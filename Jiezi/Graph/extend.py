@@ -20,23 +20,26 @@ import math
 np.set_printoptions(threshold=np.inf)
 
 
-def define_hamiltion(a, b, neighbor_a, neighbor_b, n, m, t_1, t_2, onsite, hopping):
+def define_hamiltion(a, b, neighbor_a, neighbor_b, n, m, t_1, t_2, T_repeat, onsite, hopping):
     """
-    numbering A atom and B atom: combine (p, q) with its number
+    Function1: numbering A atom and B atom: combine (p, q) with its number
     the order is first A then B, thus the number of B is greater than A
-    :param a: list, set of atom A, which is like [(),(),(),...]
-    :param b: list, set of atom B, which is like [(),(),(),...]
+    Function2: compute the neighbor of every atom
+    Principle: first compute cell, then the whole tube
+    :param a: list, set of the index of atom A in one cell, which is like [(),(),(),...]
+    :param b: list, set of the index of atom B in one cell, which is like [(),(),(),...]
     :param neighbor_a: list, the neighbor of A, [[(),(),()],[(),()],...]
     :param neighbor_b: list, the neighbor of B, [[(),(),()],[(),()],...]
     :param n:
     :param m:
     :param t_1:
     :param t_2:
+    :param T_repeat: number of layers
     :param onsite:
     :param hopping:
-    :return: a_number: dict, save the number of A atom, which is like {1:(), 2:(), ...}
-             b_number: dict, save the number of B atom, which is like {29:(), 30:(), ...}
-             total_neighbor: dict, save the neighbor's number of every atom,which is like {1:[2,3,4],...}
+    :return: a_total_number: dict, save the number of A atom of whole tube, which is like {1:(), 2:(), ...}
+             b_total_number: dict, save the number of B atom of whole tube, which is like {29:(), 30:(), ...}
+             total_link: dict, save the neighbor's number of every atom in whole tube, which is like {1:[2,3,4],...}
              cell_hamilton: np.array[nn,nn], the hamilton matrix of initial layer's hamilton
              hopping_hamilton: np.array[nn,nn], the hamilton matrix between the initial and second layer
     """
@@ -48,7 +51,8 @@ def define_hamiltion(a, b, neighbor_a, neighbor_b, n, m, t_1, t_2, onsite, hoppi
         a_number[index + 1] = a[index]
     for index in range(len(b)):
         b_number[index + 1 + len(a)] = b[index]
-    # numbering the neighbor relation of total atoms
+
+    # numbering the neighbor relation of total atoms in one cell
     # total_neighbor is like {1:[2,3,4],2:[1,5,6],3:...}
     for index in range(len(neighbor_a)):
         sub = neighbor_a[index]
@@ -83,10 +87,6 @@ def define_hamiltion(a, b, neighbor_a, neighbor_b, n, m, t_1, t_2, onsite, hoppi
         a_number_next[number + nn] = (index[0] + t_1, index[1] + t_2)
     for number, index in b_number.items():
         b_number_next[number + nn] = (index[0] + t_1, index[1] + t_2)
-    print("a_number:", a_number)
-    print("b_number:", b_number)
-    print("a_number_next:", a_number_next)
-    print("b_number_next:", b_number_next)
 
     # find linked atoms between two layers
     layertolayer = []
@@ -109,43 +109,64 @@ def define_hamiltion(a, b, neighbor_a, neighbor_b, n, m, t_1, t_2, onsite, hoppi
         for sub in rule:
             if find_value(a_number, sub):
                 layertolayer.append((get_key(a_number, sub), number))
-    print("layer", layertolayer)
+
     # construct hopping hamilton matrix
     hopping_hamilton = np.zeros((nn, nn))
     # layertolayer list follows the rule that initial(small) layer number first, next(big) layer number then
     for element in layertolayer:
         # this hopping matrix is the right-top one, the left-bottom one is its conjugate
         hopping_hamilton[element[0] - 1, element[1] - nn - 1] = hopping
-    return a_number, b_number, total_neighbor, cell_hamilton, hopping_hamilton
+
+    # compute the relation of number and index(p,q) in the whole tube which has T_repeat same layers
+    a_total_number = {}
+    b_total_number = {}
+    for layer in range(T_repeat):
+        for number, index in a_number.items():
+            a_total_number[number + layer * nn] = (index[0] + layer * t_1, index[1] + layer * t_2)
+        for number, index in b_number.items():
+            b_total_number[number + layer * nn] = (index[0] + layer * t_1, index[1] + layer * t_2)
+
+    # compute the relationship about neighbors after extending
+    total_link = {}
+    for layer in range(T_repeat):
+        # total_neighbor is like: {1: [48], 2: [48, 29, 30],...}
+        for number, member in total_neighbor.items():
+            temp = []
+            for index in member:
+                index += nn * layer
+                temp.append(index)
+            total_link[number + nn * layer] = temp
+        # add the atoms between linked layers
+        # layer1 to layer2 is layertolayer
+        # layertolayer is like: [(42, 57), (56, 57),...]
+        if layer == 0:
+            continue
+        else:
+            for num_1, num_2 in layertolayer:
+                n_1 = num_1 + (layer - 1) * nn
+                n_2 = num_2 + (layer - 1) * nn
+                total_link[n_1].append(n_2)
+                total_link[n_2].append(n_1)
+
+    return a_total_number, b_total_number, total_link, cell_hamilton, hopping_hamilton
 
 
-def coordinate(a_set, b_set, n, m, circumstance, t_1, t_2, count, T_repeat, acc):
+def coordinate(coord_a, coord_b, n, m, circumstance, acc, radius):
     """
-
-    :param a_set: dict, number and index
-    :param b_set: dict, number and index
+    convert the index (p, q) of every atom in the whole tube with T_repeat same cells to real 3D space coordinate(x,y,z)
+    :param coord_a: dict, number and index
+    :param coord_b: dict, number and index
     :param n:
     :param m:
     :param circumstance:
-    :param t_1:
-    :param t_2:
-    :param count: total number of atoms in each layer
-    :param T_repeat: total number of layers
     :param acc: a_cc
     :return: the coordinate of A and B in 3D space
              the coordinate of A and B in 3D space
     """
-    # compute the relation of number and index(p,q) in the whole tube which has T_repeat same layers
-    coord_a = {}
-    coord_b = {}
-    planar_a = []
-    planar_b = []
-    for layer in range(T_repeat):
-        for number, index in a_set.items():
-            coord_a[number + layer * count] = (index[0] + layer * t_1, index[1] + layer * t_2)
-        for number, index in b_set.items():
-            coord_b[number + layer * count] = (index[0] + layer * t_1, index[1] + layer * t_2)
+
     # transfer the index(p, q) to real coordinate [x,y,z]
+    result_a = {}
+    result_b = {}
     for number, index in coord_a.items():
         x = (index[0] + index[1]) * (3 / 2 * acc)
         y = (index[0] - index[1]) * (math.sqrt(3) / 2 * acc)
@@ -153,13 +174,12 @@ def coordinate(a_set, b_set, n, m, circumstance, t_1, t_2, count, T_repeat, acc)
         theta = math.acos(math.sqrt(3) / 2 * (n + m) / math.sqrt(m ** 2 + n ** 2 + m * n))
         u = x * math.cos(theta) + y * math.sin(theta)
         v = - x * math.sin(theta) + y * math.cos(theta)
-        planar_a.append([u, v])
         # roll up
         alpha = u / circumstance * 2 * math.pi
-        x_3d = math.cos(alpha - math.pi / 2)
-        y_3d = math.sin(alpha - math.pi / 2)
+        x_3d = math.cos(alpha - math.pi / 2) * radius
+        y_3d = math.sin(alpha - math.pi / 2) * radius
         z_3d = v
-        coord_a[number] = [x_3d, y_3d, z_3d]
+        result_a[number] = [x_3d, y_3d, z_3d]
 
     for number, index in coord_b.items():
         x = (index[0] + index[1] + 2 / 3) * (3 / 2 * acc)
@@ -168,23 +188,34 @@ def coordinate(a_set, b_set, n, m, circumstance, t_1, t_2, count, T_repeat, acc)
         theta = math.acos(math.sqrt(3) / 2 * (n + m) / math.sqrt(m ** 2 + n ** 2 + m * n))
         u = x * math.cos(theta) + y * math.sin(theta)
         v = - x * math.sin(theta) + y * math.cos(theta)
-        planar_b.append([u, v])
         # roll up
         alpha = u / circumstance * 2 * math.pi
-        x_3d = acc * math.cos(alpha - math.pi / 2)
-        y_3d = acc * math.sin(alpha - math.pi / 2)
+        x_3d = math.cos(alpha - math.pi / 2) * radius
+        y_3d = math.sin(alpha - math.pi / 2) * radius
         z_3d = v
-        coord_b[number] = [x_3d, y_3d, z_3d]
-    return coord_a, coord_b, planar_a, planar_b
+        result_b[number] = [x_3d, y_3d, z_3d]
+    return result_a, result_b
 
 
 def find_value(dict, value):
+    """
+    if the value exists in a dict, return true
+    :param dict: dict
+    :param value: value
+    :return: True or False
+    """
     for k, v in dict.items():
         if v == value:
             return True
 
 
 def get_key(dict, value):
+    """
+    give the value, return its key
+    :param dict: dict
+    :param value: value
+    :return: key
+    """
     for k, v in dict.items():
         if v == value:
             return k

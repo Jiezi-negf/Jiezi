@@ -5,9 +5,9 @@ sys.path.append(myutils_path)
 
 import matplotlib.pyplot as plt
 
-import Graph
+from Jiezi import Graph
 
-cnt = Graph.builder.CNT(3, 1, 1, nonideal=False)
+cnt = Graph.builder.CNT(4, 2, 3, nonideal=False)
 cnt.construct()
 cnt.data_print()
 cnt.data_plot()
