@@ -66,16 +66,20 @@ class CNT:
         self.__radius = shape_para[1]
         (t_1, t_2) = shape_para[2]
         # both set_a and set_b are [(),(),...]
-        set_a, set_b = cell.atom_ocean(self.__n, self.__m, self.__a_cc)
+        set_a, set_b = cell.atom_ocean(self.__n, self.__m, self.__a_cc) 
         set_a, set_b, a_right, b_right = cell.screen(set_a, set_b, self.__n, self.__m, t_1, t_2)
-        self.__a_set_cell, self.__b_set_cell, self.__a_link_index, self.__b_link_index, self.__a_link_map_index, self.__b_link_map_index = \
+        self.__a_set_cell, self.__b_set_cell, self.__a_link_index, \
+        self.__b_link_index, self.__a_link_map_index, self.__b_link_map_index = \
             cell.neighbor(set_a, set_b, a_right, b_right, self.__n, self.__m)
 
-        self.__a_set_number, self.__b_set_number, self.__total_link_number, self.__hamilton_cell, \
-        self.__hamilton_hopping = extend.define_hamiltion(self.__a_set_cell, self.__b_set_cell, self.__a_link_index, self.__b_link_index,
+        self.__a_set_number, self.__b_set_number, \
+        self.__total_link_number, self.__hamilton_cell, \
+        self.__hamilton_hopping = extend.define_hamiltion(self.__a_set_cell, self.__b_set_cell, \
+                                                          self.__a_link_index, self.__b_link_index, \
                                                           self.__n, self.__m, t_1, t_2, self.__Trepeat, 1, 2)
 
-        self.__coord_a, self.__coord_b = extend.coordinate(self.__a_set_number, self.__b_set_number, self.__n, self.__m,
+        self.__coord_a, self.__coord_b = extend.coordinate(self.__a_set_number, self.__b_set_number, \
+                                                           self.__n, self.__m, \
                                                            circumstance, self.__a_cc, self.__radius)
         if self.__nonideal:
             nonideal()
