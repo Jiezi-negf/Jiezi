@@ -32,7 +32,7 @@ def shape_parameter(n, m, a_cc):
     radius = circumference / (2 * math.pi)
     # compute the index of the translation vector T
     # dr is the greatest common divisor of (2m+n) and (2n+m)
-    dr = greatest_comm_divisor((2*n+m), (2*m+n))
+    dr = math.gcd(2*n+m, 2*m+n)
     T = ((2*m+n)//dr, -(2*n+m)//dr)
     # compute the length of vector T
     T_length = math.sqrt(3) / dr * circumference
@@ -200,10 +200,3 @@ def neighbor(set_a, set_b, a_right, b_right, n, m):
     return set_a, set_b, a_link, b_link, a_map, b_map
 
 
-# Euclidean rolling Division method to compute greatest common divisor of n and m
-# use recursive method to finish it
-def greatest_comm_divisor(n, m):
-    if not m:
-        return n
-    else:
-        return greatest_comm_divisor(m, n % m)
