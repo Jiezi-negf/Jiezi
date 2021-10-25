@@ -22,7 +22,7 @@ def nonideal():
 class CNT:
     __name__ = "Carbon Nanotube"
 
-    def __init__(self, n: int, m: int, Trepeat: int, a_cc=1.4, *, nonideal=False):
+    def __init__(self, n: int, m: int, Trepeat: int, a_cc=1.4, nonideal=False):
         assert 0 <= m <= n, "Condition 0 <= m <= n does not fill!"
         assert Trepeat >= 0, "Repeatation must be positive!"
 

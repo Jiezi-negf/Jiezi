@@ -32,7 +32,7 @@ def visual(coordinate_a, coordinate_b, total_link):
         x.append(points[i + 1][0])
         y.append(points[i + 1][1])
         z.append(points[i + 1][2])
-    mlab.points3d(x, y, z, resolution=16, scale_factor=0.8)
+    mlab.points3d(x, y, z, color=(1, 0, 0), resolution=16, scale_factor=0.8)
 
     for start, neighbor in total_link.items():
         xx = []
