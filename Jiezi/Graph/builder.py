@@ -9,7 +9,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from . import cell
 from . import extend
-from . import visual
+from Jiezi.Visualization.Visualization_Graph import visual
 from mayavi import mlab
 
 """ CNT class """
@@ -107,5 +107,5 @@ class CNT:
         print(self.__hamilton_hopping)
 
     def data_plot(self):
-        visual.visual(self.__coord_a, self.__coord_b, self.__total_link_number)
+        visual(self.__coord_a, self.__coord_b, self.__total_link_number)
         mlab.show()
