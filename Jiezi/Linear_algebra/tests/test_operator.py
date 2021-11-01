@@ -9,18 +9,17 @@
 import sys
 import os
 import numpy as np
-from Jiezi.Linear_algebra.vector import vector
-from Jiezi.Linear_algebra.matrix import matrix
-from Jiezi.Linear_algebra.operator import operator
+from Jiezi.Linear_algebra.vector_numpy import vector_numpy
+from Jiezi.Linear_algebra.matrix_numpy import matrix_numpy
+from Jiezi.Linear_algebra import operator as op
 
 script_path = os.path.dirname(__file__)
 myutils_path = os.path.join(script_path, '../../../')
 sys.path.append(myutils_path)
 
-vec = vector(2)
-mat = matrix(2, 2)
+vec = vector_numpy(2)
+mat = matrix_numpy(2, 2)
 sca = 2
-op = operator()
 vec.copy([1, 0])
 mat.copy([[1, 1j], [1j, 1]])
 # test matmulvec

@@ -8,7 +8,7 @@
 
 import sys
 import os
-from Jiezi.Linear_algebra.vector import vector
+from Jiezi.Linear_algebra.vector_numpy import vector_numpy
 import numpy as np
 
 script_path = os.path.dirname(__file__)
@@ -16,7 +16,7 @@ myutils_path = os.path.join(script_path, '../../../')
 sys.path.append(myutils_path)
 
 # test init
-vec = vector(3)
+vec = vector_numpy(3)
 assert (vec.get_value() == np.array([0+0j, 0+0j, 0+0j])).all(), "init is wrong"
 # test get_size
 assert vec.get_size() == (3,), "get_size is wrong"

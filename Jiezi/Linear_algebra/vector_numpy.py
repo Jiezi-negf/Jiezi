@@ -6,28 +6,28 @@
 # of this distribution.
 # ==============================================================================
 
-
 import numpy as np
+from Jiezi.Linear_algebra.base_linalg import vector
 
 
-class matrix:
+class vector_numpy(vector):
     """
     vector is defined as row vector by default
     """
-    def __init__(self, row: int, column: int, type="numpy"):
-        self.__value = np.zeros((row, column), dtype=complex, order="C")
-        self.__row = row
-        self.__column = column
+
+    def __init__(self, n: int):
+        self.__value = np.zeros(n, dtype=complex, order="C")
+        self.__size = n
 
     def get_size(self):
         return self.__value.shape
 
-    def set_value(self, row, column, value):
-        self.__value[row, column] = value
+    def set_value(self, index, value):
+        self.__value[index] = value
 
     def get_value(self, *index):
         """
-        return the matrix as numpy array
+        return the vector as numpy array
         if index is None, then the numpy type result will be returned
         the reason why I return np.copy rather than return the self.__value is:
         >>mat1 = matrix(2, 2)
@@ -39,57 +39,45 @@ class matrix:
         """
         if index == ():
             return np.copy(self.__value)
-        elif len(index) == 2:
-            return np.copy(self.__value[index[0], index[1]])
+        elif np.size(index) == 1:
+            return np.copy(self.__value[index])
         else:
-            return np.copy(self.__value[index[0]:index[1], index[2]:index[3]])
+            return np.copy(self.__value[index[0]:index[1]])
 
     def imaginary(self):
-        temp = matrix(self.__row, self.__column)
+        """
+        the reason why I construct the temporary variable "temp" is to avoid changing the original value,
+        because the following function is just for operation, the value of "self" should not be changed
+        """
+        temp = vector_numpy(self.__size)
         temp.copy(self.get_value().imag)
         return temp
 
     def real(self):
-        temp = matrix(self.__row, self.__column)
+        temp = vector_numpy(self.__size)
         temp.copy(self.get_value().real)
         return temp
 
     def trans(self):
-        temp = matrix(self.__row, self.__column)
-        temp.copy(np.transpose(self.get_value()))
+        temp = vector_numpy(self.__size)
+        temp.copy(self.get_value().reshape(self.__size, 1))
         return temp
 
     def conjugate(self):
-        temp = matrix(self.__row, self.__column)
+        temp = vector_numpy(self.__size)
         temp.copy(np.conjugate(self.get_value()))
         return temp
 
     def dagger(self):
-        temp = matrix(self.__row, self.__column)
+        temp = vector_numpy(self.__size)
         temp.copy(np.conjugate(self.get_value()))
-        temp.copy(np.transpose(temp.__value))
+        temp.copy(temp.get_value().reshape(self.__size, 1))
         return temp
 
     def nega(self):
-        temp = matrix(self.__row, self.__column)
+        temp = vector_numpy(self.__size)
         temp.copy(np.negative(self.get_value()))
         return temp
-
-    def identity(self):
-        assert self.__row == self.__column, "identity matrix must be square"
-        self.__value = np.eye(self.__row, self.__column)
-
-    def tre(self):
-        """
-        trace
-        """
-        return np.trace(self.get_value())
-
-    def det(self):
-        """
-        determination
-        """
-        return np.linalg.det(self.get_value())
 
     def copy(self, source):
         """

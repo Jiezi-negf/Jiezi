@@ -10,14 +10,14 @@
 import sys
 import os
 import numpy as np
-from Jiezi.Linear_algebra.matrix import matrix
+from Jiezi.Linear_algebra.matrix_numpy import matrix_numpy
 
 script_path = os.path.dirname(__file__)
 myutils_path = os.path.join(script_path, '../../../')
 sys.path.append(myutils_path)
 
 # test init
-mat = matrix(2, 3)
+mat = matrix_numpy(2, 3)
 assert (mat.get_value() == np.array([[0, 0, 0], [0, 0, 0]])).all(), "init is wrong"
 # test get_size
 assert mat.get_size() == (2, 3), "get_size is wrong"
@@ -58,7 +58,7 @@ assert (mat.nega().get_value() == np.array([[0 - 1j, 0 - 2j, 0 - 3j], [-1 - 1j, 
 assert (mat.get_value() == np.array([[0 + 1j, 0 + 2j, 0 + 3j], [1 + 1j, 1 + 2j, 1 + 3j]])).all(), \
         "original value can not be changed"
 # test identity
-ele = matrix(3, 3)
+ele = matrix_numpy(3, 3)
 ele.identity()
 assert (ele.get_value() == np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]])).all(), "identity is wrong"
 # test trace
