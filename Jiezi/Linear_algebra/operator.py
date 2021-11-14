@@ -118,6 +118,13 @@ def addvec(*vec: vector):
         return temp
 
 
+def inv(mat):
+    if isinstance(mat, matrix_numpy):
+        temp = matrix_numpy(mat.get_size()[0], mat.get_size()[1])
+        temp.copy(np.linalg.inv(mat.get_value()))
+        return temp
+
+
 def eigenvalue(mat: matrix):
     if isinstance(mat, matrix_numpy):
         temp = vector_numpy(mat.get_size()[0])

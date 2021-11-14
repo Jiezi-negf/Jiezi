@@ -22,7 +22,7 @@ def nonideal():
 class CNT:
     __name__ = "Carbon Nanotube"
 
-    def __init__(self, n: int, m: int, Trepeat: int, a_cc=1.4, nonideal=False):
+    def __init__(self, n: int, m: int, Trepeat: int, a_cc=1.44, onsite=1.0, hopping=1.0, nonideal=False):
         assert 0 <= m <= n, "Condition 0 <= m <= n does not fill!"
         assert Trepeat >= 0, "Repeatation must be positive!"
 
@@ -31,6 +31,8 @@ class CNT:
         self.__radius = 0.0
         self.__Trepeat = Trepeat
         self.__a_cc = a_cc
+        self.__onsite = onsite
+        self.__hopping = hopping
         # the suffix "number" means it contains number
         # the suffix "index" means there is only (p,q) but not number
         # {1: (0, 0), 2: (1, -1),...}
@@ -76,7 +78,8 @@ class CNT:
         self.__total_link_number, self.__hamilton_cell, \
         self.__hamilton_hopping = extend.define_hamiltion(self.__a_set_cell, self.__b_set_cell, \
                                                           self.__a_link_index, self.__b_link_index, \
-                                                          self.__n, self.__m, t_1, t_2, self.__Trepeat, 1, 2)
+                                                          self.__n, self.__m, t_1, t_2, self.__Trepeat, \
+                                                          self.__onsite, self.__hopping)
 
         self.__coord_a, self.__coord_b = extend.coordinate(self.__a_set_number, self.__b_set_number, \
                                                            self.__n, self.__m, \
@@ -109,3 +112,15 @@ class CNT:
     def data_plot(self):
         visual(self.__coord_a, self.__coord_b, self.__total_link_number)
         mlab.show()
+
+    def get_hamilton_cell(self):
+        return self.__hamilton_cell
+
+    def get_hamilton_hopping(self):
+        return self.__hamilton_hopping
+
+    def get_onsite_value(self):
+        return self.__onsite
+
+    def get_hopping_value(self):
+        return self.__hopping

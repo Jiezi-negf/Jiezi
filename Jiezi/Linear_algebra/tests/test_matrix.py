@@ -69,3 +69,4 @@ assert ele.det() == 1, "det is wrong"
 src = np.array([[1. + 2.j, 2. + 3.j, 2]])
 mat.copy(src)
 assert (mat.get_value() == np.array([[1. + 2.j, 2. + 3.j, 2]])).all(), "copy is wrong"
+

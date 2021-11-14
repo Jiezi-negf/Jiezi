@@ -45,6 +45,8 @@ assert (op.trimatmul(mat, mat, mat, "ccc").get_value() == np.array([[-2, -2j], [
 assert (op.addmat(mat, mat, mat).get_value() == np.array([[3, 3j], [3j, 3]])).all(), "addmat is wrong"
 # test addvec
 assert (op.addvec(vec, vec, vec, vec).get_value() == np.array([4, 0])).all(), "addvec is wrong"
-
+# test inv
+mat.copy(np.array([[1, 2], [0, 1]]))
+assert (op.inv(mat).get_value() == np.array([[1, -2], [0, 1]])).all(), "inv is wrong"
 
 

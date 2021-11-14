@@ -10,8 +10,9 @@
 import numpy as np
 from Jiezi.Linear_algebra.base_linalg import matrix
 
+
 class matrix_numpy(matrix):
-    def __init__(self, row: int, column: int, type="numpy"):
+    def __init__(self, row: int = 2, column: int = 2):
         self.__value = np.zeros((row, column), dtype=complex, order="C")
         self.__row = row
         self.__column = column
@@ -92,7 +93,7 @@ class matrix_numpy(matrix):
         """
         source must be the numpy type parameter rather than matrix or vector
         """
-        self.__value = np.asarray(source)
+        self.__value = np.asarray(source, dtype=complex)
 
     def print(self):
         print(self.__value)
