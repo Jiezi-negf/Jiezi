@@ -20,7 +20,7 @@ myutils_path = os.path.join(script_path, '../../../')
 sys.path.append(myutils_path)
 
 T_repeat = 3
-cnt = builder.CNT(5, 5, T_repeat, nonideal=False)
+cnt = builder.CNT(5, 5, T_repeat, a_cc=1.44, onsite=-0.28, hopping=-2.97, nonideal=False)
 cnt.construct()
 H_cell = cnt.get_hamilton_cell()
 H_hopping = cnt.get_hamilton_hopping()
@@ -29,7 +29,7 @@ hopping_value = cnt.get_hopping_value()
 H = hamilton.hamilton(H_cell, H_hopping, nn, T_repeat)
 H.build_H()
 H.build_S(hopping_value, base_overlap=0.018)
-k_total, band = band.band_structure(H.get_hamilton_onsite(), H.get_hamilton_hopping(), H.get_S(), \
+k_total, band = band.band_structure(H.get_hamilton_onsite(), H.get_hamilton_hopping(), H.get_Sii(), H.get_Si1(), \
                                     0, 3 * 3.14/1.44, 1 * 3.14/1.44/20)
 print(band[0].get_value())
 i = 0

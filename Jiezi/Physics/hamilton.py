@@ -27,6 +27,7 @@ class hamilton:
         self.__Hii = []
         self.__Hi1 = []
         self.__Sii = []
+        self.__Si1 = []
         return
 
     def build_H(self):
@@ -52,12 +53,17 @@ class hamilton:
         :param base_overlap: S_AB, the overlap of base A and B
         """
         H_onsite = matrix_numpy()
+        H_hopping = matrix_numpy()
         H_onsite.copy(self.__H_onsite)
-        S = op.scamulmat(base_overlap/hopping_value, H_onsite)
+        H_hopping.copy(self.__H_hopping)
+        Sii = op.scamulmat(base_overlap/hopping_value, H_onsite)
+        Si1 = op.scamulmat(base_overlap/hopping_value, H_hopping)
         for i in range(self.__block_size):
-            S.set_value(i, i, 1+0j)
+            Sii.set_value(i, i, 1+0j)
         for i in range(self.__length):
-            self.__Sii.append(S)
+            self.__Sii.append(Sii)
+            self.__Si1.append(Si1)
+        self.__Si1.append(Si1)
 
     def get_hamilton_onsite(self):
         return self.__Hii
@@ -65,8 +71,11 @@ class hamilton:
     def get_hamilton_hopping(self):
         return self.__Hi1
 
-    def get_S(self):
+    def get_Sii(self):
         return self.__Sii
+
+    def get_Si1(self):
+        return self.__Si1
 
 
 

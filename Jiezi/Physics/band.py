@@ -12,7 +12,7 @@ from Jiezi.Linear_algebra.matrix_numpy import matrix_numpy
 from Jiezi.Linear_algebra import operator as op
 
 
-def subband(Hii, Hi1, Sii, k):
+def subband(Hii, Hi1, Sii, Si1, k):
     """
     this function is to calculate the eigen energy with the specific "k"
     the formula is: [H_{i-1,i}*exp(-j*ka)+H_{i,i}+H_{i,i+1}*exp(j*ka)]\psi =ES_{i,i}\psi
@@ -27,13 +27,15 @@ def subband(Hii, Hi1, Sii, k):
     for i in range(len(Hii)):
         H_temp = op.addmat(Hii[i], op.scamulmat(np.exp(-k * 1j), Hi1[i].trans()),
                            op.scamulmat(np.exp(k * 1j), Hi1[i + 1]))
-        H_temp = op.matmulmat(op.inv(Sii[i]), H_temp)
-        U.append(op.eigenvec(H_temp))
+        S_temp = op.addmat(Sii[i], op.scamulmat(np.exp(-k * 1j), Si1[i].trans()),
+                           op.scamulmat(np.exp(k * 1j), Si1[i + 1]))
+        H_temp = op.matmulmat(op.inv(S_temp), H_temp)
         sub_band.append(op.eigenvalue(H_temp))
+        U.append(op.eigenvec(H_temp))
     return sub_band, U
 
 
-def band_structure(Hii, Hi1, Sii, start, end, step):
+def band_structure(Hii, Hi1, Sii, Si1, start, end, step):
     """
     plot the band structure by scanning the k from start to end
     :param start: the beginning of k
@@ -44,7 +46,7 @@ def band_structure(Hii, Hi1, Sii, start, end, step):
     k_total = np.arange(start, end, step)
     band = []
     for k in k_total:
-        sub_band, U = subband(Hii, Hi1, Sii, k)
+        sub_band, U = subband(Hii, Hi1, Sii, Si1, k)
         band.append(sub_band[0])
     return k_total, band
 
