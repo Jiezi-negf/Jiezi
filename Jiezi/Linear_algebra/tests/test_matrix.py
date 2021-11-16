@@ -69,4 +69,9 @@ assert ele.det() == 1, "det is wrong"
 src = np.array([[1. + 2.j, 2. + 3.j, 2]])
 mat.copy(src)
 assert (mat.get_value() == np.array([[1. + 2.j, 2. + 3.j, 2]])).all(), "copy is wrong"
+# test eigenvalue and eigenvec
+a = np.diag((3, 2, 1))
+mat.copy(a)
+assert (mat.eigenvalue().get_value() == [1, 2, 3]).all(), "eigenvalue is wrong"
+assert (mat.eigenvec().get_value() == np.array([[0, 0, 1], [0, 1, 0], [1, 0, 0]])).all(), "eigenvec is wrong"
 

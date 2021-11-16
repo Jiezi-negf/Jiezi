@@ -30,8 +30,8 @@ def subband(Hii, Hi1, Sii, Si1, k):
         S_temp = op.addmat(Sii[i], op.scamulmat(np.exp(-k * 1j), Si1[i].trans()),
                            op.scamulmat(np.exp(k * 1j), Si1[i + 1]))
         H_temp = op.matmulmat(op.inv(S_temp), H_temp)
-        sub_band.append(op.eigenvalue(H_temp))
-        U.append(op.eigenvec(H_temp))
+        sub_band.append(H_temp.eigenvalue())
+        U.append(H_temp.eigenvec())
     return sub_band, U
 
 

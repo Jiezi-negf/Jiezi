@@ -9,6 +9,7 @@
 
 import numpy as np
 from Jiezi.Linear_algebra.base_linalg import matrix
+from Jiezi.Linear_algebra.vector_numpy import vector_numpy
 
 
 class matrix_numpy(matrix):
@@ -97,3 +98,32 @@ class matrix_numpy(matrix):
 
     def print(self):
         print(self.__value)
+
+    def eigenvalue(self):
+        """
+        sorted eigen values from small to big
+        return value is the vector_numpy type
+        """
+        value_unsorted = np.linalg.eig(self.get_value())[0]
+        sorted_index = np.argsort(value_unsorted)
+        value = []
+        for i in sorted_index:
+            value.append(value_unsorted[i])
+        temp = vector_numpy(self.get_size()[0])
+        temp.copy(value)
+        return temp
+
+    def eigenvec(self):
+        """
+        sorted eigen vectors, of which the order is ruled by the sorted eigen values.
+        return value is the matrix_numpy type
+        """
+        value_unsorted = np.linalg.eig(self.get_value())[0]
+        vec_unsorted = np.linalg.eig(self.get_value())[1]
+        sorted_index = np.argsort(value_unsorted)
+        vec = np.copy(vec_unsorted)
+        for i in range(len(sorted_index)):
+            vec[:, i] = vec_unsorted[:, sorted_index[i]]
+        temp = matrix_numpy(self.get_size()[0], self.get_size()[1])
+        temp.copy(vec)
+        return temp

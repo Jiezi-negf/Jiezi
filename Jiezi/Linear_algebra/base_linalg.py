@@ -117,3 +117,10 @@ class matrix(abc.ABC):
     def print(self):
         pass
 
+    @abc.abstractmethod
+    def eigenvalue(self):
+        pass
+
+    @abc.abstractmethod
+    def eigenvec(self):
+        pass

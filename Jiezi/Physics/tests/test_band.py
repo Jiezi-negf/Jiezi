@@ -20,7 +20,7 @@ myutils_path = os.path.join(script_path, '../../../')
 sys.path.append(myutils_path)
 
 T_repeat = 3
-cnt = builder.CNT(5, 5, T_repeat, a_cc=1.44, onsite=-0.28, hopping=-2.97, nonideal=False)
+cnt = builder.CNT(9, 0, T_repeat, a_cc=1.44, onsite=-0.28, hopping=-2.97, nonideal=False)
 cnt.construct()
 H_cell = cnt.get_hamilton_cell()
 H_hopping = cnt.get_hamilton_hopping()
@@ -36,6 +36,6 @@ i = 0
 for band_k in band:
     k = np.ones(band[0].get_size()) * k_total[i]
     i += 1
-    plt.scatter(k, band_k.get_value())
+    plt.scatter(k, band_k.get_value()/2.97)
 plt.gca().set_aspect('equal', adjustable='box')
 plt.show()
