@@ -8,12 +8,10 @@
 
 import sys
 import os
-from Jiezi.Linear_algebra.vector_numpy import vector_numpy
 import numpy as np
 
-script_path = os.path.dirname(__file__)
-myutils_path = os.path.join(script_path, '../../../')
-sys.path.append(myutils_path)
+sys.path.append("../../../")
+from Jiezi.LA.vector_numpy import vector_numpy
 
 # test init
 vec = vector_numpy(3)

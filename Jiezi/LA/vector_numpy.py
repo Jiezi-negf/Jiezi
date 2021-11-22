@@ -7,8 +7,7 @@
 # ==============================================================================
 
 import numpy as np
-from Jiezi.Linear_algebra.base_linalg import vector
-
+from Jiezi.LA.base_linalg import vector
 
 class vector_numpy(vector):
     """

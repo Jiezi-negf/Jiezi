@@ -9,12 +9,11 @@
 import sys
 import os
 import numpy as np
+
+sys.path.append("../../../")
 from Jiezi.Physics import hamilton
 from Jiezi.Graph import builder
 
-script_path = os.path.dirname(__file__)
-myutils_path = os.path.join(script_path, '../../../')
-sys.path.append(myutils_path)
 
 T_repeat = 3
 cnt = builder.CNT(4, 2, T_repeat, onsite=-0.28, hopping=-2.97, nonideal=False)

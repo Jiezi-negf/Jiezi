@@ -10,7 +10,10 @@
 import sys
 import os
 import numpy as np
-from Jiezi.Linear_algebra.matrix_numpy import matrix_numpy
+
+import sys
+sys.path.append("../../../")
+from Jiezi.LA.matrix_numpy import matrix_numpy
 
 script_path = os.path.dirname(__file__)
 myutils_path = os.path.join(script_path, '../../../')

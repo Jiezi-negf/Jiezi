@@ -9,7 +9,6 @@
 import numpy as np
 import abc
 
-
 class vector(abc.ABC):
     @abc.abstractmethod
     def get_size(self):

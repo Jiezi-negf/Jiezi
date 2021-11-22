@@ -10,14 +10,12 @@
 import sys
 import os
 import numpy as np
-from Jiezi.Physics import hamilton, band
-from Jiezi.Graph import builder
 import matplotlib.pyplot as plt
 
+sys.path.append("../../../")
+from Jiezi.Physics import hamilton, band
+from Jiezi.Graph import builder
 
-script_path = os.path.dirname(__file__)
-myutils_path = os.path.join(script_path, '../../../')
-sys.path.append(myutils_path)
 
 T_repeat = 3
 cnt = builder.CNT(9, 0, T_repeat, a_cc=1.44, onsite=-0.28, hopping=-2.97, nonideal=False)

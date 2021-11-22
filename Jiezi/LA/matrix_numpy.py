@@ -8,8 +8,8 @@
 
 
 import numpy as np
-from Jiezi.Linear_algebra.base_linalg import matrix
-from Jiezi.Linear_algebra.vector_numpy import vector_numpy
+from Jiezi.LA.base_linalg import matrix
+from Jiezi.LA.vector_numpy import vector_numpy
 
 
 class matrix_numpy(matrix):
