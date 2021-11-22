@@ -7,10 +7,11 @@
 # ==============================================================================
 import numpy as np
 import matplotlib.pyplot as plt
-from . import cell
-from . import extend
-from Jiezi.Visualization.Visualization_Graph import visual
 from mayavi import mlab
+
+from Jiezi.Graph import cell
+from Jiezi.Graph import extend
+from Jiezi.Visualization.Visualization_Graph import visual
 
 """ CNT class """
 
