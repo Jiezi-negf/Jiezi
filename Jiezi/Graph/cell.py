@@ -59,6 +59,7 @@ def atom_ocean(n, m, a_cc):
     first_index_max = max(0, n, t_1, n + t_1)
     second_index_min = min(0, m, t_2, m + t_2)
     second_index_max = max(0, m, t_2, m + t_2)
+    #TODO: optimize performance
     for first_index in range(first_index_min, first_index_max + 1):
         for second_index in range(second_index_min, second_index_max + 1):
             a.append((first_index, second_index))

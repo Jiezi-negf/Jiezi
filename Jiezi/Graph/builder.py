@@ -64,15 +64,18 @@ class CNT:
         self.__nonideal = nonideal
 
     def construct(self):
+        #circumstance, self.__radius, t_1, t_2 = cell.shape_parameter(self.__n, self.__m, self.__a_cc)
         shape_para = cell.shape_parameter(self.__n, self.__m, self.__a_cc)
         circumstance = shape_para[0]
         self.__radius = shape_para[1]
         (t_1, t_2) = shape_para[2]
         # both set_a and set_b are [(),(),...]
+        #TODO: in atom_ocean, function shape_parameter is called, which is unnecessary because you have computed shape_para
         set_a, set_b = cell.atom_ocean(self.__n, self.__m, self.__a_cc) 
         set_a, set_b, a_right, b_right = cell.screen(set_a, set_b, self.__n, self.__m, t_1, t_2)
-        self.__a_set_cell, self.__b_set_cell, self.__a_link_index, \
-        self.__b_link_index, self.__a_link_map_index, self.__b_link_map_index = \
+        self.__a_set_cell, self.__b_set_cell,\
+        self.__a_link_index, self.__b_link_index,\
+        self.__a_link_map_index, self.__b_link_map_index = \
             cell.neighbor(set_a, set_b, a_right, b_right, self.__n, self.__m)
 
         self.__a_set_number, self.__b_set_number, \
