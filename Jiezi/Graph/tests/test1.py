@@ -6,13 +6,12 @@
 # of this distribution.
 # ==============================================================================
 
+import sys
+sys.path.append("../../../")
+import Jiezi.Graph.builder as builder
 
-import sys, os
-script_path = os.path.dirname(__file__)
-myutils_path = os.path.join(script_path, '../../../')
-sys.path.append(myutils_path)
-from Jiezi import Graph
-cnt = Graph.builder.CNT(4, 2, 3, a_cc=1.44, onsite=-0.28, hopping=-2.97, nonideal=False)
+cnt = builder.CNT(4, 2, 3, a_cc=1.44, onsite=-0.28, hopping=-2.97, nonideal=False)
+
 cnt.construct()
 cnt.data_print()
 cnt.data_plot()

@@ -40,7 +40,7 @@ def shape_parameter(n, m, a_cc):
     return shape_para
 
 
-def atom_ocean(n, m, a_cc):
+def atom_ocean(n, m, a_cc, t_1, t_2):
     """
     build the ocean of two type atoms for the following step: screening
     :param n: chirality first para
@@ -52,13 +52,13 @@ def atom_ocean(n, m, a_cc):
     b = []
     shape_para = shape_parameter(n, m, a_cc)
     # translation vector is T(t1,t2)
-    (t_1, t_2) = shape_para[2]
     # O:(0,0)     A:(n,m)
     # B:(t1,t2) B’:(n+t1,m+t2)
     first_index_min = min(0, n, t_1, n + t_1)
     first_index_max = max(0, n, t_1, n + t_1)
     second_index_min = min(0, m, t_2, m + t_2)
     second_index_max = max(0, m, t_2, m + t_2)
+    # TODO: optimize performance
     for first_index in range(first_index_min, first_index_max + 1):
         for second_index in range(second_index_min, second_index_max + 1):
             a.append((first_index, second_index))

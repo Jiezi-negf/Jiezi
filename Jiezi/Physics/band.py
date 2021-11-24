@@ -7,9 +7,9 @@
 # ==============================================================================
 
 import numpy as np
-from Jiezi.Linear_algebra.vector_numpy import vector_numpy
-from Jiezi.Linear_algebra.matrix_numpy import matrix_numpy
-from Jiezi.Linear_algebra import operator as op
+from Jiezi.LA.vector_numpy import vector_numpy
+from Jiezi.LA.matrix_numpy import matrix_numpy
+from Jiezi.LA import operator as op
 
 
 def subband(Hii, Hi1, Sii, Si1, k):

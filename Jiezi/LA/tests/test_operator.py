@@ -7,16 +7,14 @@
 # ==============================================================================
 
 import sys
-import os
-
-script_path = os.path.dirname(__file__)
-myutils_path = os.path.join(script_path, '../../../')
-sys.path.append(myutils_path)
-
 import numpy as np
-from Jiezi.Linear_algebra.vector_numpy import vector_numpy
-from Jiezi.Linear_algebra.matrix_numpy import matrix_numpy
-from Jiezi.Linear_algebra import operator as op
+
+sys.path.append("../../../")
+
+from Jiezi.LA.vector_numpy import vector_numpy
+from Jiezi.LA.matrix_numpy import matrix_numpy
+from Jiezi.LA import operator as op
+
 
 vec = vector_numpy(2)
 mat = matrix_numpy(2, 2)

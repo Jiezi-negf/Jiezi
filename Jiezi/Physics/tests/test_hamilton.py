@@ -8,11 +8,9 @@
 
 import sys
 import os
+import numpy as np
 
-script_path = os.path.dirname(__file__)
-myutils_path = os.path.join(script_path, '../../../')
-sys.path.append(myutils_path)
-
+sys.path.append("../../../")
 from Jiezi.Physics import hamilton
 from Jiezi.Graph import builder
 
