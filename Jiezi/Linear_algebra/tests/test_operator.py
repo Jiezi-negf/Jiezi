@@ -8,14 +8,15 @@
 
 import sys
 import os
-import numpy as np
-from Jiezi.Linear_algebra.vector_numpy import vector_numpy
-from Jiezi.Linear_algebra.matrix_numpy import matrix_numpy
-from Jiezi.Linear_algebra import operator as op
 
 script_path = os.path.dirname(__file__)
 myutils_path = os.path.join(script_path, '../../../')
 sys.path.append(myutils_path)
+
+import numpy as np
+from Jiezi.Linear_algebra.vector_numpy import vector_numpy
+from Jiezi.Linear_algebra.matrix_numpy import matrix_numpy
+from Jiezi.Linear_algebra import operator as op
 
 vec = vector_numpy(2)
 mat = matrix_numpy(2, 2)
@@ -32,6 +33,8 @@ assert (op.vecmulvec(vec.trans(), vec).get_value() == np.array([[1, 0], [0, 0]])
 assert op.vecdotvec(vec, vec.trans()) == 1, "vecdotvec is wrong"
 # test matmulmat
 assert (op.matmulmat(mat, mat).get_value() == np.array([[0, 2j], [2j, 0]])).all(), "matmulmat is wrong"
+# test matmul_sym
+assert (op.matmul_sym(mat.conjugate(), mat).get_value() == np.array([[2, 0], [0, 2]])).all(), "matmul_sym is wrong"
 # test scamulvec
 assert (op.scamulvec(sca, vec).get_value() == np.array([2, 0])).all(), "scamulvec is wrong"
 # test scamulmat
@@ -48,5 +51,3 @@ assert (op.addvec(vec, vec, vec, vec).get_value() == np.array([4, 0])).all(), "a
 # test inv
 mat.copy(np.array([[1, 2], [0, 1]]))
 assert (op.inv(mat).get_value() == np.array([[1, -2], [0, 1]])).all(), "inv is wrong"
-
-

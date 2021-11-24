@@ -8,13 +8,13 @@
 
 import sys
 import os
-import numpy as np
-from Jiezi.Physics import hamilton
-from Jiezi.Graph import builder
 
 script_path = os.path.dirname(__file__)
 myutils_path = os.path.join(script_path, '../../../')
 sys.path.append(myutils_path)
+
+from Jiezi.Physics import hamilton
+from Jiezi.Graph import builder
 
 T_repeat = 3
 cnt = builder.CNT(4, 2, T_repeat, onsite=-0.28, hopping=-2.97, nonideal=False)
@@ -29,5 +29,5 @@ H.build_S(hopping_value, base_overlap=0.018)
 # onsite = np.array(H.get_hamilton_onsite())
 # hop = np.array(H.get_hamilton_hopping())
 # print(onsite.shape, hop.shape)
-print(H.get_hamilton_onsite()[0].get_value())
+print(H.get_Hii()[0].get_value())
 print(H.get_Si1()[0].get_value())

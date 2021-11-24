@@ -71,6 +71,24 @@ def matmulmat(mat1: matrix, mat2: matrix):
         return temp
 
 
+def matmul_sym(mat1: matrix, mat2: matrix):
+    """
+    the final result is a Hermite matrix, we can just calculate the diagonal element and right-up part elements
+    """
+    if isinstance(mat1, matrix_numpy) and isinstance(mat2, matrix_numpy):
+        assert mat1.get_size()[1] == mat2.get_size()[0], "The size of matrix are not compatible!"
+        temp = matrix_numpy(mat1.get_size()[0], mat2.get_size()[1])
+        for i in range(mat1.get_size()[0]):
+            for j in range(i, mat2.get_size()[1]):
+                temp_ij = 0.0 + 0.0j
+                for k in range(mat1.get_size()[1]):
+                    temp_ij += mat1.get_value(i, k) * mat2.get_value(k, j)
+                temp.set_value(i, j, temp_ij)
+                temp_ji = complex(temp_ij.real, -temp_ij.imag)
+                temp.set_value(j, i, temp_ji)
+        return temp
+
+
 def scamulvec(scalar: complex, vec: vector):
     """
     scalar * vec
@@ -94,11 +112,11 @@ def scamulmat(scalar: complex, mat: matrix):
 def trimatmul(mat1: matrix, mat2: matrix, mat3: matrix, type="nnn"):
     if isinstance(mat1, matrix_numpy) and isinstance(mat2, matrix_numpy) and isinstance(mat3, matrix_numpy):
         if type[0] == "c":
-            mat1 = mat1.conjugate()
+            mat1 = mat1.dagger()
         if type[1] == "c":
-            mat2 = mat2.conjugate()
+            mat2 = mat2.dagger()
         if type[2] == "c":
-            mat3 = mat3.conjugate()
+            mat3 = mat3.dagger()
         return matmulmat(matmulmat(mat1, mat2), mat3)
 
 

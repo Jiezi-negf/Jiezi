@@ -65,10 +65,10 @@ class hamilton:
             self.__Si1.append(Si1)
         self.__Si1.append(Si1)
 
-    def get_hamilton_onsite(self):
+    def get_Hii(self):
         return self.__Hii
 
-    def get_hamilton_hopping(self):
+    def get_Hi1(self):
         return self.__Hi1
 
     def get_Sii(self):
