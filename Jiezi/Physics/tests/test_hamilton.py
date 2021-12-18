@@ -17,13 +17,14 @@ from Jiezi.Graph import builder
 T_repeat = 3
 cnt = builder.CNT(4, 2, T_repeat, onsite=-0.28, hopping=-2.97, nonideal=False)
 cnt.construct()
-H_cell = cnt.get_hamilton_cell()
-H_hopping = cnt.get_hamilton_hopping()
-nn = H_cell.shape[0]
-hopping_value = cnt.get_hopping_value()
-H = hamilton.hamilton(H_cell, H_hopping, nn, T_repeat)
+#H_cell = cnt.get_hamilton_cell()
+#H_hopping = cnt.get_hamilton_hopping()
+#nn = H_cell.shape[0]
+#hopping_value = cnt.get_hopping_value()
+#H = hamilton.hamilton(H_cell, H_hopping, nn, T_repeat)
+H = hamilton.hamilton(cnt)
 H.build_H()
-H.build_S(hopping_value, base_overlap=0.018)
+H.build_S(base_overlap=0.018)
 # onsite = np.array(H.get_hamilton_onsite())
 # hop = np.array(H.get_hamilton_hopping())
 # print(onsite.shape, hop.shape)

@@ -128,3 +128,6 @@ class CNT:
 
     def get_hopping_value(self):
         return self.__hopping
+
+    def get_Trepeat(self):
+        return self.__Trepeat

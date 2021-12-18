@@ -19,11 +19,13 @@ class hamilton:
     Hii: Hii[i]=H_{i,i}
     Hi1: Hi1[i]=H_{i-1,i}
     """
-    def __init__(self, hamilton_cell, hamilton_hopping, size, length):
-        self.__H_onsite = hamilton_cell.tolist()
-        self.__H_hopping = hamilton_hopping.tolist()
-        self.__block_size = size
-        self.__length = length
+    def __init__(self, cnt):
+        self.hopping_value = cnt.get_hopping_value()
+
+        self.__H_onsite = cnt.get_hamilton_cell().tolist()
+        self.__H_hopping = cnt.get_hamilton_hopping().tolist()
+        self.__block_size = cnt.get_hamilton_cell().shape[0]
+        self.__length = cnt.get_Trepeat()
         self.__Hii = []
         self.__Hi1 = []
         self.__Sii = []
@@ -45,7 +47,7 @@ class hamilton:
             self.__Hi1.append(H_hopping)
         self.__Hi1.append(H_hopping)
 
-    def build_S(self, hopping_value, base_overlap=1.0):
+    def build_S(self, base_overlap=1.0):
         """
         overlap matrix of the base vector
         :param hopping_value: the non-diagonal element of H_cell
@@ -55,8 +57,8 @@ class hamilton:
         H_hopping = matrix_numpy()
         H_onsite.copy(self.__H_onsite)
         H_hopping.copy(self.__H_hopping)
-        Sii = op.scamulmat(base_overlap/hopping_value, H_onsite)
-        Si1 = op.scamulmat(base_overlap/hopping_value, H_hopping)
+        Sii = op.scamulmat(base_overlap/self.hopping_value, H_onsite)
+        Si1 = op.scamulmat(base_overlap/self.hopping_value, H_hopping)
         for i in range(self.__block_size):
             Sii.set_value(i, i, 1+0j)
         for i in range(self.__length):
