@@ -28,7 +28,6 @@ class hamilton:
         self.__Hi1 = []
         self.__Sii = []
         self.__Si1 = []
-        return
 
     def build_H(self):
         """
