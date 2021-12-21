@@ -16,16 +16,13 @@ sys.path.append("../../../")
 from Jiezi.Physics import hamilton, band
 from Jiezi.Graph import builder
 
-T_repeat = 3
-cnt = builder.CNT(9, 0, T_repeat, a_cc=1.44, onsite=-0.28, hopping=-2.97, nonideal=False)
+
+cnt = builder.CNT(n=5, m=5, Trepeat=3, nonideal=False)
 cnt.construct()
-H_cell = cnt.get_hamilton_cell()
-H_hopping = cnt.get_hamilton_hopping()
-nn = H_cell.shape[0]
-hopping_value = cnt.get_hopping_value()
-H = hamilton.hamilton(H_cell, H_hopping, nn, T_repeat)
-H.build_H()
-H.build_S(hopping_value, base_overlap=0.018)
+H = hamilton.hamilton(cnt, onsite=-0.28, hopping=-2.97)
+phi_list = [0, 0, 0]
+H.build_H(phi_list)
+H.build_S(base_overlap=0.018)
 k_total, band = band.band_structure(H.get_Hii(), H.get_Hi1(), H.get_Sii(), H.get_Si1(),
                                     0, 3 * 3.14 / 1.44, 1 * 3.14 / 1.44 / 20)
 print(band[0].get_value())

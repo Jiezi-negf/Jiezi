@@ -6,8 +6,8 @@
 # of this distribution.
 # ==============================================================================
 from Jiezi.Physics.hamilton import hamilton
-from Jiezi.Linear_algebra.matrix_numpy import matrix_numpy
-from Jiezi.Linear_algebra import operator as op
+from Jiezi.LA.matrix_numpy import matrix_numpy
+from Jiezi.LA import operator as op
 
 
 def mode_space(H: hamilton, U, part, nm):

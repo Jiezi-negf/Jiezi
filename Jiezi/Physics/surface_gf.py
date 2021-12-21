@@ -7,8 +7,8 @@
 # ==============================================================================
 
 
-from Jiezi.Linear_algebra.matrix_numpy import matrix_numpy
-from Jiezi.Linear_algebra import operator as op
+from Jiezi.LA.matrix_numpy import matrix_numpy
+from Jiezi.LA import operator as op
 
 
 def surface_gf(E, eta, H00, H10, S00, iter_max, TOL):

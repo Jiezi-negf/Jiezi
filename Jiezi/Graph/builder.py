@@ -23,17 +23,19 @@ def nonideal():
 class CNT:
     __name__ = "Carbon Nanotube"
 
-    def __init__(self, n: int, m: int, Trepeat: int, a_cc=1.44, onsite=1.0, hopping=1.0, nonideal=False):
+    def __init__(self, n: int, m: int, Trepeat: int, a_cc=1.44, nonideal=False):
         assert 0 <= m <= n, "Condition 0 <= m <= n does not fill!"
         assert Trepeat >= 0, "Repeatation must be positive!"
-
+        # (n,m) is chirality indices, (t_1,t_2) is translation vector, which is normal to (n,m)
+        # Trepeat is the number of cells/layers along the (t_1,t_2) direction
+        # acc is the distance between two adjacent carbon atoms
         self.__n = n
         self.__m = m
+        self.__t1 = 0
+        self.__t2 = 0
         self.__radius = 0.0
         self.__Trepeat = Trepeat
         self.__a_cc = a_cc
-        self.__onsite = onsite
-        self.__hopping = hopping
         # the suffix "number" means it contains number
         # the suffix "index" means there is only (p,q) but not number
         # {1: (0, 0), 2: (1, -1),...}
@@ -59,31 +61,33 @@ class CNT:
         self.__planar_b = []
 
         # array
-        self.__hamilton_cell = np.zeros((2, 2))
-        self.__hamilton_hopping = np.zeros((2, 2))
+        # nn is the size of hamilton matrix
+        self.__nn = 0
+        # total_neighbor is the element for constructing hamilton matrix of single cell
+        self.__total_neighbor = {}
+        # layertolayer is the element for constructing hamilton matrix between layers
+        self.__layertolayer = []
         self.__nonideal = nonideal
 
     def construct(self):
-        #circumstance, self.__radius, t_1, t_2 = cell.shape_parameter(self.__n, self.__m, self.__a_cc)
+        # circumstance, self.__radius, t_1, t_2 = cell.shape_parameter(self.__n, self.__m, self.__a_cc)
         shape_para = cell.shape_parameter(self.__n, self.__m, self.__a_cc)
         circumstance = shape_para[0]
         self.__radius = shape_para[1]
-        (t_1, t_2) = shape_para[2]
+        (self.__t_1, self.__t_2) = shape_para[2]
         # both set_a and set_b are [(),(),...]
-        #TODO: in atom_ocean, function shape_parameter is called, which is unnecessary because you have computed shape_para
-        set_a, set_b = cell.atom_ocean(self.__n, self.__m, self.__a_cc, t_1, t_2)
-        set_a, set_b, a_right, b_right = cell.screen(set_a, set_b, self.__n, self.__m, t_1, t_2)
+        set_a, set_b = cell.atom_ocean(self.__n, self.__m, self.__a_cc, self.__t_1, self.__t_2)
+        set_a, set_b, a_right, b_right = cell.screen(set_a, set_b, self.__n, self.__m, self.__t_1, self.__t_2)
         self.__a_set_cell, self.__b_set_cell,\
         self.__a_link_index, self.__b_link_index,\
         self.__a_link_map_index, self.__b_link_map_index = \
             cell.neighbor(set_a, set_b, a_right, b_right, self.__n, self.__m)
 
         self.__a_set_number, self.__b_set_number, \
-        self.__total_link_number, self.__hamilton_cell, \
-        self.__hamilton_hopping = extend.define_hamiltion(self.__a_set_cell, self.__b_set_cell, \
+        self.__total_neighbor, self.__total_link_number, self.__layertolayer, self.__nn \
+                                                = extend.pre_define_hamilton(self.__a_set_cell, self.__b_set_cell, \
                                                           self.__a_link_index, self.__b_link_index, \
-                                                          self.__n, self.__m, t_1, t_2, self.__Trepeat, \
-                                                          self.__onsite, self.__hopping)
+                                                          self.__n, self.__m, self.__t_1, self.__t_2, self.__Trepeat)
 
         self.__coord_a, self.__coord_b = extend.coordinate(self.__a_set_number, self.__b_set_number, \
                                                            self.__n, self.__m, \
@@ -110,24 +114,23 @@ class CNT:
         print(self.__coord_a)
         print("coordinate of B in 3D space:")
         print(self.__coord_b)
-        print(self.__hamilton_cell)
-        print(self.__hamilton_hopping)
 
     def data_plot(self):
         visual(self.__coord_a, self.__coord_b, self.__total_link_number)
         mlab.show()
 
-    def get_hamilton_cell(self):
-        return self.__hamilton_cell
+    # the following four parameters are necessary for constructing hamilton matrix in Physics.hamilton module
+    # when the cnt object is regarded as the input parameter of hamilton initialize function, these four
+    # parameters' values will be taken out using these four get_xxx methods.
+    def get_nn(self):
+        return self.__nn
 
-    def get_hamilton_hopping(self):
-        return self.__hamilton_hopping
+    def get_layertolayer(self):
+        return self.__layertolayer
 
-    def get_onsite_value(self):
-        return self.__onsite
-
-    def get_hopping_value(self):
-        return self.__hopping
+    def get_total_neighbor(self):
+        return self.__total_neighbor
 
     def get_Trepeat(self):
         return self.__Trepeat
+

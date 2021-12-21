@@ -9,11 +9,10 @@
 
 from Jiezi.Physics.phonon import phonon
 from Jiezi.Physics.rgf import rgf
-from Jiezi.Physics.hamilton import hamilton
-from Jiezi.Linear_algebra import operator as op
+from Jiezi.LA import operator as op
 
 
-def SCBA(E_list, iter_max: int, TOL, ratio, eta, mul, mur, H: hamilton, sigma_lesser_ph, sigma_r_ph,
+def SCBA(E_list, iter_max: int, TOL, ratio, eta, mul, mur, Hii, Hi1, Sii, sigma_lesser_ph, sigma_r_ph,
          form_factor, Dac, Dop, omega):
     G_R_fullE = []
     G_lesser_fullE = []
@@ -21,8 +20,8 @@ def SCBA(E_list, iter_max: int, TOL, ratio, eta, mul, mur, H: hamilton, sigma_le
     G1i_lesser_fullE = []
     sigma_lesser_ph_fullE = []
     sigma_r_ph_fullE = []
-    Sigma_right_R_fullE = []
-    Sigma_left_R_fullE = []
+    Sigma_left_lesser_fullE = []
+    Sigma_left_greater_fullE = []
     sigma_lesser_ph_fullE_new = []
     sigma_r_ph_fullE_new = []
     # initialize
@@ -33,8 +32,8 @@ def SCBA(E_list, iter_max: int, TOL, ratio, eta, mul, mur, H: hamilton, sigma_le
         G1i_lesser_fullE.append(sigma_lesser_ph[0])
         sigma_lesser_ph_fullE.append(sigma_lesser_ph[ee])
         sigma_r_ph_fullE.append(sigma_r_ph[ee])
-        Sigma_right_R_fullE.append(sigma_lesser_ph[0][0])
-        Sigma_left_R_fullE.append(sigma_lesser_ph[0][0])
+        Sigma_left_lesser_fullE.append(sigma_lesser_ph[0][0])
+        Sigma_left_greater_fullE.append(sigma_lesser_ph[0][0])
         sigma_lesser_ph_fullE_new.append(sigma_lesser_ph[0])
         sigma_r_ph_fullE_new.append(sigma_lesser_ph[0])
     iter = 0
@@ -45,8 +44,8 @@ def SCBA(E_list, iter_max: int, TOL, ratio, eta, mul, mur, H: hamilton, sigma_le
         iter += 1
         # phonon result ---> GF
         for ee in range(len(E_list)):
-            G_R_ee, G_lesser_ee, G_greater_ee, G1i_lesser_ee, Sigma_right_R_ee, Sigma_left_R_ee = \
-                rgf(ee, eta, mul, mur, H, sigma_lesser_ph_fullE, sigma_r_ph_fullE)
+            G_R_ee, G_lesser_ee, G_greater_ee, G1i_lesser_ee, Sigma_left_lesser_ee, Sigma_left_greater_ee = \
+                rgf(ee, eta, mul, mur, Hii, Hi1, Sii, sigma_lesser_ph_fullE, sigma_r_ph_fullE)
             # G_R_fullE, G_lesser_fullE, G_greater_fullE, G1i_lesser_fullE : [[], [], ...]
             # for example, length of G_lesser_fullE is len(E_list)
             # length of G_lesser_fullE[ee] is nz
@@ -55,11 +54,11 @@ def SCBA(E_list, iter_max: int, TOL, ratio, eta, mul, mur, H: hamilton, sigma_le
             G_lesser_fullE[ee] = G_lesser_ee
             G_greater_fullE[ee] = G_greater_ee
             G1i_lesser_fullE[ee] = G1i_lesser_ee
-            # Sigma_right_R_fullE, Sigma_left_R_fullE: []
-            # for example, length of Sigma_right_R_fullE is len(E_list)
-            # Sigma_right_R_fullE[ee] is a matrix_numpy(nm, nm) object
-            Sigma_right_R_fullE[ee] = Sigma_right_R_ee
-            Sigma_left_R_fullE[ee] = Sigma_left_R_ee
+            # Sigma_left_lesser_fullE, Sigma_left_greater_fullE: []
+            # for example, length of Sigma_left_lesser_fullE is len(E_list)
+            # Sigma_left_lesser_fullE[ee] is a matrix_numpy(nm, nm) object
+            Sigma_left_lesser_fullE[ee] = Sigma_left_lesser_ee
+            Sigma_left_greater_fullE[ee] = Sigma_left_greater_ee
 
         # GF result ---> phonon
         for ee in range(len(E_list)):
@@ -83,4 +82,5 @@ def SCBA(E_list, iter_max: int, TOL, ratio, eta, mul, mur, H: hamilton, sigma_le
         error = error/(len(E_list) * nz * nm)
         print("iter number is:", iter)
         print("error is:", error)
-    return G_R_fullE, G_lesser_fullE, G_greater_fullE, G1i_lesser_fullE, Sigma_right_R_fullE, Sigma_left_R_fullE
+    return G_R_fullE, G_lesser_fullE, G_greater_fullE, G1i_lesser_fullE, Sigma_left_lesser_fullE, \
+           Sigma_left_greater_fullE
