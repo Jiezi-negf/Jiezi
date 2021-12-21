@@ -5,20 +5,14 @@
 # Jiezi authors can be found in the file AUTHORS.md at the top-level directory
 # of this distribution.
 # ==============================================================================
-
-import sys
-import os
 import numpy as np
 
-sys.path.append("../../../")
-from Jiezi.Physics import hamilton
-from Jiezi.Graph import builder
 
-cnt = builder.CNT(n=4, m=2, Trepeat=3, nonideal=False)
-cnt.construct()
-H = hamilton.hamilton(cnt, onsite=-0.28, hopping=-2.97)
-phi_list = [1, 2, 3]
-H.build_H(phi_list)
-H.build_S(base_overlap=0.018)
-print(H.get_Hii()[2].get_value())
-print(H.get_Si1()[0].get_value())
+def fake_potential(T_repeat, E_bottom, E_top):
+    phi = np.zeros(T_repeat)
+    phi[0] = E_bottom
+    for i in range(1, T_repeat // 2):
+        phi[i] = (E_top - E_bottom)/(T_repeat/2 - 2) * (i - 1) + E_bottom
+    for i in range(T_repeat // 2, T_repeat):
+        phi[i] = phi[T_repeat - 1 - i]
+    return phi

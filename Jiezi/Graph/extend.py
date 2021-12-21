@@ -20,7 +20,7 @@ import math
 np.set_printoptions(threshold=np.inf)
 
 
-def define_hamiltion(a, b, neighbor_a, neighbor_b, n, m, t_1, t_2, T_repeat, onsite, hopping):
+def pre_define_hamilton(a, b, neighbor_a, neighbor_b, n, m, t_1, t_2, T_repeat):
     """
     Function1: numbering A atom and B atom: combine (p, q) with its number
     the order is first A then B, thus the number of B is greater than A
@@ -35,13 +35,12 @@ def define_hamiltion(a, b, neighbor_a, neighbor_b, n, m, t_1, t_2, T_repeat, ons
     :param t_1:
     :param t_2:
     :param T_repeat: number of layers
-    :param onsite:
-    :param hopping:
     :return: a_total_number: dict, save the number of A atom of whole tube, which is like {1:(), 2:(), ...}
              b_total_number: dict, save the number of B atom of whole tube, which is like {29:(), 30:(), ...}
+             total_neighbor: dict, save the neighbor's number of atoms within single cell, which is like {1:[2,3,4],...}
              total_link: dict, save the neighbor's number of every atom in whole tube, which is like {1:[2,3,4],...}
-             cell_hamilton: np.array[nn,nn], the hamilton matrix of initial layer's hamilton
-             hopping_hamilton: np.array[nn,nn], the hamilton matrix between the initial and second layer
+             layertolayer: list, adjacent atoms between two layers, [(45, 57),...]
+             nn: integer, the size of single hamilton matrix is (nn * nn)
     """
     a_number = {}
     b_number = {}
@@ -67,17 +66,8 @@ def define_hamiltion(a, b, neighbor_a, neighbor_b, n, m, t_1, t_2, T_repeat, ons
             key.append(get_key(a_number, element))
         total_neighbor[len(neighbor_a) + index + 1] = key
 
-    # put the hopping and onsite value in the cell hamilton array
     # the size of the cell hamilton array is nn * nn
     nn = len(neighbor_a) + len(neighbor_b)
-    cell_hamilton = np.zeros((nn, nn))
-    # onsite value is the diagonal element
-    for i in range(nn):
-        cell_hamilton[i, i] = onsite
-    for row, value in total_neighbor.items():
-        for column in value:
-            cell_hamilton[row - 1, column - 1] = hopping
-            cell_hamilton[column - 1, row - 1] = hopping
 
     # next layer
     # compute the number and index of the next layer atoms
@@ -110,13 +100,6 @@ def define_hamiltion(a, b, neighbor_a, neighbor_b, n, m, t_1, t_2, T_repeat, ons
             if find_value(a_number, sub):
                 layertolayer.append((get_key(a_number, sub), number))
 
-    # construct hopping hamilton matrix
-    hopping_hamilton = np.zeros((nn, nn))
-    # layertolayer list follows the rule that initial(small) layer number first, next(big) layer number then
-    for element in layertolayer:
-        # this hopping matrix is the right-top one, the left-bottom one is its conjugate
-        hopping_hamilton[element[0] - 1, element[1] - nn - 1] = hopping
-
     # compute the relation of number and index(p,q) in the whole tube which has T_repeat same layers
     a_total_number = {}
     b_total_number = {}
@@ -148,7 +131,7 @@ def define_hamiltion(a, b, neighbor_a, neighbor_b, n, m, t_1, t_2, T_repeat, ons
                 total_link[n_1].append(n_2)
                 total_link[n_2].append(n_1)
 
-    return a_total_number, b_total_number, total_link, cell_hamilton, hopping_hamilton
+    return a_total_number, b_total_number, total_neighbor, total_link, layertolayer, nn
 
 
 def coordinate(coord_a, coord_b, n, m, circumstance, acc, radius):

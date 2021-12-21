@@ -15,7 +15,7 @@ from Jiezi.LA import operator as op
 def subband(Hii, Hi1, Sii, Si1, k):
     """
     this function is to calculate the eigen energy with the specific "k"
-    the formula is: [H_{i-1,i}*exp(-j*ka)+H_{i,i}+H_{i,i+1}*exp(j*ka)]\psi =ES_{i,i}\psi
+    the formula is: [H_{i-1,i}*exp(-j*ka)+H_{i,i}+H_{i,i+1}*exp(j*ka)] \psi =ES_{i,i}\psi
     :param Hii: Hii[i]=H_{i,i}
     :param Hi1: Hi1[i]=H_{i-1,i}
     :param Sii: base overlap

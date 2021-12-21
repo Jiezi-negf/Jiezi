@@ -7,13 +7,12 @@
 # ==============================================================================
 
 import sys
+
 sys.path.append("../../../")
 import Jiezi.Graph.builder as builder
 
-cnt = builder.CNT(4, 2, 3, a_cc=1.44, onsite=-0.28, hopping=-2.97, nonideal=False)
+cnt = builder.CNT(4, 2, 3, a_cc=1.44, nonideal=False)
 
 cnt.construct()
 cnt.data_print()
 cnt.data_plot()
-print(cnt.get_onsite_value(), cnt.get_hopping_value())
-

@@ -8,6 +8,8 @@
 import math
 
 E_list = []
+h_bar = 1
+q_unit = 1e19
 
 
 def bose(E, BOSE=1, TEMP=1):
@@ -23,3 +25,11 @@ def heaviside(x):
         return 1
     else:
         return 0
+
+
+def integral(E, G):
+    E_num = len(E)
+    result = 0
+    for ee in range(E_num - 1):
+        result += (G[ee] + G[ee + 1]) * (E[ee + 1] - E[ee]) / 2
+    return result

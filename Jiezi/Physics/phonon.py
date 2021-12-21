@@ -7,8 +7,8 @@
 # ==============================================================================
 
 
-from Jiezi.Linear_algebra.matrix_numpy import matrix_numpy
-from Jiezi.Linear_algebra import operator as op
+from Jiezi.LA.matrix_numpy import matrix_numpy
+from Jiezi.LA import operator as op
 from Jiezi.Physics.common import *
 
 
@@ -34,11 +34,11 @@ def phonon(ee, form_factor, G_lesser, G_greater, Dac, Dop, omega):
                 temp_lesser += Dop * form_factor[zz].get_value(i, j) * G_lesser[ee + omega][zz].get_value(j, j) * \
                                (N_bose1 + 1) * heaviside(len(E_list) - (ee + omega))\
                                + Dop * form_factor[zz].get_value(i, j) * G_lesser[ee - omega][zz].get_value(j, j) * \
-                               N_bose2 * heaviside(ee - omega)
+                               (N_bose2) * heaviside(ee - omega)
                 temp_greater += Dop * form_factor[zz].get_value(i, j) * G_greater[ee + omega][zz].get_value(j, j) * \
-                                (N_bose1 + 1) * heaviside(len(E_list) - (ee + omega)) \
+                                (N_bose1) * heaviside(len(E_list) - (ee + omega)) \
                                 + Dop * form_factor[zz].get_value(i, j) * G_greater[ee - omega][zz].get_value(j, j) * \
-                                N_bose2 * heaviside(ee - omega)
+                                (N_bose2 + 1) * heaviside(ee - omega)
             # avoid numerical issue
             temp_lesser_new = complex(0.0, abs(temp_lesser.imag))
             temp_greater_new = complex(0.0, -abs(temp_greater.imag))

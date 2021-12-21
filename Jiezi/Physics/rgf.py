@@ -6,28 +6,27 @@
 # of this distribution.
 # ==============================================================================
 from Jiezi.Physics.hamilton import hamilton
-from Jiezi.Linear_algebra import operator as op
-from Jiezi.Linear_algebra.matrix_numpy import matrix_numpy
+from Jiezi.LA import operator as op
+from Jiezi.LA.matrix_numpy import matrix_numpy
 from Jiezi.Physics.surface_gf import surface_gf
 from Jiezi.Physics.common import *
 
 
-def rgf(ee, eta, mul, mur, H: hamilton, sigma_lesser_ph, sigma_r_ph):
+def rgf(ee, eta, mul, mur, Hii, Hi1, Sii, sigma_lesser_ph, sigma_r_ph):
     g_R = []
     g_lesser = []
     G_R = []
     G_lesser = []
     G_greater = []
     G1i_lesser = []
-    Hii = H.get_Hii()
-    Hi1 = H.get_Hi1()
-    Sii = H.get_Sii()
     nz = len(Hii)
     # 1 compute left contact's surface GF and self-energy
     H00 = op.addmat(Hii[0], op.matmulmat(sigma_r_ph[ee][0], Sii[0]))
     G00 = surface_gf(E_list[ee], eta, H00, Hi1[0].dagger(), Sii[0], iter_max=50, TOL=1)
     Sigma_left_R = op.trimatmul(Hi1[0], G00, Hi1[0], type="cnn")
     Sigma_left_lesser = op.scamulmat(-fermi(E_list[ee]-mul), op.addmat(Sigma_left_R, Sigma_left_R.dagger().nega()))
+    Sigma_left_greater = op.scamulmat(-(1-fermi(E_list[ee]-mul)),
+                                      op.addmat(Sigma_left_R, Sigma_left_R.dagger().nega()))
     # 2 the first member of little retarded GF -- g_0_R
     w = complex(E_list[ee], eta)
     g_0_R = op.inv(op.addmat(op.scamulmat(w, Sii[0]), Hii[0].nega(), Sigma_left_R.nega()))
@@ -84,4 +83,4 @@ def rgf(ee, eta, mul, mur, H: hamilton, sigma_lesser_ph, sigma_r_ph):
     for i in range(0, nz):
         G_i_greater = op.addmat(G_lesser[i], G_R[i], G_R[i].dagger().nega())
         G_greater.append(G_i_greater)
-    return G_R, G_lesser, G_greater, G1i_lesser, Sigma_right_R, Sigma_left_R
+    return G_R, G_lesser, G_greater, G1i_lesser, Sigma_left_lesser, Sigma_left_greater
