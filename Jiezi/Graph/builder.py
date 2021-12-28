@@ -31,6 +31,7 @@ class CNT:
         # acc is the distance between two adjacent carbon atoms
         self.__n = n
         self.__m = m
+        # TODO: t1 and t2 are not used yet.
         self.__t1 = 0
         self.__t2 = 0
         self.__radius = 0.0
@@ -43,10 +44,14 @@ class CNT:
         # {29: (1, -2), 30: (1, -1),...}
         self.__b_set_cell = {}
 
+        # TODO: __x_link_index is just part of __x_link_map_index, maybe make them as
+        # variables instead of member variables
         # [[(4, 1)], [(4, 1), (1, -2), (1, -1)],...]
         self.__a_link_index = []
         self.__b_link_index = []
 
+        # NOTE: cell numbering (x,y) appears in __x_set_cell and __x_link_map_index
+        # maybe replace the numbering in __x_link_map_index by key or numbering in __x_set_cell
         # {(0, 0): [(4, 1)], (1, -1): [(4, 1), (1, -2), (1, -1)],...}
         self.__a_link_map_index = {}
         self.__b_link_map_index = {}
@@ -66,6 +71,7 @@ class CNT:
         # total_neighbor is the element for constructing hamilton matrix of single cell
         self.__total_neighbor = {}
         # layertolayer is the element for constructing hamilton matrix between layers
+        # NOTE: propose to rename layertolayer to interlayer
         self.__layertolayer = []
         self.__nonideal = nonideal
 

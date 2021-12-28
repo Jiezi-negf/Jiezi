@@ -10,7 +10,7 @@ from Jiezi.LA.matrix_numpy import matrix_numpy
 from Jiezi.LA import operator as op
 
 
-def mode_space(H: hamilton, U, part, nm):
+def mode_space(H: hamilton, U, part: str, nm: int):
     Hii = H.get_Hii()
     Hi1 = H.get_Hi1()
     Sii = H.get_Sii()
@@ -19,6 +19,7 @@ def mode_space(H: hamilton, U, part, nm):
     Hii_new = []
     Hi1_new = []
     Sii_new = []
+    # TODO: think initialize matrix from base class
     U_new_i = matrix_numpy()
     for i in range(nz):
         nn = U[i].get_size()[0]

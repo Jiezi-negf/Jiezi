@@ -57,6 +57,7 @@ class hamilton:
             for column in value:
                 cell_hamilton[row - 1, column - 1] = self.__hopping
                 cell_hamilton[column - 1, row - 1] = self.__hopping
+        # TODO: think create a matrix with base class instead of numpy matrix
         single_H_cell = matrix_numpy()
         single_H_cell.copy(cell_hamilton)
         return single_H_cell
