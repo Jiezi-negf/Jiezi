@@ -16,6 +16,8 @@ def mode_space(H: hamilton, U, part: str, nm: int):
     Sii = H.get_Sii()
     nz = len(Hii)
     U_new = []
+    # TODO: Hii_new, Hi1_new and Sii_new seem to be unnecessary, one can modify directly
+    # on Hii, Hi1 and Sii instead
     Hii_new = []
     Hi1_new = []
     Sii_new = []
