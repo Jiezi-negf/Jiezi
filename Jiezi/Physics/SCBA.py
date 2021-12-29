@@ -12,8 +12,8 @@ from Jiezi.Physics.rgf import rgf
 from Jiezi.LA import operator as op
 
 
-def SCBA(E_list, iter_max: int, TOL, ratio, eta, mul, mur, Hii, Hi1, Sii, sigma_lesser_ph, sigma_r_ph,
-         form_factor, Dac, Dop, omega):
+def SCBA(E_list, iter_max: int, TOL, ratio, eta, mul, mur, Hii, Hi1, Sii, 
+         sigma_lesser_ph, sigma_r_ph, form_factor, Dac, Dop, omega):
     G_R_fullE = []
     G_lesser_fullE = []
     G_greater_fullE = []
@@ -36,12 +36,12 @@ def SCBA(E_list, iter_max: int, TOL, ratio, eta, mul, mur, Hii, Hi1, Sii, sigma_
         Sigma_left_greater_fullE.append(sigma_lesser_ph[0][0])
         sigma_lesser_ph_fullE_new.append(sigma_lesser_ph[0])
         sigma_r_ph_fullE_new.append(sigma_lesser_ph[0])
-    iter = 0
+    iter_c = 0
     error = 0
     nz = len(sigma_lesser_ph[0])
     nm = len(sigma_lesser_ph[0][0])
-    while iter <= iter_max and error <= TOL:
-        iter += 1
+    while iter_c <= iter_max and error <= TOL:
+        iter_c += 1
         # phonon result ---> GF
         for ee in range(len(E_list)):
             G_R_ee, G_lesser_ee, G_greater_ee, G1i_lesser_ee, Sigma_left_lesser_ee, Sigma_left_greater_ee = \
@@ -75,12 +75,15 @@ def SCBA(E_list, iter_max: int, TOL, ratio, eta, mul, mur, Hii, Hi1, Sii, sigma_
                 for n in range(nm):
                     error = error + abs(abs(sigma_lesser_ph_fullE[ee][zz].get_value(n, n))
                                         -abs(sigma_lesser_ph_fullE_new[ee][zz].get_value(n, n)))
+
                 sigma_lesser_ph_fullE[ee][zz] = op.addmat(op.scamulmat(ratio, sigma_lesser_ph_fullE[ee][zz]),
                                                           op.scamulmat(1 - ratio, sigma_lesser_ph_fullE_new[ee][zz]))
+
                 sigma_r_ph_fullE[ee][zz] = op.addmat(op.scamulmat(ratio, sigma_r_ph_fullE[ee][zz]),
                                                      op.scamulmat(1 - ratio, sigma_r_ph_fullE_new[ee][zz]))
+
         error = error/(len(E_list) * nz * nm)
-        print("iter number is:", iter)
+        print("iter number is:", iter_c)
         print("error is:", error)
     return G_R_fullE, G_lesser_fullE, G_greater_fullE, G1i_lesser_fullE, Sigma_left_lesser_fullE, \
            Sigma_left_greater_fullE

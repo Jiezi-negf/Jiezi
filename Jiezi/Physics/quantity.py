@@ -11,8 +11,8 @@ from Jiezi.LA import operator as op
 import math
 
 
-def quantity(G_lesser_fullE, G_greater_fullE, G1i_lesser_fullE, Sigma_left_lesser_fullE, Sigma_left_greater_fullE,
-             Hi1):
+def quantity(G_lesser_fullE, G_greater_fullE, G1i_lesser_fullE, 
+             Sigma_left_lesser_fullE, Sigma_left_greater_fullE, Hi1):
     n_tol = []
     p_tol = []
     J = []
@@ -21,8 +21,11 @@ def quantity(G_lesser_fullE, G_greater_fullE, G1i_lesser_fullE, Sigma_left_lesse
     # compute J_L
     G_J_L = []
     for ee in range(len(E_list)):
-        G_J_L.append(op.addmat(op.matmulmat(G_greater_fullE[ee][0], Sigma_left_lesser_fullE[ee]),
-                               op.matmulmat(G_lesser_fullE[ee][0], Sigma_left_greater_fullE[ee]).nega()).tre())
+        G_J_L.append(op.addmat(op.matmulmat(G_greater_fullE[ee][0], \
+                                            Sigma_left_lesser_fullE[ee]),
+                               op.matmulmat(G_lesser_fullE[ee][0], \
+                                            Sigma_left_greater_fullE[ee]).nega()).tre())
+
     J_L = integral(E_list, G_J_L) / math.pi / h_bar * q_unit
     J.append(J_L)
 
