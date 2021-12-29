@@ -25,6 +25,8 @@ def SCBA(E_list, iter_max: int, TOL, ratio, eta, mul, mur, Hii, Hi1, Sii,
     sigma_lesser_ph_fullE_new = []
     sigma_r_ph_fullE_new = []
     # initialize
+    # TODO: initialization seems to be redundant
+    # proposal: rewrite the variable definition as e.g. G_R_fullE = [None] * len(E_list) ...
     for ee in range(len(E_list)):
         G_R_fullE.append(sigma_lesser_ph[0])
         G_lesser_fullE.append(sigma_lesser_ph[0])
@@ -41,7 +43,6 @@ def SCBA(E_list, iter_max: int, TOL, ratio, eta, mul, mur, Hii, Hi1, Sii,
     nz = len(sigma_lesser_ph[0])
     nm = len(sigma_lesser_ph[0][0])
     while iter_c <= iter_max and error <= TOL:
-        iter_c += 1
         # phonon result ---> GF
         for ee in range(len(E_list)):
             G_R_ee, G_lesser_ee, G_greater_ee, G1i_lesser_ee, Sigma_left_lesser_ee, Sigma_left_greater_ee = \
@@ -83,7 +84,12 @@ def SCBA(E_list, iter_max: int, TOL, ratio, eta, mul, mur, Hii, Hi1, Sii,
                                                      op.scamulmat(1 - ratio, sigma_r_ph_fullE_new[ee][zz]))
 
         error = error/(len(E_list) * nz * nm)
+
+        # update iter_c
+        iter_c += 1
+
         print("iter number is:", iter_c)
         print("error is:", error)
-    return G_R_fullE, G_lesser_fullE, G_greater_fullE, G1i_lesser_fullE, Sigma_left_lesser_fullE, \
-           Sigma_left_greater_fullE
+
+    return G_R_fullE, G_lesser_fullE, G_greater_fullE, G1i_lesser_fullE, \
+           Sigma_left_lesser_fullE, Sigma_left_greater_fullE
