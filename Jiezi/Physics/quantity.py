@@ -51,6 +51,8 @@ def quantity(G_lesser_fullE, G_greater_fullE, G1i_lesser_fullE,
         # compute the function G_J_i(ee) in location i, which will be integrated
         for ee in range(len(E_list)):
             G_J_i.append(-2 * op.matmulmat(Hi1[i+1], G1i_lesser_fullE[ee][i]).imaginary().tre())
+
         J_i = integral(E_list, G_J_i)/ math.pi / h_bar * q_unit
         J.append(J_i)
+
     return n_tol, p_tol, J
