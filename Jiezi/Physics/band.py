@@ -10,9 +10,10 @@ import numpy as np
 from Jiezi.LA.vector_numpy import vector_numpy
 from Jiezi.LA.matrix_numpy import matrix_numpy
 from Jiezi.LA import operator as op
+from Jiezi.Physics.hamilton import hamilton
 
 
-def subband(Hii, Hi1, Sii, Si1, k):
+def subband(H: hamilton, k):
     """
     this function is to calculate the eigen energy with the specific "k"
     the formula is: [H_{i-1,i}*exp(-j*ka)+H_{i,i}+H_{i,i+1}*exp(j*ka)] \psi =ES_{i,i}\psi
@@ -22,6 +23,10 @@ def subband(Hii, Hi1, Sii, Si1, k):
     :param k:
     :return: subband[i] are eigen energy, U[i] are eigen vectors
     """
+    Hii = H.get_Hii()
+    Hi1 = H.get_Hi1()
+    Sii = H.get_Sii()
+    Si1 = H.get_Si1()
     sub_band = []
     U = []
     for i in range(len(Hii)):
@@ -35,7 +40,7 @@ def subband(Hii, Hi1, Sii, Si1, k):
     return sub_band, U
 
 
-def band_structure(Hii, Hi1, Sii, Si1, start, end, step):
+def band_structure(H: hamilton, start, end, step):
     """
     plot the band structure by scanning the k from start to end
     :param start: the beginning of k
@@ -46,7 +51,7 @@ def band_structure(Hii, Hi1, Sii, Si1, start, end, step):
     k_total = np.arange(start, end, step)
     band = []
     for k in k_total:
-        sub_band, U = subband(Hii, Hi1, Sii, Si1, k)
+        sub_band, U = subband(H, k)
         band.append(sub_band[0])
     return k_total, band
 

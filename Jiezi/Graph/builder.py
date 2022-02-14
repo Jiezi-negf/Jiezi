@@ -8,7 +8,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from mayavi import mlab
-
+import math
 from Jiezi.Graph import cell
 from Jiezi.Graph import extend
 from Jiezi.Visualization.Visualization_Graph import visual
@@ -31,11 +31,10 @@ class CNT:
         # acc is the distance between two adjacent carbon atoms
         self.__n = n
         self.__m = m
-        self.__t1 = 0
-        self.__t2 = 0
         self.__radius = 0.0
         self.__Trepeat = Trepeat
         self.__a_cc = a_cc
+        self.__Tlength = 0.0
         # the suffix "number" means it contains number
         # the suffix "index" means there is only (p,q) but not number
         # {1: (0, 0), 2: (1, -1),...}
@@ -65,8 +64,8 @@ class CNT:
         self.__nn = 0
         # total_neighbor is the element for constructing hamilton matrix of single cell
         self.__total_neighbor = {}
-        # layertolayer is the element for constructing hamilton matrix between layers
-        self.__layertolayer = []
+        # interlayer is the element for constructing hamilton matrix between layers
+        self.__interlayer = []
         self.__nonideal = nonideal
 
     def construct(self):
@@ -75,6 +74,7 @@ class CNT:
         circumstance = shape_para[0]
         self.__radius = shape_para[1]
         (self.__t_1, self.__t_2) = shape_para[2]
+        self.__Tlength = shape_para[3]
         # both set_a and set_b are [(),(),...]
         set_a, set_b = cell.atom_ocean(self.__n, self.__m, self.__a_cc, self.__t_1, self.__t_2)
         set_a, set_b, a_right, b_right = cell.screen(set_a, set_b, self.__n, self.__m, self.__t_1, self.__t_2)
@@ -84,7 +84,7 @@ class CNT:
             cell.neighbor(set_a, set_b, a_right, b_right, self.__n, self.__m)
 
         self.__a_set_number, self.__b_set_number, \
-        self.__total_neighbor, self.__total_link_number, self.__layertolayer, self.__nn \
+        self.__total_neighbor, self.__total_link_number, self.__interlayer, self.__nn \
                                                 = extend.pre_define_hamilton(self.__a_set_cell, self.__b_set_cell, \
                                                           self.__a_link_index, self.__b_link_index, \
                                                           self.__n, self.__m, self.__t_1, self.__t_2, self.__Trepeat)
@@ -96,6 +96,9 @@ class CNT:
             nonideal()
 
     def data_print(self):
+        print("chirality vector:{nm};translatin vector:{T}".format(nm=(self.__n, self.__m), T=(self.__t_1, self.__t_2)))
+        print("radius:{radius};cell length:{cell}".format(radius=self.__radius, cell=self.__Tlength))
+        print("length of the whole cnt is:", self.__Tlength * self.__Trepeat)
         print("A in first cell:")
         print(self.__a_set_cell)
         print("B in first cell:")
@@ -114,19 +117,21 @@ class CNT:
         print(self.__coord_a)
         print("coordinate of B in 3D space:")
         print(self.__coord_b)
+        print("layer to layer is:")
+        print(self.__interlayer)
 
     def data_plot(self):
         visual(self.__coord_a, self.__coord_b, self.__total_link_number)
         mlab.show()
 
-    # the following four parameters are necessary for constructing hamilton matrix in Physics.hamilton module
+    # the following parameters are necessary for constructing hamilton matrix in Physics.hamilton module
     # when the cnt object is regarded as the input parameter of hamilton initialize function, these four
-    # parameters' values will be taken out using these four get_xxx methods.
+    # parameters' values will be taken out using these get_xxx methods.
     def get_nn(self):
         return self.__nn
 
     def get_layertolayer(self):
-        return self.__layertolayer
+        return self.__interlayer
 
     def get_total_neighbor(self):
         return self.__total_neighbor
@@ -134,3 +139,10 @@ class CNT:
     def get_Trepeat(self):
         return self.__Trepeat
 
+    def get_coordinate(self):
+        coordinate_ab = self.__coord_a.copy()
+        coordinate_ab.update(self.__coord_b)
+        return coordinate_ab
+
+    def get_length(self):
+        return self.__Trepeat * self.__Tlength

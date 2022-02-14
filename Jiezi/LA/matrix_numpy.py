@@ -24,6 +24,12 @@ class matrix_numpy(matrix):
     def set_value(self, row, column, value):
         self.__value[row, column] = value
 
+    def set_block_value(self, row_start, row_end, col_start, col_end, value):
+        if isinstance(value, matrix_numpy):
+            self.__value[row_start:row_end, col_start:col_end] = value.get_value()
+        else:
+            self.__value[row_start:row_end, col_start:col_end] = value
+
     def get_value(self, *index):
         """
         return the matrix as numpy array

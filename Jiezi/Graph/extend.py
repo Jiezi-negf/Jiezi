@@ -79,7 +79,7 @@ def pre_define_hamilton(a, b, neighbor_a, neighbor_b, n, m, t_1, t_2, T_repeat):
         b_number_next[number + nn] = (index[0] + t_1, index[1] + t_2)
 
     # find linked atoms between two layers
-    layertolayer = []
+    interlayer = []
     # according to the "rule", use new A to find old B, use new B to find old A
     # new indicates the next layer, old is the initial layer
     for number, index in a_number_next.items():
@@ -89,7 +89,7 @@ def pre_define_hamilton(a, b, neighbor_a, neighbor_b, n, m, t_1, t_2, T_repeat):
                 (p_a - n, q_a - 1 - m), (p_a - n, q_a - m), (p_a - 1 - n, q_a - m)]
         for sub in rule:
             if find_value(b_number, sub):
-                layertolayer.append((get_key(b_number, sub), number))
+                interlayer.append((get_key(b_number, sub), number))
 
     for number, index in b_number_next.items():
         p_b, q_b = index
@@ -98,7 +98,7 @@ def pre_define_hamilton(a, b, neighbor_a, neighbor_b, n, m, t_1, t_2, T_repeat):
                 (p_b + 1 - n, q_b - m), (p_b - n, q_b - m), (p_b - n, q_b + 1 - m)]
         for sub in rule:
             if find_value(a_number, sub):
-                layertolayer.append((get_key(a_number, sub), number))
+                interlayer.append((get_key(a_number, sub), number))
 
     # compute the relation of number and index(p,q) in the whole tube which has T_repeat same layers
     a_total_number = {}
@@ -125,13 +125,13 @@ def pre_define_hamilton(a, b, neighbor_a, neighbor_b, n, m, t_1, t_2, T_repeat):
         if layer == 0:
             continue
         else:
-            for num_1, num_2 in layertolayer:
+            for num_1, num_2 in interlayer:
                 n_1 = num_1 + (layer - 1) * nn
                 n_2 = num_2 + (layer - 1) * nn
                 total_link[n_1].append(n_2)
                 total_link[n_2].append(n_1)
 
-    return a_total_number, b_total_number, total_neighbor, total_link, layertolayer, nn
+    return a_total_number, b_total_number, total_neighbor, total_link, interlayer, nn
 
 
 def coordinate(coord_a, coord_b, n, m, circumstance, acc, radius):

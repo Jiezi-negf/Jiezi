@@ -13,12 +13,15 @@ import numpy as np
 sys.path.append("../../../")
 from Jiezi.Physics import hamilton
 from Jiezi.Graph import builder
+from Jiezi.LA import operator as op
 
-cnt = builder.CNT(n=4, m=2, Trepeat=3, nonideal=False)
+cnt = builder.CNT(n=4, m=2, Trepeat=5, nonideal=False)
 cnt.construct()
 H = hamilton.hamilton(cnt, onsite=-0.28, hopping=-2.97)
-phi_list = [1, 2, 3]
-H.build_H(phi_list)
+H.build_H()
 H.build_S(base_overlap=0.018)
+Hii = H.get_Hii()
+Hi1 = H.get_Hi1()
+Hi1[2].copy(op.scamulmat(10000, Hi1[2]).get_value())
 print(H.get_Hii()[2].get_value())
-print(H.get_Si1()[0].get_value())
+print(H.get_Sii()[0].get_value())

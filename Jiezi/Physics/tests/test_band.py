@@ -17,14 +17,12 @@ from Jiezi.Physics import hamilton, band
 from Jiezi.Graph import builder
 
 
-cnt = builder.CNT(n=5, m=5, Trepeat=3, nonideal=False)
+cnt = builder.CNT(n=4, m=0, Trepeat=3, nonideal=False)
 cnt.construct()
 H = hamilton.hamilton(cnt, onsite=-0.28, hopping=-2.97)
-phi_list = [0, 0, 0]
-H.build_H(phi_list)
+H.build_H()
 H.build_S(base_overlap=0.018)
-k_total, band = band.band_structure(H.get_Hii(), H.get_Hi1(), H.get_Sii(), H.get_Si1(),
-                                    0, 3 * 3.14 / 1.44, 1 * 3.14 / 1.44 / 20)
+k_total, band = band.band_structure(H, 0, 3 * 3.14 / 1.44, 1 * 3.14 / 1.44 / 20)
 print(band[0].get_value())
 i = 0
 for band_k in band:

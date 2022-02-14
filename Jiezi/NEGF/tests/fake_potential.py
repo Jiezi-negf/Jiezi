@@ -6,13 +6,21 @@
 # of this distribution.
 # ==============================================================================
 import numpy as np
+from matplotlib import pyplot as plt
+from Jiezi.Physics.common import *
 
 
-def fake_potential(T_repeat, E_bottom, E_top):
-    phi = np.zeros(T_repeat)
-    phi[0] = E_bottom
-    for i in range(1, T_repeat // 2):
-        phi[i] = (E_top - E_bottom)/(T_repeat/2 - 2) * (i - 1) + E_bottom
-    for i in range(T_repeat // 2, T_repeat):
-        phi[i] = phi[T_repeat - 1 - i]
-    return phi
+def fake_potential(z, z_max):
+    if z <= z_max / 2:
+        y = -1 / (np.exp(-3 * (z - z_max / 2 + 0.1 * z_max)) + 1)
+    else:
+        y = -2 / (np.exp(3 * (z - z_max / 2 - 0.1 * z_max)) + 1) + 1
+    return 0
+
+
+# x_list = np.arange(0, 20, 0.1)
+# y_list = []
+# for x in x_list:
+#     y_list.append(fake_potential(x, 20))
+# plt.plot(x_list, y_list)
+# plt.show()

@@ -12,40 +12,35 @@ from Jiezi.Physics.rgf import rgf
 from Jiezi.LA import operator as op
 
 
-def SCBA(E_list, iter_max: int, TOL, ratio, eta, mul, mur, Hii, Hi1, Sii, sigma_lesser_ph, sigma_r_ph,
-         form_factor, Dac, Dop, omega):
-    G_R_fullE = []
-    G_lesser_fullE = []
-    G_greater_fullE = []
-    G1i_lesser_fullE = []
-    sigma_lesser_ph_fullE = []
-    sigma_r_ph_fullE = []
-    Sigma_left_lesser_fullE = []
-    Sigma_left_greater_fullE = []
-    sigma_lesser_ph_fullE_new = []
-    sigma_r_ph_fullE_new = []
+def SCBA(E_list, iter_max: int, TOL, ratio, eta, mul, mur, Hii, Hi1, Sii,
+         sigma_lesser_ph, sigma_r_ph, form_factor, Dac, Dop, omega):
     # initialize
-    for ee in range(len(E_list)):
-        G_R_fullE.append(sigma_lesser_ph[0])
-        G_lesser_fullE.append(sigma_lesser_ph[0])
-        G_greater_fullE.append(sigma_lesser_ph[0])
-        G1i_lesser_fullE.append(sigma_lesser_ph[0])
-        sigma_lesser_ph_fullE.append(sigma_lesser_ph[ee])
-        sigma_r_ph_fullE.append(sigma_r_ph[ee])
-        Sigma_left_lesser_fullE.append(sigma_lesser_ph[0][0])
-        Sigma_left_greater_fullE.append(sigma_lesser_ph[0][0])
-        sigma_lesser_ph_fullE_new.append(sigma_lesser_ph[0])
-        sigma_r_ph_fullE_new.append(sigma_lesser_ph[0])
-    iter = 0
+    iter_c = 0
     error = 0
     nz = len(sigma_lesser_ph[0])
     nm = len(sigma_lesser_ph[0][0])
-    while iter <= iter_max and error <= TOL:
-        iter += 1
+
+    G_R_fullE = [None] * len(E_list)
+    G_lesser_fullE = [None] * len(E_list)
+    G_greater_fullE = [None] * len(E_list)
+    G1i_lesser_fullE = [None] * len(E_list)
+
+    sigma_lesser_ph_fullE = sigma_lesser_ph
+    sigma_r_ph_fullE = sigma_r_ph
+    sigma_lesser_ph_fullE_new = sigma_lesser_ph
+    sigma_r_ph_fullE_new = sigma_r_ph
+
+    Sigma_left_lesser_fullE = [None] * len(E_list)
+    Sigma_left_greater_fullE = [None] * len(E_list)
+    Sigma_right_lesser_fullE = [None] * len(E_list)
+    Sigma_right_greater_fullE = [None] * len(E_list)
+
+    while iter_c <= iter_max and error <= TOL:
         # phonon result ---> GF
         for ee in range(len(E_list)):
-            G_R_ee, G_lesser_ee, G_greater_ee, G1i_lesser_ee, Sigma_left_lesser_ee, Sigma_left_greater_ee = \
-                rgf(ee, eta, mul, mur, Hii, Hi1, Sii, sigma_lesser_ph_fullE, sigma_r_ph_fullE)
+            G_R_ee, G_lesser_ee, G_greater_ee, G1i_lesser_ee, \
+            Sigma_left_lesser_ee, Sigma_left_greater_ee, Sigma_right_lesser_ee, Sigma_right_greater_ee = \
+                rgf(ee, E_list, eta, mul, mur, Hii, Hi1, Sii, sigma_lesser_ph, sigma_r_ph)
             # G_R_fullE, G_lesser_fullE, G_greater_fullE, G1i_lesser_fullE : [[], [], ...]
             # for example, length of G_lesser_fullE is len(E_list)
             # length of G_lesser_fullE[ee] is nz
@@ -59,11 +54,13 @@ def SCBA(E_list, iter_max: int, TOL, ratio, eta, mul, mur, Hii, Hi1, Sii, sigma_
             # Sigma_left_lesser_fullE[ee] is a matrix_numpy(nm, nm) object
             Sigma_left_lesser_fullE[ee] = Sigma_left_lesser_ee
             Sigma_left_greater_fullE[ee] = Sigma_left_greater_ee
+            Sigma_right_lesser_fullE[ee] = Sigma_right_lesser_ee
+            Sigma_right_greater_fullE[ee] = Sigma_right_greater_ee
 
         # GF result ---> phonon
         for ee in range(len(E_list)):
             sigma_lesser_ph_ee, sigma_r_ph_ee = \
-                phonon(ee, form_factor, G_lesser_fullE, G_greater_fullE, Dac, Dop, omega)
+                phonon(ee, E_list, form_factor, G_lesser_fullE, G_greater_fullE, Dac, Dop, omega)
             sigma_lesser_ph_fullE_new[ee] = sigma_lesser_ph_ee
             sigma_r_ph_fullE_new[ee] = sigma_r_ph_ee
 
@@ -80,7 +77,8 @@ def SCBA(E_list, iter_max: int, TOL, ratio, eta, mul, mur, Hii, Hi1, Sii, sigma_
                 sigma_r_ph_fullE[ee][zz] = op.addmat(op.scamulmat(ratio, sigma_r_ph_fullE[ee][zz]),
                                                      op.scamulmat(1 - ratio, sigma_r_ph_fullE_new[ee][zz]))
         error = error/(len(E_list) * nz * nm)
-        print("iter number is:", iter)
+        iter_c += 1
+        print("iter number is:", iter_c)
         print("error is:", error)
-    return G_R_fullE, G_lesser_fullE, G_greater_fullE, G1i_lesser_fullE, Sigma_left_lesser_fullE, \
-           Sigma_left_greater_fullE
+    return G_R_fullE, G_lesser_fullE, G_greater_fullE, G1i_lesser_fullE, \
+           Sigma_left_lesser_fullE, Sigma_left_greater_fullE, Sigma_right_lesser_fullE, Sigma_right_greater_fullE

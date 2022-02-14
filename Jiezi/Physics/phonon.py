@@ -12,7 +12,7 @@ from Jiezi.LA import operator as op
 from Jiezi.Physics.common import *
 
 
-def phonon(ee, form_factor, G_lesser, G_greater, Dac, Dop, omega):
+def phonon(ee, E_list, form_factor, G_lesser, G_greater, Dac, Dop, omega):
     sigma_lesser_ph = []
     sigma_r_ph = []
     nz = len(form_factor)
@@ -28,16 +28,22 @@ def phonon(ee, form_factor, G_lesser, G_greater, Dac, Dop, omega):
             temp_greater = 0
             for j in range(nm):
                 # acoustic phonon component
-                temp_lesser += Dac * form_factor[zz].get_value(i, j) * G_lesser[ee][zz].get_value(j, j)
-                temp_greater += Dac * form_factor[zz].get_value(i, j) * G_greater[ee][zz].get_value(j, j)
+                temp_lesser += Dac * form_factor[zz].get_value(i, j) * \
+                               G_lesser[ee][zz].get_value(j, j)
+                temp_greater += Dac * form_factor[zz].get_value(i, j) * \
+                                G_greater[ee][zz].get_value(j, j)
                 # optical phonon component
-                temp_lesser += Dop * form_factor[zz].get_value(i, j) * G_lesser[ee + omega][zz].get_value(j, j) * \
+                temp_lesser += Dop * form_factor[zz].get_value(i, j) * \
+                               G_lesser[ee + omega][zz].get_value(j, j) * \
                                (N_bose1 + 1) * heaviside(len(E_list) - (ee + omega))\
-                               + Dop * form_factor[zz].get_value(i, j) * G_lesser[ee - omega][zz].get_value(j, j) * \
+                               + Dop * form_factor[zz].get_value(i, j) * \
+                               G_lesser[ee - omega][zz].get_value(j, j) * \
                                (N_bose2) * heaviside(ee - omega)
-                temp_greater += Dop * form_factor[zz].get_value(i, j) * G_greater[ee + omega][zz].get_value(j, j) * \
+                temp_greater += Dop * form_factor[zz].get_value(i, j) * \
+                                G_greater[ee + omega][zz].get_value(j, j) * \
                                 (N_bose1) * heaviside(len(E_list) - (ee + omega)) \
-                                + Dop * form_factor[zz].get_value(i, j) * G_greater[ee - omega][zz].get_value(j, j) * \
+                                + Dop * form_factor[zz].get_value(i, j) * \
+                                G_greater[ee - omega][zz].get_value(j, j) * \
                                 (N_bose2 + 1) * heaviside(ee - omega)
             # avoid numerical issue
             temp_lesser_new = complex(0.0, abs(temp_lesser.imag))

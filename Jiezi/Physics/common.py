@@ -6,10 +6,18 @@
 # of this distribution.
 # ==============================================================================
 import math
+from Jiezi.LA import operator as op
+from Jiezi.LA.matrix_numpy import matrix_numpy
+import numpy as np
 
-E_list = []
+
 h_bar = 1
 q_unit = 1e19
+# mul = -0.2
+# mur = -1.2
+mul = 1
+mur = 2
+KT = 1
 
 
 def bose(E, BOSE=1, TEMP=1):
@@ -17,7 +25,7 @@ def bose(E, BOSE=1, TEMP=1):
 
 
 def fermi(x):
-    return 1 / (1 + math.exp(x))
+    return 1 / (1 + math.exp(x / KT))
 
 
 def heaviside(x):
@@ -33,3 +41,13 @@ def integral(E, G):
     for ee in range(E_num - 1):
         result += (G[ee] + G[ee + 1]) * (E[ee + 1] - E[ee]) / 2
     return result
+
+
+def ifdagger(mat: matrix_numpy):
+    row, col = mat.get_size()
+    delta = op.addmat(mat, mat.dagger().nega())
+    error = 0
+    for i in range(row):
+        for j in range(col):
+            error += np.sqrt(delta.get_value(i, j).imag ** 2 + delta.get_value(i, j).real ** 2)
+    return error

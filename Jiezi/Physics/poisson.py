@@ -64,6 +64,6 @@ def poisson(x_min, x_max, num_interval, u_s, u_d, f_value):
     # Compute solution
     u = Function(V)
     solve(a == L, u, bcs)
-
+    # TODO: projection should be done here, only return values on interested points
     # Plot solution and mesh
     return np.array(u.vector())
