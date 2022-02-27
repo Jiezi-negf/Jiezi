@@ -104,7 +104,7 @@ class hamilton:
             H_hopping = self.build_single_H_hopping()
             Sii = op.scamulmat(base_overlap / self.__hopping, H_onsite)
             for i in range(self.__nn):
-                Sii.set_value(i, i, 1 + 0j)
+                Sii.set_value(i, i, 1.0 + 0.0j)
             Si1 = op.scamulmat(base_overlap / self.__hopping, H_hopping)
             self.__Sii.append(Sii)
             self.__Si1.append(Si1)

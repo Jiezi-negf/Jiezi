@@ -28,7 +28,7 @@ def quantity(E_list, G_lesser_fullE, G_greater_fullE, G1i_lesser_fullE,
                                op.matmulmat(G_lesser_fullE[ee][0],
                                             Sigma_left_greater_fullE[ee]).nega()).tre())
     J_L = integral(E_list, G_J_L) / math.pi / h_bar
-    J.append(J_L)
+    J.append(J_L.real)
 
     # compute n, p, and J(i->i+1)
     for i in range(num_layer):
@@ -52,9 +52,9 @@ def quantity(E_list, G_lesser_fullE, G_greater_fullE, G1i_lesser_fullE,
         G_J_i = []
         # compute the function G_J_i(ee) in location i, which will be integrated
         for ee in range(len(E_list)):
-            G_J_i.append(-2 * op.matmulmat(Hi1[i+1], G1i_lesser_fullE[ee][i]).imaginary().tre())
+            G_J_i.append(-2.0 * op.matmulmat(Hi1[i+1], G1i_lesser_fullE[ee][i]).imaginary().tre())
 
-        J_i = integral(E_list, G_J_i)/ math.pi / h_bar
+        J_i = integral(E_list, G_J_i) / math.pi / h_bar
         J.append(J_i)
 
     # compute J_R
@@ -65,6 +65,6 @@ def quantity(E_list, G_lesser_fullE, G_greater_fullE, G1i_lesser_fullE,
                                op.matmulmat(G_lesser_fullE[ee][num_layer - 1],
                                             Sigma_right_greater_fullE[ee]).nega()).tre())
     J_R = - integral(E_list, G_J_R) / math.pi / h_bar
-    J.append(J_R)
+    J.append(J_R.real)
 
     return n_tol, p_tol, J

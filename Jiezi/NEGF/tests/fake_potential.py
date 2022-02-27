@@ -11,11 +11,11 @@ from Jiezi.Physics.common import *
 
 
 def fake_potential(z, z_max):
-    if z <= z_max / 2:
-        y = -1 / (np.exp(-3 * (z - z_max / 2 + 0.1 * z_max)) + 1)
+    if z <= z_max / 2.0:
+        y = -1.0 / (np.exp(-3.0 * (z - z_max / 2.0 + 0.1 * z_max)) + 1.0)
     else:
-        y = -2 / (np.exp(3 * (z - z_max / 2 - 0.1 * z_max)) + 1) + 1
-    return 0
+        y = -2.0 / (np.exp(3.0 * (z - z_max / 2.0 - 0.1 * z_max)) + 1.0) + 1.0
+    return y
 
 
 # x_list = np.arange(0, 20, 0.1)

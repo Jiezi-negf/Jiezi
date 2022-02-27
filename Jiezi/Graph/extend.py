@@ -151,30 +151,30 @@ def coordinate(coord_a, coord_b, n, m, circumstance, acc, radius):
     result_a = {}
     result_b = {}
     for number, index in coord_a.items():
-        x = (index[0] + index[1]) * (3 / 2 * acc)
-        y = (index[0] - index[1]) * (math.sqrt(3) / 2 * acc)
+        x = (index[0] + index[1]) * (3.0 / 2.0 * acc)
+        y = (index[0] - index[1]) * (math.sqrt(3.0) / 2.0 * acc)
         # rotate
-        theta = math.acos(math.sqrt(3) / 2 * (n + m) / math.sqrt(m ** 2 + n ** 2 + m * n))
+        theta = math.acos(math.sqrt(3.0) / 2.0 * (n + m) / math.sqrt(m ** 2 + n ** 2 + m * n))
         u = x * math.cos(theta) + y * math.sin(theta)
         v = - x * math.sin(theta) + y * math.cos(theta)
         # roll up
-        alpha = u / circumstance * 2 * math.pi
-        x_3d = math.cos(alpha - math.pi / 2) * radius
-        y_3d = math.sin(alpha - math.pi / 2) * radius
+        alpha = u / circumstance * 2.0 * math.pi
+        x_3d = math.cos(alpha - math.pi / 2.0) * radius
+        y_3d = math.sin(alpha - math.pi / 2.0) * radius
         z_3d = v
         result_a[number] = [x_3d, y_3d, z_3d]
 
     for number, index in coord_b.items():
-        x = (index[0] + index[1] + 2 / 3) * (3 / 2 * acc)
-        y = (index[0] - index[1]) * (math.sqrt(3) / 2 * acc)
+        x = (index[0] + index[1] + 2.0 / 3.0) * (3.0 / 2.0 * acc)
+        y = (index[0] - index[1]) * (math.sqrt(3.0) / 2.0 * acc)
         # rotate
-        theta = math.acos(math.sqrt(3) / 2 * (n + m) / math.sqrt(m ** 2 + n ** 2 + m * n))
+        theta = math.acos(math.sqrt(3.0) / 2.0 * (n + m) / math.sqrt(m ** 2 + n ** 2 + m * n))
         u = x * math.cos(theta) + y * math.sin(theta)
         v = - x * math.sin(theta) + y * math.cos(theta)
         # roll up
-        alpha = u / circumstance * 2 * math.pi
-        x_3d = math.cos(alpha - math.pi / 2) * radius
-        y_3d = math.sin(alpha - math.pi / 2) * radius
+        alpha = u / circumstance * 2.0 * math.pi
+        x_3d = math.cos(alpha - math.pi / 2.0) * radius
+        y_3d = math.sin(alpha - math.pi / 2.0) * radius
         z_3d = v
         result_b[number] = [x_3d, y_3d, z_3d]
     return result_a, result_b

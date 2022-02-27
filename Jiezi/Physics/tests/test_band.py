@@ -17,7 +17,7 @@ from Jiezi.Physics import hamilton, band
 from Jiezi.Graph import builder
 
 
-cnt = builder.CNT(n=4, m=0, Trepeat=3, nonideal=False)
+cnt = builder.CNT(n=5, m=5, Trepeat=6, nonideal=False)
 cnt.construct()
 H = hamilton.hamilton(cnt, onsite=-0.28, hopping=-2.97)
 H.build_H()

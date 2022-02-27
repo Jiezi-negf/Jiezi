@@ -20,9 +20,10 @@ from Jiezi.LA.matrix_numpy import matrix_numpy
 from Jiezi.Physics.common import *
 from Jiezi.Physics.quantity import quantity
 import numpy as np
+import matplotlib.pyplot as plt
 
 # construct the structure
-cnt = builder.CNT(n=4, m=0, Trepeat=12, nonideal=False)
+cnt = builder.CNT(n=4, m=2, Trepeat=12, nonideal=False)
 cnt.construct()
 
 # build hamilton matrix
@@ -38,11 +39,11 @@ H.build_S(base_overlap=0.018)
 E_subband, U = subband(H, k=0)
 
 # compute the mode space basis to decrease the size of H
-nm = 16
-# Hii_new, Hi1_new, Sii_new, form_factor = mode_space(H, U, "low", nm)
-Hii_new = H.get_Hii()
-Hi1_new = H.get_Hi1()
-Sii_new = H.get_Sii()
+nm = 52
+Hii_new, Hi1_new, Sii_new, form_factor = mode_space(H, U, "low", nm)
+# Hii_new = H.get_Hii()
+# Hi1_new = H.get_Hi1()
+# Sii_new = H.get_Sii()
 
 # pick up the min and max value of E_subband
 min_temp = []
@@ -62,7 +63,7 @@ print(E_list)
 
 # compute GF by RGF iteration
 # define the phonon self-energy matrix as zero matrix
-eta = 1e-4
+eta = 5e-6
 sigma_ph = []
 nz = len(Hii_new)
 nm = Hii_new[0].get_size()[0]
@@ -100,3 +101,6 @@ n_tol, p_tol, J = quantity(E_list, G_lesser_fullE, G_greater_fullE, G1i_lesser_f
                            Sigma_right_lesser_fullE, Sigma_right_greater_fullE,
                            Hi1_new)
 print(J)
+x = range(len(J))
+plt.plot(x, J)
+plt.show()

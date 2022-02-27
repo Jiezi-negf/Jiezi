@@ -18,21 +18,22 @@ def rgf(ee, E_list, eta, mul, mur, Hii, Hi1, Sii, sigma_lesser_ph, sigma_r_ph):
     G_greater = []
     G1i_lesser = []
     nz = len(Hii)
+    eta_rgf = 0.0
 
     # 1 compute left contact's surface GF and self-energy
     H00 = op.addmat(Hii[0], op.matmulmat(sigma_r_ph[ee][0], Sii[0]))
     G00 = surface_gf(E_list[ee], eta, H00, Hi1[0].dagger(), Sii[0])[0]
     Sigma_left_R = op.trimatmul(Hi1[0], G00, Hi1[0], type="cnn")
     Sigma_left_lesser = op.scamulmat(fermi(E_list[ee] - mul),
-                                     op.scamulmat(complex(0, 1),
+                                     op.scamulmat(complex(0.0, 1.0),
                                                   op.addmat(Sigma_left_R, Sigma_left_R.dagger().nega())))
-    Sigma_left_greater = op.scamulmat(1 - fermi(E_list[ee] - mul),
-                                      op.scamulmat(complex(0, 1),
+    Sigma_left_greater = op.scamulmat(1.0 - fermi(E_list[ee] - mul),
+                                      op.scamulmat(complex(0.0, 1.0),
                                                    op.addmat(Sigma_left_R, Sigma_left_R.dagger().nega())))
     print("surface GF converge")
 
     # 2 the first member of little retarded GF -- g_0_R
-    w = complex(E_list[ee], eta)
+    w = complex(E_list[ee], eta_rgf)
     g_0_R = op.inv(op.addmat(op.scamulmat(w, Sii[0]), Hii[0].nega(),
                              op.matmulmat(sigma_r_ph[ee][0], Sii[0]).nega(),
                              Sigma_left_R.nega()))

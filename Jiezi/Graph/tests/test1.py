@@ -11,7 +11,7 @@ import sys
 sys.path.append("../../../")
 import Jiezi.Graph.builder as builder
 
-cnt = builder.CNT(5, 5, 3, a_cc=1.44, nonideal=False)
+cnt = builder.CNT(4, 2, 1, a_cc=1.44, nonideal=False)
 
 cnt.construct()
 cnt.data_print()

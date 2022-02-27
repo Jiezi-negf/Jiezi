@@ -12,7 +12,7 @@ from Jiezi.LA import operator as op
 import numpy as np
 
 
-def surface_gf(E, eta, H00, H10, S00, iter_max=50, TOL=1e-10):
+def surface_gf(E, eta, H00, H10, S00, iter_max=100, TOL=1e-10):
     print("start the surface GF loop")
     w = op.scamulmat(complex(E, eta), S00)
     iter_c = 0
@@ -65,7 +65,7 @@ def surface_gf(E, eta, H00, H10, S00, iter_max=50, TOL=1e-10):
     return G00, GBB
 
 
-def surface_gf_dumb(E, eta, H00, H10, S00, iter_max=50, TOL=1e-10):
+def surface_gf_dumb(E, eta, H00, H10, S00, iter_max=100, TOL=1e-10):
     """
     when computing left contact, H10 is Hi1.dagger.
     H10 is Hi1 for right contact.
