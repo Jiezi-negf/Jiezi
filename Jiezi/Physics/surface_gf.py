@@ -95,4 +95,3 @@ def surface_gf_dumb(E, eta, H00, H10, S00, iter_max=100, TOL=1e-10):
         else:
             g_0.copy(g_i.get_value())
     return G00
-

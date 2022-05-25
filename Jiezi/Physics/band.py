@@ -54,5 +54,3 @@ def band_structure(H: hamilton, start, end, step):
         sub_band, U = subband(H, k)
         band.append(sub_band[0])
     return k_total, band
-
-
