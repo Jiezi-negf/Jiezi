@@ -10,7 +10,7 @@ from Jiezi.LA.matrix_numpy import matrix_numpy
 from Jiezi.LA import operator as op
 
 
-def mode_space(H: hamilton, U, part: str, nm: int):
+def mode_space(H: hamilton, U, nm: int):
     Hii = H.get_Hii()
     Hi1 = H.get_Hi1()
     Sii = H.get_Sii()
@@ -19,12 +19,7 @@ def mode_space(H: hamilton, U, part: str, nm: int):
     U_new_i = matrix_numpy()
     for i in range(nz):
         nn = U[i].get_size()[0]
-        if part == "low":
-            # remain the left nm columns of matrix(lower energy)
-            U_new_i.copy(U[i].get_value(0, nn, 0, nm))
-        else:
-            # remain the right nm column of matrix(higher energy)
-            U_new_i.copy(U[i].get_value(0, nn, nn - nm, nn))
+        U_new_i.copy(U[i].get_value(0, nn, nn//2 - nm//2, nn//2 + nm//2))
         U_new.append(U_new_i)
     # transfer the Hii and Sii
     for i in range(nz):

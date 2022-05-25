@@ -30,7 +30,7 @@ def vecmulmat(vec: vector, mat: matrix):
     vec is row vector
     """
     if isinstance(vec, vector_numpy) and isinstance(mat, matrix_numpy):
-        assert vec.get_size()[0] == mat.get_size()[0], "The size of matrix and vector are not compatible!"
+        assert vec.get_size()[1] == mat.get_size()[0], "The size of matrix and vector are not compatible!"
         temp = vector_numpy(mat.get_size()[1])
         temp.copy(np.dot(vec.get_value(), mat.get_value()))
         return temp
@@ -44,8 +44,8 @@ def vecmulvec(vec1: vector, vec2: vector):
     """
     if isinstance(vec1, vector_numpy) and isinstance(vec2, vector_numpy):
         assert vec1.get_size()[1] == 1, "The first vector must be column vector!"
-        assert len(vec2.get_size()) == 1, "The second vector must be row vector!"
-        temp = matrix_numpy(vec1.get_size()[0], vec2.get_size()[0])
+        assert vec2.get_size()[0] == 1, "The second vector must be row vector!"
+        temp = matrix_numpy(vec1.get_size()[0], vec2.get_size()[1])
         temp.copy(np.multiply(vec1.get_value(), vec2.get_value()))
         return temp
 
@@ -55,7 +55,7 @@ def vecdotvec(vec1: vector, vec2: vector):
     vec1(1, m) * vec2(m, 1) = scalar
     """
     if isinstance(vec1, vector_numpy) and isinstance(vec2, vector_numpy):
-        assert len(vec1.get_size()) == 1, "The first vector must be row vector!"
+        assert vec1.get_size()[0] == 1, "The first vector must be row vector!"
         assert vec2.get_size()[1] == 1, "The second vector must be column vector!"
         return np.dot(vec1.get_value(), vec2.get_value())
 
@@ -94,7 +94,7 @@ def scamulvec(scalar: complex, vec: vector):
     scalar * vec
     """
     if isinstance(vec, vector_numpy):
-        temp = vector_numpy(vec.get_size()[0])
+        temp = vector_numpy()
         temp.copy(np.multiply(scalar, vec.get_value()))
         return temp
 
@@ -130,8 +130,10 @@ def addmat(*mat: matrix):
 
 def addvec(*vec: vector):
     if isinstance(vec[0], vector_numpy):
-        temp = vector_numpy(vec[0].get_size()[0])
-        for vec_i in vec:
+        temp = vector_numpy()
+        temp.copy(vec[0].get_value())
+        for i in range(1, len(vec)):
+            vec_i = vec[i]
             temp.copy(np.add(temp.get_value(), vec_i.get_value()))
         return temp
 

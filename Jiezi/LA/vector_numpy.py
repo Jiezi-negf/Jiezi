@@ -15,8 +15,8 @@ class vector_numpy(vector):
     vector is defined as row vector by default
     """
 
-    def __init__(self, n: int):
-        self.__value = np.zeros(n, dtype=complex, order="C")
+    def __init__(self, n: int = 2):
+        self.__value = np.zeros(n, dtype=complex, order="C").reshape(-1, 1)
         self.__size = n
 
     def get_size(self):
@@ -40,9 +40,9 @@ class vector_numpy(vector):
         if index == ():
             return np.copy(self.__value)
         elif np.size(index) == 1:
-            return np.copy(self.__value[index])
+            return np.copy(self.__value[index, 0])
         else:
-            return np.copy(self.__value[index[0]:index[1]])
+            return np.copy(self.__value[index[0]:index[1], 0]).reshape(-1, 1)
 
     def imaginary(self):
         """
@@ -60,7 +60,7 @@ class vector_numpy(vector):
 
     def trans(self):
         temp = vector_numpy(self.__size)
-        temp.copy(self.get_value().reshape(self.__size, 1))
+        temp.copy(self.get_value().T)
         return temp
 
     def conjugate(self):
@@ -84,6 +84,7 @@ class vector_numpy(vector):
         source must be the numpy type parameter rather than matrix or vector
         """
         self.__value = np.asarray(source)
+        self.__size = self.__value.shape
 
     def print(self):
         print(self.__value)

@@ -38,7 +38,7 @@ H.build_S(base_overlap=0.018)
 
 E_subband, U = subband(H, k=0)
 # nm = 30
-# Hii, Hi1, Sii, form_factor = mode_space(H, U, "low", 16)
+# Hii, Hi1, Sii, form_factor = mode_space(H, U, 16)
 Hii = H.get_Hii()
 Hi1 = H.get_Hi1()
 Sii = H.get_Sii()

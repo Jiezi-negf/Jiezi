@@ -8,6 +8,7 @@
 import numpy as np
 from matplotlib import pyplot as plt
 from Jiezi.Physics.common import *
+import math
 
 
 def fake_potential(z, z_max):
@@ -18,9 +19,15 @@ def fake_potential(z, z_max):
     return y
 
 
-# x_list = np.arange(0, 20, 0.1)
-# y_list = []
+# p1=3
+# p2=10
+# x_list = np.arange(0, 10, 0.1)
+# y_list1 = []
+# y_list2 = []
 # for x in x_list:
-#     y_list.append(fake_potential(x, 20))
-# plt.plot(x_list, y_list)
+#     y_list1.append(-1*(math.exp(-x/p1)-1))
+#     y_list2.append(-1 * (math.exp(-x / p2) - 1))
+# plt.plot(x_list, y_list1, label="small", color="r")
+# plt.plot(x_list, y_list2, label="big", color="b")
+# plt.legend()
 # plt.show()

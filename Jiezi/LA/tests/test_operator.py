@@ -23,7 +23,7 @@ class TestOp(unittest.TestCase):
         vec = vector_numpy(2)
         mat = matrix_numpy(2, 2)
         sca = 2
-        vec.copy([1, 0])
+        vec.copy([[1, 0]])
         mat.copy([[1, 1j], [1j, 1]])
 
         # test matmulvec
@@ -50,8 +50,10 @@ class TestOp(unittest.TestCase):
         np.array([[2, 0], [0, 2]])).all(), "matmul_sym is wrong")
 
         # test scamulvec
-        self.assertTrue((op.scamulvec(sca, vec).get_value() == np.array([2, 0])).all(), \
-        "scamulvec is wrong")
+        self.assertTrue((op.scamulvec(sca, vec).get_value() == np.array([[2, 0]])).all(), \
+        "scamulvec_row is wrong")
+        self.assertTrue((op.scamulvec(sca, vec.trans()).get_value() == np.array([[2], [0]])).all(), \
+        "scamulvec_column is wrong")
 
         # test scamulmat
         self.assertTrue((op.scamulmat(sca, mat).get_value() == \
@@ -76,7 +78,7 @@ class TestOp(unittest.TestCase):
 
         # test addvec
         self.assertTrue((op.addvec(vec, vec, vec, vec).get_value() == \
-        np.array([4, 0])).all(), "addvec is wrong")
+        np.array([[4, 0]])).all(), "addvec is wrong")
 
         # test inv
         mat.copy(np.array([[1, 2], [0, 1]]))

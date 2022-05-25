@@ -32,6 +32,7 @@ class CNT:
         self.__n = n
         self.__m = m
         self.__radius = 0.0
+        self.__circumstance = 0.0
         self.__Trepeat = Trepeat
         self.__a_cc = a_cc
         self.__Tlength = 0.0
@@ -71,7 +72,7 @@ class CNT:
     def construct(self):
         # circumstance, self.__radius, t_1, t_2 = cell.shape_parameter(self.__n, self.__m, self.__a_cc)
         shape_para = cell.shape_parameter(self.__n, self.__m, self.__a_cc)
-        circumstance = shape_para[0]
+        self.__circumstance = shape_para[0]
         self.__radius = shape_para[1]
         (self.__t_1, self.__t_2) = shape_para[2]
         self.__Tlength = shape_para[3]
@@ -91,7 +92,7 @@ class CNT:
 
         self.__coord_a, self.__coord_b = extend.coordinate(self.__a_set_number, self.__b_set_number, \
                                                            self.__n, self.__m, \
-                                                           circumstance, self.__a_cc, self.__radius)
+                                                           self.__circumstance, self.__a_cc, self.__radius)
         if self.__nonideal:
             nonideal()
 
@@ -146,3 +147,14 @@ class CNT:
 
     def get_length(self):
         return self.__Trepeat * self.__Tlength
+
+    def get_radius(self):
+        return self.__radius
+
+    def get_singlecell_length(self):
+        return self.__Tlength
+
+    def get_mass_desity(self):
+        # the unit is g/cm^3
+        rho = self.__nn * 1.993e-23 / (math.pi * (self.__radius * 1e-8)**2 * self.__Tlength * 1e-8)
+        return rho

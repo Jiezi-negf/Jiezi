@@ -11,12 +11,11 @@ import sys
 sys.path.append("../../../")
 
 from Jiezi.Graph import builder
-from Jiezi.NEGF.tests.fake_potential import fake_potential
 from Jiezi.Physics import hamilton
 from Jiezi.Physics.band import subband
 from Jiezi.Physics.modespace import mode_space
+from Jiezi.Physics.SCBA import SCBA
 from Jiezi.Physics.rgf import rgf
-from Jiezi.LA.matrix_numpy import matrix_numpy
 from Jiezi.Physics.common import *
 from Jiezi.Physics.quantity import quantity
 import numpy as np
@@ -46,6 +45,7 @@ Hii_new, Hi1_new, Sii_new, form_factor = mode_space(H, U, nm-10)
 # Sii_new = H.get_Sii()
 
 # pick up the min and max value of E_subband
+nm = Hii_new[0].get_size()[0]
 min_temp = []
 max_temp = []
 for energy in E_subband:
@@ -55,48 +55,41 @@ min_subband = min(min_temp).real
 max_subband = max(max_temp).real
 
 # define Energy list that should be computed
-start = min(mul, mur, min_subband) - 10 * KT
-end = max(mul, mur, max_subband) + 10 * KT
-step = 0.1
-E_list = np.arange(start, end, step)
+E_start = min(mul, mur, min_subband) - 10 * KT
+E_end = max(mul, mur, max_subband) + 10 * KT
+E_step = 0.05
+E_list = np.arange(E_start, E_end, E_step)
 print(E_list)
 
 # compute GF by RGF iteration
 # define the phonon self-energy matrix as zero matrix
-eta = 5e-6
-sigma_ph = []
+sigma_r_ph = []
+sigma_lesser_ph = []
 nz = len(Hii_new)
 nm = Hii_new[0].get_size()[0]
-sigma_ph_element = matrix_numpy(nm, nm)
-for i in range(len(E_list)):
+for ee in range(len(E_list)):
     sigma_ph_ee = []
     for j in range(nz):
+        sigma_ph_element = matrix_numpy(nm, nm)
         sigma_ph_ee.append(sigma_ph_element)
-    sigma_ph.append(sigma_ph_ee)
+    sigma_r_ph.append(sigma_ph_ee)
+    sigma_lesser_ph.append(sigma_ph_ee)
 
 # initial list to store GF matrix of every energy
-G_R_fullE = []
-G_lesser_fullE = []
-G_greater_fullE = []
-G1i_lesser_fullE = []
-Sigma_left_lesser_fullE = []
-Sigma_left_greater_fullE = []
-Sigma_right_lesser_fullE = []
-Sigma_right_greater_fullE = []
-
-for ee in range(len(E_list)):
-    G_R, G_lesser, G_greater, G1i_lesser, \
-    Sigma_left_lesser, Sigma_left_greater, \
-    Sigma_right_lesser, Sigma_right_greater = \
-        rgf(ee, E_list, eta, mul, mur, Hii_new, Hi1_new, Sii_new, sigma_ph, sigma_ph)
-    G_R_fullE.append(G_R)
-    G_lesser_fullE.append(G_lesser)
-    G_greater_fullE.append(G_greater)
-    G1i_lesser_fullE.append(G1i_lesser)
-    Sigma_left_lesser_fullE.append(Sigma_left_lesser)
-    Sigma_left_greater_fullE.append(Sigma_left_greater)
-    Sigma_right_lesser_fullE.append(Sigma_right_lesser)
-    Sigma_right_greater_fullE.append(Sigma_right_greater)
+iter_max = 10
+TOL = 1e-100
+ratio = 0.5
+eta = 5e-6
+ac = 2.5
+op = 1.0e8
+v_s = 5.0e5
+omega = 4
+Dac = ac ** 2 * KT / (cnt.get_mass_desity() * v_s ** 2)
+Dop = (h_bar * op) ** 2 / (2 * cnt.get_mass_desity() * omega * E_step)
+G_R_fullE, G_lesser_fullE, G_greater_fullE, G1i_lesser_fullE, \
+    Sigma_left_lesser_fullE, Sigma_left_greater_fullE, Sigma_right_lesser_fullE, Sigma_right_greater_fullE = \
+SCBA(E_list, iter_max, TOL, ratio, eta, mul, mur, Hii_new, Hi1_new, Sii_new,
+            sigma_lesser_ph, sigma_r_ph, form_factor, Dac, Dop, omega)
 
 n_tol, p_tol, J, dos = quantity(E_list, G_R_fullE, G_lesser_fullE, G_greater_fullE, G1i_lesser_fullE,
                            Sigma_left_lesser_fullE, Sigma_left_greater_fullE,

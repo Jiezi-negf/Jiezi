@@ -5,65 +5,41 @@
 # Jiezi authors can be found in the file AUTHORS.md at the top-level directory
 # of this distribution.
 # ==============================================================================
-"""
-FEniCS tutorial demo program: Poisson equation with Dirichlet conditions.
-Test problem is chosen to give an exact solution at all nodes of the mesh.
 
-  -Laplace(u) = f    in the unit square
-            u = u_D  on the boundary
-
-  u_D = 1 + x^2 + 2y^2
-    f = -6
-"""
 import numpy as np
+import math
 from dolfin import *
 import matplotlib.pyplot as plt
+import copy
+from Jiezi.FEM.dirty import dirty
+from Jiezi.FEM.map import map_tocell
+from Jiezi.FEM.ef_solver import ef_solver
+from Jiezi.FEM.assembly import assembly
 
 
-def poisson(x_min, x_max, num_interval, u_s, u_d, f_value):
-    # Create mesh and define function space
-    mesh = IntervalMesh(num_interval, x_min, x_max)
-    V = FunctionSpace(mesh, 'P', 1)
-    coor = mesh.coordinates()
+def poisson(info_mesh, geo_para, z_length, E_list, TOL_ef, TOL_du, ef_init, Dirichlet_BC,
+            dos, density_n, u_init):
 
-    # Define boundary condition
-    class SB_left(SubDomain):
-        def inside(self, x, on_boundary):
-            return near(x[0], x_min) and on_boundary
+    # prepare the component which will be used in the matrix element computation
+    N_GP_T, cell_co, cell_long_term, cell_NJ, cell_NNTJ, mark_list, Dirichlet_list = dirty(info_mesh, geo_para)
 
-    class SB_right(SubDomain):
-        def inside(self, x, on_boundary):
-            return near(x[0], x_max) and on_boundary
+    # call a mapping function to map the u_init which is defined following the dof order to
+    # u_init_cell which is defined following the cell structure
+    u_init_cell = map_tocell(info_mesh, u_init)
 
-    sub_boundaries = MeshFunction("size_t", mesh, mesh.topology().dim() - 1)
-    left = SB_left()
-    right = SB_right()
-    sub_boundaries.set_all(0)
-    left.mark(sub_boundaries, 1)
-    right.mark(sub_boundaries, 2)
+    # solve the fermi energy level on gauss points of every cell
+    ef, dos_GP_list = \
+        ef_solver(u_init_cell, N_GP_T, cell_co, dos, density_n, ef_init, mark_list, z_length, E_list, TOL_ef)
 
-    bc_left = DirichletBC(V, u_s, sub_boundaries, 1)
-    bc_right = DirichletBC(V, u_d, sub_boundaries, 2)
-    bcs = [bc_left, bc_right]
-
-    # define source term f
-    class myfunc(UserExpression):
-        def eval(self, values, x):
-            for i in range(len(coor[0]) - 1):
-                if between(x[0], (coor[0][i], coor[0][i + 1])):
-                    values[0] = f_value[i]
-
-    f = myfunc()
-
-    # Define variational problem
-    u = TrialFunction(V)
-    v = TestFunction(V)
-    a = dot(grad(u), grad(v)) * dx
-    L = f * v * dx
-
-    # Compute solution
-    u = Function(V)
-    solve(a == L, u, bcs)
-    # TODO: projection should be done here, only return values on interested points
-    # Plot solution and mesh
-    return np.array(u.vector())
+    # start the newton iteration now
+    u_k = copy.deepcopy(u_init)
+    dof_amount = len(u_k)
+    while 1:
+        u_k_cell = map_tocell(info_mesh, u_k)
+        A, b = assembly(info_mesh, N_GP_T, cell_long_term, cell_NJ, cell_NNTJ, Dirichlet_list, Dirichlet_BC,
+             u_k_cell, dof_amount, ef, dos_GP_list, E_list)
+        du = solve_LA_eq(A, b)
+        if norm(du) < TOL_du:
+            break
+        u_k = u_k + du
+    return u_k

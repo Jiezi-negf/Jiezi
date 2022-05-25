@@ -25,7 +25,7 @@ class matrix_numpy(matrix):
         self.__value[row, column] = value
 
     def set_block_value(self, row_start, row_end, col_start, col_end, value):
-        if isinstance(value, matrix_numpy):
+        if isinstance(value, matrix_numpy) or isinstance(value, vector_numpy):
             self.__value[row_start:row_end, col_start:col_end] = value.get_value()
         else:
             self.__value[row_start:row_end, col_start:col_end] = value
@@ -101,6 +101,8 @@ class matrix_numpy(matrix):
         source must be the numpy type parameter rather than matrix or vector
         """
         self.__value = np.asarray(source, dtype=complex)
+        self.__row = self.__value.shape[0]
+        self.__column = self.__value.shape[1]
 
     def print(self):
         print(self.__value)

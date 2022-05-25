@@ -11,13 +11,14 @@ from Jiezi.LA import operator as op
 import math
 
 
-def quantity(E_list, G_lesser_fullE, G_greater_fullE, G1i_lesser_fullE,
+def quantity(E_list, G_R_fullE, G_lesser_fullE, G_greater_fullE, G1i_lesser_fullE,
              Sigma_left_lesser_fullE, Sigma_left_greater_fullE,
              Sigma_right_lesser_fullE, Sigma_right_greater_fullE,
              Hi1):
     n_tol = []
     p_tol = []
     J = []
+    dos = []
     # number of layer
     num_layer = len(G_lesser_fullE[0])
     # compute J_L
@@ -27,7 +28,7 @@ def quantity(E_list, G_lesser_fullE, G_greater_fullE, G1i_lesser_fullE,
                                             Sigma_left_lesser_fullE[ee]),
                                op.matmulmat(G_lesser_fullE[ee][0],
                                             Sigma_left_greater_fullE[ee]).nega()).tre())
-    J_L = integral(E_list, G_J_L) / math.pi / h_bar
+    J_L = q_unit * integral(E_list, G_J_L) / math.pi / h_bar
     J.append(J_L.real)
 
     # compute n, p, and J(i->i+1)
@@ -54,7 +55,7 @@ def quantity(E_list, G_lesser_fullE, G_greater_fullE, G1i_lesser_fullE,
         for ee in range(len(E_list)):
             G_J_i.append(-2.0 * op.matmulmat(Hi1[i+1], G1i_lesser_fullE[ee][i]).imaginary().tre())
 
-        J_i = integral(E_list, G_J_i) / math.pi / h_bar
+        J_i = q_unit * integral(E_list, G_J_i) / math.pi / h_bar
         J.append(J_i)
 
     # compute J_R
@@ -64,7 +65,14 @@ def quantity(E_list, G_lesser_fullE, G_greater_fullE, G1i_lesser_fullE,
                                             Sigma_right_lesser_fullE[ee]),
                                op.matmulmat(G_lesser_fullE[ee][num_layer - 1],
                                             Sigma_right_greater_fullE[ee]).nega()).tre())
-    J_R = - integral(E_list, G_J_R) / math.pi / h_bar
+    J_R = - q_unit * integral(E_list, G_J_R) / math.pi / h_bar
     J.append(J_R.real)
 
-    return n_tol, p_tol, J
+    # compute density of states(DOS)
+    for ee in range(len(E_list)):
+        dos_ee = []
+        for zz in range(num_layer):
+            dos_ee.append(- G_R_fullE[ee][zz].tre().imag)
+        dos.append(dos_ee)
+
+    return n_tol, p_tol, J, dos

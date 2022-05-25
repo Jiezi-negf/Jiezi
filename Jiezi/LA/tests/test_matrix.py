@@ -139,7 +139,9 @@ class TestMatrix(unittest.TestCase):
         TestMatrix.mat.copy(src)
 
         self.assertTrue((TestMatrix.mat.get_value() == np.array([[1. + 2.j, 2. + 3.j, 2]])).all(), \
-                        "copy is wrong")
+                        "copy is wrong: value")
+        self.assertTrue(TestMatrix.mat.get_size() == (1, 3),
+                        "copy is wrong: size")
 
     def eigen(self):
         a = np.diag((3, 2, 1))

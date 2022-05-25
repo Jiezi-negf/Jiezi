@@ -32,7 +32,7 @@ Hi1 = H.get_Hi1()
 Sii = H.get_Sii()
 nz = len(Hii)
 nm = Hii[0].get_size()[0]
-# Hii, Hi1, Sii, form_factor = modespace.mode_space(H, U, "low", nm)
+# Hii, Hi1, Sii, form_factor = modespace.mode_space(H, U, nm)
 ee = 0
 eta = 5e-6
 GBB_L = surface_gf.surface_gf(E_list[ee], eta, Hii[0], Hi1[0].dagger(), Sii[0], TOL=1e-12)[1]
