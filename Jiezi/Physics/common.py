@@ -25,9 +25,9 @@ KT = 0.026
 r_inter, r_oxide, cnt_radius, width_cnt, width_oxide, z_total, zlength_oxide = 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
 # material parameters
 epsilon_0 = 1.0
-epsilon_air = 1.0 * epsilon_0
-epsilon_cnt = 1.0 * epsilon_0
-epsilon_oxide = 1.0 * epsilon_0
+epsilon_air = 2.0 * epsilon_0
+epsilon_cnt = 3.0 * epsilon_0
+epsilon_oxide = 4.0 * epsilon_0
 
 
 def bose(E, BOSE=1.0, TEMP=1.0):
