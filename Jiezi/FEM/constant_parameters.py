@@ -91,7 +91,7 @@ def isDirichlet(point_coordinate, geo_para):
     return flag
 
 
-def dirty(info_mesh, geo_para):
+def constant_parameters(info_mesh, geo_para):
     """
     :param info_mesh: [{vertex1:[x,y,z],vertex2:[x,y,z],... },{},...]
     :param geo_para: geometrical parameters
@@ -133,17 +133,23 @@ def dirty(info_mesh, geo_para):
 
         # 2 compute the coefficients of the shape functions
         co_shapefunc = shape_function(dof_coord)
-        co_shapefunc_bcd234 = np.array(co_shapefunc)[1:4, 1:4]
+        # co_shapefunc_bcd234 = np.array(co_shapefunc)[1:4, 1:4]
         cell_co[cell_index] = co_shapefunc
 
         # 3 compute the determinant of Jacobian matrix |J_e|
         # as there will be zero element in co_shapefunc, i need to compute the reciprocal element by element
-        jacobian = np.zeros((3, 3))
+        # jacobian = np.zeros((3, 3))
+        # for i in range(3):
+        #     for j in range(3):
+        #         if not co_shapefunc_bcd234[i][j] == 0:
+        #             jacobian[i, j] = 1 / co_shapefunc_bcd234[i, j]
+        # det_jacobian = np.linalg.det(jacobian)
+        jacob_temp = np.array(dof_coord).transpose()
+        jacob2 = np.zeros((3, 3))
         for i in range(3):
             for j in range(3):
-                if not co_shapefunc_bcd234[i][j] == 0:
-                    jacobian[i, j] = 1 / co_shapefunc_bcd234[i, j]
-        det_jacobian = np.linalg.det(jacobian)
+                jacob2[i, j] = jacob_temp[i, j + 1] - jacob_temp[i, 0]
+        det_jacobian = np.linalg.det(jacob2)
 
         # 4 compute the long term
         alpha_xyz = vector_numpy(3)
@@ -203,7 +209,7 @@ def dirty(info_mesh, geo_para):
             point_coord = dof_coord[i]
             if isDirichlet(point_coord, geo_para) == 1:
                 Dirichlet_list.append(dof_number[i])
-            Dirichlet_list = list(set(Dirichlet_list))
+    Dirichlet_list = list(set(Dirichlet_list))
     return N_GP_T, cell_co, cell_long_term, cell_NJ, cell_NNTJ, mark_list, Dirichlet_list
 
 

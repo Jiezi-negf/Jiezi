@@ -18,7 +18,7 @@ sys.path.append("../../../")
 from Jiezi.FEM.shape_function import shape_function
 
 coord = [1, 2, 1]
-dof_coor = [[4, 5, 6], [2, 7, 1], [0, 0, 1], [0, 1, 0]]
+dof_coor = [[4, 5, 6], [2, 7, 1], [5, 2, 3], [1, 3, 7]]
 co_shapefunc = shape_function(dof_coor)
 matrix_1 = np.arange(16).reshape(4, 4)
 for i in range(4):

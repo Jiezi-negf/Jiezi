@@ -132,7 +132,7 @@ def gauss_xyz(co_shapefunc):
 def find_dos(coord, dos, z_length):
     """
     based on the GPs' coordination on xyz space, get the layer which it belongs to
-    then get the dos which is jest a function of energy.
+    then get the dos which is just a function of energy.
     :param coord: coordination of one gauss point
     :param dos: from the output of GF, dos[ee][zz] = D(E(ee),z)
     :param z_length: the whole length of the tube along the z axis

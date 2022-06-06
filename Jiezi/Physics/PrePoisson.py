@@ -21,12 +21,12 @@ def PrePoisson(cnt: CNT):
     r_inter = cnt_radius - width_cnt / 2
     width_oxide = 0.2 * cnt_radius
     z_total = cnt.get_length()
-    zlength_oxide = 0.1 * z_total
+    zlength_oxide = 0.2 * z_total
 
-    mesh_whole_min_size = 0.02 * z_total
-    mesh_whole_max_size = 0.05 * z_total
-    mesh_cnt_min_size = 0.5 * mesh_whole_min_size
-    mesh_cnt_max_size = 0.5 * mesh_whole_max_size
+    mesh_whole_min_size = 0.1 * z_total
+    mesh_whole_max_size = 0.2 * z_total
+    mesh_cnt_min_size = 0.7 * mesh_whole_min_size
+    mesh_cnt_max_size = 0.7 * mesh_whole_max_size
 
     # step2: determine where the salome script file is and where the Mesh_whole.dat file is
     path_salome_bin = "/home/zjy/salome/SALOME-9.3.0-UB18.04-SRC"
@@ -61,8 +61,8 @@ def PrePoisson(cnt: CNT):
     os.system(path_salome_bin + "/salome -t" + " " + path_salome_script)
     os.system("python3" + " " + path_salome_kill)
 
-    # # step 5: run the "salome2fenics.py" to transform .dat to .xml
-    # os.system("python3" + " " + path_salome2fenics)
+    # step 5: run the "salome2fenics.py" to transform .dat to .xml
+    os.system("python3" + " " + path_salome2fenics)
 
     # step 6: compute all the geometric parameters  that poisson solver needs as the return value
     r_outer = r_inter + width_cnt

@@ -14,7 +14,7 @@ from Jiezi.Physics.common import *
 import numpy as np
 
 
-def assembly(info_mesh, N_GP_T, cell_long_term, cell_NJ, cell_NNTJ, Dirichlet_list, Dirichlet_BC,
+def assembly(info_mesh, N_GP_T, cell_long_term, cell_NJ, cell_NNTJ, Dirichlet_list,
              u_k_cell, dof_amount, ef, dos_GP_list, E_list):
     # create A_total and b_total to store the final matrix and vector in Ax=b
     A_total = matrix_numpy(dof_amount, dof_amount)
@@ -42,10 +42,10 @@ def assembly(info_mesh, N_GP_T, cell_long_term, cell_NJ, cell_NNTJ, Dirichlet_li
         for i in range(4):
             A_cell = op.addmat(A_cell, op.scamulmat(
                 func_f_DFD(ef[cell_index][i], dos_GP_list[cell_index][i], -u_in_f[i], E_list),
-                cell_NNTJ[cell_index][i]))
+                cell_NNTJ[cell_index][i]).nega())
 
         # compute and add the right first term to b_cell
-        b_cell = op.addvec(b_cell, op.matmulvec(cell_long_term[cell_index], u_cell_row.trans()))
+        b_cell = op.addvec(b_cell, op.matmulvec(cell_long_term[cell_index], u_cell_row.trans()).nega())
 
         # compute and add the right second term to b_cell
         for i in range(4):
@@ -74,7 +74,7 @@ def assembly(info_mesh, N_GP_T, cell_long_term, cell_NJ, cell_NNTJ, Dirichlet_li
         # set the element about the Dirichlet point to 1
         A_total.set_value(D_index, D_index, 1.0)
         # set the value of b on Dirichlet point to its value based on the Dirichlet boundary condition
-        b_total.set_value((D_index, 0), Dirichlet_BC)
+        b_total.set_value((D_index, 0), 0)
         print(i)
     return A_total, b_total
 
@@ -105,7 +105,6 @@ def func_f(ef, dos, u, E_list):
         result += (dos[ee] * fermi(E_list[ee] - ef)
                    + dos[ee + 1] * fermi(E_list[ee + 1] - ef)) * E_step / 2
     return result
-
 
 
 

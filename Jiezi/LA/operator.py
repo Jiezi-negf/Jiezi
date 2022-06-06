@@ -57,7 +57,7 @@ def vecdotvec(vec1: vector, vec2: vector):
     if isinstance(vec1, vector_numpy) and isinstance(vec2, vector_numpy):
         assert vec1.get_size()[0] == 1, "The first vector must be row vector!"
         assert vec2.get_size()[1] == 1, "The second vector must be column vector!"
-        return np.dot(vec1.get_value(), vec2.get_value())
+        return np.dot(vec1.get_value(), vec2.get_value())[0][0]
 
 
 def matmulmat(mat1: matrix, mat2: matrix):
