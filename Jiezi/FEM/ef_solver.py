@@ -5,12 +5,14 @@
 # Jiezi authors can be found in the file AUTHORS.md at the top-level directory
 # of this distribution.
 # ==============================================================================
+import copy
 
 from Jiezi.LA.matrix_numpy import matrix_numpy
 from Jiezi.LA.vector_numpy import vector_numpy
 from Jiezi.LA import operator as op
 from Jiezi.Physics.common import *
 import numpy as np
+from scipy.optimize import root, fsolve
 
 
 def ef_solver(u_init, N_GP_T, cell_co, dos, density_n, ef_init, mark_list, z_length, E_list, TOL):
@@ -48,43 +50,76 @@ def ef_solver(u_init, N_GP_T, cell_co, dos, density_n, ef_init, mark_list, z_len
     # every ef[i] stores a list [], which stores the values of gf on four GPs of cell i
     ef = [None] * len(cell_co)
     dos_GP_list = [None] * len(cell_co)
-
+    n_GP_list = [None] * len(cell_co)
+    u_GP_list = [None] * len(cell_co)
     for cell_index in range(len(cell_co)):
-        mark_value = mark_list[cell_index]
-        if not mark_value == 1:
-            ef[cell_index] = [-1e5, -1e5, -1e5, -1e5]
-            continue
-        ef_cell_i = [None] * 4
         dos_cell_i = [None] * 4
-
+        n_cell_i  = [None] * 4
         gauss_point_xyz = gauss_xyz(cell_co[cell_index])
-
         # u_GP_cell is a list, the length of which is 4, which stores the phi value on the four GP of cell_index
         u_GP_cell = [None] * 4
-        for i in range(4):
+        for GP_index in range(4):
             u_init_vec = vector_numpy(4)
             u_init_vec.copy(np.array([u_init[cell_index]]).transpose())
-            u_GP_cell[i] = op.vecdotvec(N_GP_T[cell_index][i], u_init_vec)
+            u_GP_cell[GP_index] = op.vecdotvec(N_GP_T[GP_index], u_init_vec)
+        u_GP_list[cell_index] = u_GP_cell
 
         for GP_index in range(4):
-            u_GP = -u_GP_cell[GP_index]
             coord = gauss_point_xyz[GP_index]
             dos_GP = find_dos(coord, dos, z_length)
             n_GP = find_n(coord, density_n, z_length)
             dos_cell_i[GP_index] = dos_GP
-
-            ef_i = ef_init[cell_index][GP_index]
-            while 1:
-                ef_i1 = ef_i - KT * (integral_ef_up(u_GP, dos_GP, E_list, ef_i) - n_GP) \
-                        / integral_ef_bottom(u_GP, dos_GP, E_list, ef_i)
-                error = abs(ef_i1 - ef_i)
-                if error < TOL:
-                    break
-                ef_i = ef_i1
-            ef_cell_i[GP_index] = ef_i
-
-        ef[cell_index] = ef_cell_i
+            n_cell_i[GP_index] = n_GP
+        n_GP_list[cell_index] = n_cell_i
         dos_GP_list[cell_index] = dos_cell_i
+
+    for cell_index in range(len(cell_co)):
+        if mark_list[cell_index] != 1:
+            ef_cell_i = [-1e2] * 4
+            ef[cell_index] = ef_cell_i
+            continue
+        else:
+            ef_cell_i = [None] * 4
+            for GP_index in range(4):
+                ef_i = brent(E_list, u_GP_list[cell_index][GP_index],
+                             dos_GP_list[cell_index][GP_index], n_GP_list[cell_index][GP_index],
+                             E_list[0], E_list[len(E_list) - 1], 1e-5, 1e-5)
+                ef_cell_i[GP_index] = ef_i
+            ef[cell_index] = ef_cell_i
+
+
+    # for cell_index in range(len(cell_co)):
+    #     ef_cell_i = [None] * 4
+    #     dos_cell_i = [None] * 4
+    #     gauss_point_xyz = gauss_xyz(cell_co[cell_index])
+    #     # u_GP_cell is a list, the length of which is 4, which stores the phi value on the four GP of cell_index
+    #     u_GP_cell = [None] * 4
+    #     for i in range(4):
+    #         u_init_vec = vector_numpy(4)
+    #         u_init_vec.copy(np.array([u_init[cell_index]]).transpose())
+    #         u_GP_cell[i] = op.vecdotvec(N_GP_T[i], u_init_vec)
+    #
+    #     for GP_index in range(4):
+    #         u_GP = u_GP_cell[GP_index]
+    #         coord = gauss_point_xyz[GP_index]
+    #         dos_GP = find_dos(coord, dos, z_length)
+    #         n_GP = find_n(coord, density_n, z_length)
+    #         dos_cell_i[GP_index] = dos_GP
+    #
+    #
+    #         # ef_i = ef_init[cell_index][GP_index]
+    #         # while 1:
+    #         #     ef_i1 = ef_i - KT * (integral_ef_up(u_GP, dos_GP, E_list, ef_i) - n_GP) \
+    #         #             / integral_ef_bottom(u_GP, dos_GP, E_list, ef_i)
+    #         #     error = abs(ef_i1 - ef_i)
+    #         #     if error < TOL:
+    #         #         break
+    #         #     ef_i = ef_i1
+    #         ef_i = brent(E_list, u_GP, dos_GP, n_GP, E_list[0], E_list[len(E_list) - 1], 1e-5, 1e-5)
+    #         ef_cell_i[GP_index] = ef_i
+    #
+    #     ef[cell_index] = ef_cell_i
+    #     dos_GP_list[cell_index] = dos_cell_i
 
     return ef, dos_GP_list
 
@@ -140,7 +175,7 @@ def find_dos(coord, dos, z_length):
     """
     x, y, z = coord
     length_layer = z_length / len(dos[0])
-    layer_index = z // length_layer
+    layer_index = int(z.real // length_layer)
     dos_GP = [row[layer_index] for row in dos]
     return dos_GP
 
@@ -155,9 +190,9 @@ def find_n(coord, density_n, z_length):
     :return: n_GP, a float type data
     """
     x, y, z = coord
-    length_layer = z_length / len(density_n[0])
-    layer_index = z // length_layer
-    n_GP = density_n[layer_index]
+    length_layer = z_length / len(density_n)
+    layer_index = int(z.real // length_layer)
+    n_GP = density_n[layer_index].real
     return n_GP
 
 
@@ -165,15 +200,15 @@ def integral_ef_up(start, dos_GP, E_list, ef_i):
     result = 0.0
     E_step = E_list[1] - E_list[0]
     diff = start - E_list[0]
-    start_normal = diff // E_step
+    start_normal = int(diff // E_step)
     if diff <= 0:
         start_index = 0
     else:
         start_index = start_normal
     end_index = len(E_list)
     for ee in range(start_index, end_index - 1):
-        result += (dos_GP[ee] * fermi(E_list[ee]-ef_i)
-                   + dos_GP[ee+1] * fermi(E_list[ee+1]-ef_i)) * E_step / 2
+        result += (dos_GP[ee] * fermi(E_list[ee] - ef_i)
+                   + dos_GP[ee + 1] * fermi(E_list[ee + 1] - ef_i)) * E_step / 2
     return result
 
 
@@ -181,7 +216,7 @@ def integral_ef_bottom(start, dos_GP, E_list, ef_i):
     result = 0.0
     E_step = E_list[1] - E_list[0]
     diff = start - E_list[0]
-    start_normal = diff // E_step
+    start_normal = int(diff // E_step)
     if diff <= 0:
         start_index = 0
     else:
@@ -192,3 +227,136 @@ def integral_ef_bottom(start, dos_GP, E_list, ef_i):
                    + dos_GP[ee + 1] * fermi(E_list[ee + 1] - ef_i) * (1 - fermi(E_list[ee + 1] - ef_i))
                    ) * E_step / 2
     return result
+
+
+def func_F(E_list, phi, dos, density_n, ef):
+    result = 0.0
+    E_step = E_list[1] - E_list[0]
+    diff = -phi - E_list[0]
+    start_normal = int(diff.real // E_step)
+    if diff <= 0:
+        start_index = 0
+    elif -phi > E_list[len(E_list) - 1]:
+        start_index = len(E_list)
+    else:
+        start_index = start_normal
+    end_index = len(E_list)
+    for ee in range(start_index, end_index - 1):
+        result += (dos[ee] * fermi(E_list[ee] - ef)
+                   + dos[ee + 1] * fermi(E_list[ee + 1] - ef)) * E_step / 2
+    result -= density_n
+    return result
+
+
+# def func_F(E_list, phi, dos, density_n, ef):
+#     result = ef**3 - 2*ef**2 - +5*ef - 15
+#     return result
+# def f(ef):
+#     res = ef**3 - 2*ef**2 - +5*ef - 15
+#     return res
+
+
+def secant(E_list, phi, dos, density_n, ef_0, ef_1):
+    f_0 = func_F(E_list, phi, dos, density_n, ef_0)
+    f_1 = func_F(E_list, phi, dos, density_n, ef_1)
+    ef_2 = ef_0 - f_0 * (ef_1 - ef_0) / (f_1 - f_0)
+    return ef_2
+
+
+def IQI(E_list, phi, dos, density_n, ef_0, ef_1, ef_2):
+    f_0 = func_F(E_list, phi, dos, density_n, ef_0)
+    f_1 = func_F(E_list, phi, dos, density_n, ef_1)
+    f_2 = func_F(E_list, phi, dos, density_n, ef_2)
+    result = f_1 * f_2 / (f_0 - f_1) / (f_0 - f_2) * ef_0 \
+             + f_0 * f_2 / (f_1 - f_0) / (f_1 - f_2) * ef_1 \
+             + f_0 * f_1 / (f_2 - f_0) / (f_2 - f_1) * ef_2
+    return result
+
+
+def swap(x1, x2):
+    return x2, x1
+
+
+def between(a, b, x):
+    if a <= x <= b or b <= x <= a:
+        return True
+    else:
+        return False
+
+
+def brent(E_list, phi, dos, density_n, a, b, tol_brent_residual=1e-5, tol_brent_bisection=1e-5):
+    f_a = func_F(E_list, phi, dos, density_n, a)
+    f_b = func_F(E_list, phi, dos, density_n, b)
+    # test if a and b are set reasonably
+    if f_a * f_b > 0:
+        print("ERROR: the sign of f(a) and f(b) must be different!")
+    # make sure f(b) is closer to 0 than f(a), if not, swap a and b
+    if abs(f_a) < abs(f_b):
+        a, b = swap(a, b)
+    # initialize c and d, they both equal to a at the first loop
+    c = a
+    d = a
+    # set this variable to count the number of iteration
+    iter_brent = 0
+    # set the flag initial value false, represent that the bisection method has not been used
+    flag_bisection = False
+    # start the loop
+    while 1:
+        # make sure f(b) is closer to 0 than f(a), if not, swap a and b
+        if abs(func_F(E_list, phi, dos, density_n, a)) < abs(func_F(E_list, phi, dos, density_n, b)):
+            a, b = swap(a, b)
+        # test if the iteration is converged
+        if abs(a - b) < tol_brent_bisection or abs(func_F(E_list, phi, dos, density_n, b)) < tol_brent_residual:
+            # print("the number of iteration in brent method is:", iter_brent)
+            return b
+        # compute f(a), f(b), f(c), m, k
+        f_a = func_F(E_list, phi, dos, density_n, a)
+        f_b = func_F(E_list, phi, dos, density_n, b)
+        f_c = func_F(E_list, phi, dos, density_n, c)
+        m = (a + b) / 2
+        f_m = func_F(E_list, phi, dos, density_n, m)
+        k = (3 * a + b) / 4
+        # compute s
+        if f_a != f_c and f_b != f_c:
+            s = IQI(E_list, phi, dos, density_n, a, b, c)
+        elif b != c and f_b != f_c:
+            s = secant(E_list, phi, dos, density_n, b, c)
+        else:
+            s = m
+        f_s = func_F(E_list, phi, dos, density_n, s)
+        # compute flag_ill
+        if flag_bisection is True:
+            flag_ill = abs(s - b) < (1 / 2) * abs(b - c)
+        else:
+            flag_ill = (c == d or abs(s - b) < (1 / 2) * abs(c - d))
+        # renew the a b c
+        if flag_ill and between(k, b, s) and f_s * f_a < 0:
+            flag_bisection = False
+            d = copy.deepcopy(c)
+            c = copy.deepcopy(b)
+            b = copy.deepcopy(s)
+            iter_brent += 1
+            continue
+        if flag_ill and between(k, b, s) and f_s * f_a > 0:
+            flag_bisection = False
+            d = copy.deepcopy(c)
+            c = copy.deepcopy(b)
+            a = copy.deepcopy(b)
+            b = copy.deepcopy(s)
+            iter_brent += 1
+            continue
+        if f_m * f_a < 0:
+            flag_bisection = True
+            d = copy.deepcopy(c)
+            c = copy.deepcopy(b)
+            b = copy.deepcopy(m)
+            iter_brent += 1
+            continue
+        else:
+            flag_bisection = True
+            d = copy.deepcopy(c)
+            c = copy.deepcopy(b)
+            a = copy.deepcopy(b)
+            b = copy.deepcopy(m)
+            iter_brent += 1
+            continue

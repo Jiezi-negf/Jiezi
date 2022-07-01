@@ -21,7 +21,6 @@ def assembly(info_mesh, N_GP_T, cell_long_term, cell_NJ, cell_NNTJ, Dirichlet_li
     b_total = vector_numpy(dof_amount)
 
     for cell_index in range(len(info_mesh)):
-        print(cell_index)
         # create a variable A_cell to store one part of A in Ax=b
         # create a variable b_cell to store one part of b in Ax=b
         A_cell = matrix_numpy(4, 4)
@@ -41,7 +40,7 @@ def assembly(info_mesh, N_GP_T, cell_long_term, cell_NJ, cell_NNTJ, Dirichlet_li
         # compute and add the left second term to A_cell
         for i in range(4):
             A_cell = op.addmat(A_cell, op.scamulmat(
-                func_f_DFD(ef[cell_index][i], dos_GP_list[cell_index][i], -u_in_f[i], E_list),
+                func_f_DFD(ef[cell_index][i], dos_GP_list[cell_index][i], u_in_f[i], E_list),
                 cell_NNTJ[cell_index][i]).nega())
 
         # compute and add the right first term to b_cell
@@ -50,7 +49,7 @@ def assembly(info_mesh, N_GP_T, cell_long_term, cell_NJ, cell_NNTJ, Dirichlet_li
         # compute and add the right second term to b_cell
         for i in range(4):
             b_cell = op.addvec(b_cell, op.scamulvec(
-                func_f(ef[cell_index][i], dos_GP_list[cell_index][i], -u_in_f[i], E_list),
+                func_f(ef[cell_index][i], dos_GP_list[cell_index][i], u_in_f[i], E_list),
                 cell_NJ[cell_index][i]))
 
         # assembly the local matrix A_cell and local vector b_cell to the total matrix A and total vector b
@@ -62,7 +61,7 @@ def assembly(info_mesh, N_GP_T, cell_long_term, cell_NJ, cell_NNTJ, Dirichlet_li
                 A_total.set_value(cell_dof_index[i], cell_dof_index[j], value_matA)
             value_vecb = b_cell.get_value(i) + b_total.get_value(cell_dof_index[i])
             b_total.set_value((cell_dof_index[i], 0), value_vecb)
-    print("finish the loop")
+
     # based on the Dirichlet list and Dirichlet boundary condition to adjust the final matrix and final vector
     for i in range(len(Dirichlet_list)):
         D_index = Dirichlet_list[i]
@@ -75,36 +74,35 @@ def assembly(info_mesh, N_GP_T, cell_long_term, cell_NJ, cell_NNTJ, Dirichlet_li
         A_total.set_value(D_index, D_index, 1.0)
         # set the value of b on Dirichlet point to its value based on the Dirichlet boundary condition
         b_total.set_value((D_index, 0), 0)
-        print(i)
+    print("finish the assembly process")
     return A_total, b_total
 
 
 def func_f_DFD(ef, dos, u, E_list):
     dos_ee = 0.0
     E_step = E_list[1] - E_list[0]
-    if E_list[0] <= u <= E_list(len(E_list) - 1):
-        dos_ee = dos[(u - E_list[0]) // E_step]
+    if E_list[0] <= -u <= E_list[len(E_list) - 1]:
+        dos_ee = dos[int((-u - E_list[0]) // E_step)]
     else:
         dos_ee = 0.0
-    res = dos_ee * fermi(u - ef)
+    res = dos_ee * fermi(-u - ef)
     return res
 
 
 def func_f(ef, dos, u, E_list):
     result = 0.0
     E_step = E_list[1] - E_list[0]
-    diff = u - E_list[0]
+    diff = -u - E_list[0]
     end_index = len(E_list)
     if diff <= 0:
         start_index = 0
-    elif E_list[0] < u < E_list[len(E_list) - 1]:
-        start_index = diff // E_step
+    elif E_list[0] < -u < E_list[len(E_list) - 1]:
+        start_index = int(diff // E_step)
     else:
         start_index = end_index - 1
     for ee in range(start_index, end_index - 1):
         result += (dos[ee] * fermi(E_list[ee] - ef)
                    + dos[ee + 1] * fermi(E_list[ee + 1] - ef)) * E_step / 2
     return result
-
 
 

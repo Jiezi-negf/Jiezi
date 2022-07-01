@@ -13,7 +13,7 @@ import numpy as np
 
 
 def surface_gf(E, eta, H00, H10, S00, iter_max=100, TOL=1e-10):
-    print("start the surface GF loop")
+    # print("start the surface GF loop")
     w = op.scamulmat(complex(E, eta), S00)
     iter_c = 0
     alpha = matrix_numpy()
@@ -50,9 +50,9 @@ def surface_gf(E, eta, H00, H10, S00, iter_max=100, TOL=1e-10):
             for j in range(column):
                 sum += np.sqrt(alpha_new.get_value(i, j).real ** 2 +
                                alpha_new.get_value(i, j).imag ** 2)
-        print(
-            'iter number of surface GF loop is: {iter}, error of {iter} loop is: {error}'.format(iter=iter_c,
-                                                                                                 error=sum))
+        # print(
+        #     'iter number of surface GF loop is: {iter}, error of {iter} loop is: {error}'.format(iter=iter_c,
+        #                                                                                          error=sum))
         if sum < TOL:
             G00 = op.inv(op.addmat(w, epsilon_s_new.nega()))
             GBB = op.inv(op.addmat(w, epsilon_new.nega()))

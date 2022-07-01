@@ -30,7 +30,7 @@ def rgf(ee, E_list, eta, mul, mur, Hii, Hi1, Sii, sigma_lesser_ph, sigma_r_ph):
     Sigma_left_greater = op.scamulmat(1.0 - fermi(E_list[ee] - mul),
                                       op.scamulmat(complex(0.0, 1.0),
                                                    op.addmat(Sigma_left_R, Sigma_left_R.dagger().nega())))
-    print("surface GF converge")
+    # print("surface GF converge")
 
     # 2 the first member of little retarded GF -- g_0_R
     w = complex(E_list[ee], eta_rgf)
@@ -128,7 +128,7 @@ def rgf(ee, E_list, eta, mul, mur, Hii, Hi1, Sii, sigma_lesser_ph, sigma_r_ph):
                                              )
                                 )
         G_greater.append(G_i_greater)
-    print("rgf finish")
-    print("the number of energy is:", ee, "energy is:", E_list[ee])
+    # print("rgf finish")
+    # print("the number of energy is:", ee, "energy is:", E_list[ee])
     return G_R, G_lesser, G_greater, G1i_lesser, \
            Sigma_left_lesser, Sigma_left_greater, Sigma_right_lesser, Sigma_right_greater

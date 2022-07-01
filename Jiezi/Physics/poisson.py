@@ -28,7 +28,7 @@ def poisson(info_mesh, N_GP_T, cell_co, cell_long_term, cell_NJ, cell_NNTJ, mark
     # solve the fermi energy level on gauss points of every cell
     ef, dos_GP_list = \
         ef_solver(u_init_cell, N_GP_T, cell_co, dos, density_n, ef_init, mark_list, z_length, E_list, TOL_ef)
-
+    print("ef has been solved successfully")
     # start the newton iteration now
     u_k = copy.deepcopy(u_init)
     dof_amount = len(u_k)
@@ -37,7 +37,9 @@ def poisson(info_mesh, N_GP_T, cell_co, cell_long_term, cell_NJ, cell_NNTJ, mark
         A, b = assembly(info_mesh, N_GP_T, cell_long_term, cell_NJ, cell_NNTJ, Dirichlet_list,
              u_k_cell, dof_amount, ef, dos_GP_list, E_list)
         du = np.linalg.solve(A.get_value(), b.get_value())
-        if norm(du) < TOL_du:
+        if np.linalg.norm(du, ord=2) < TOL_du:
             break
-        u_k = u_k + du
+        for i in range(len(u_k)):
+            u_k[i] += du[i][0]
+    print("poisson finished")
     return u_k

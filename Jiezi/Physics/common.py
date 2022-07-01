@@ -13,7 +13,7 @@ import numpy as np
 # physical parameters
 h = 4.1357e-15
 h_bar = h/(2 * math.pi)
-q_unit = 1e-19
+q_unit = 1.6e-19
 mul = -0.2
 mur = -2.0
 # mul = -1.0
@@ -24,10 +24,10 @@ KT = 0.026
 # geometric parameters
 r_inter, r_oxide, cnt_radius, width_cnt, width_oxide, z_total, zlength_oxide = 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
 # material parameters
-epsilon_0 = 1.0
-epsilon_air = 2.0 * epsilon_0
-epsilon_cnt = 3.0 * epsilon_0
-epsilon_oxide = 4.0 * epsilon_0
+epsilon_0 = 8.854e-22 / q_unit
+epsilon_air = 1.0 * epsilon_0
+epsilon_cnt = 200.0 * epsilon_0
+epsilon_oxide = 3.9 * epsilon_0
 
 
 def bose(E, BOSE=1.0, TEMP=1.0):
@@ -35,7 +35,7 @@ def bose(E, BOSE=1.0, TEMP=1.0):
 
 
 def fermi(x):
-    return 1.0 / (1.0 + math.exp(x / KT))
+    return 1.0 / (1.0 + np.exp(x / KT))
 
 
 def heaviside(x):

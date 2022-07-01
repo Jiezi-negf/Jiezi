@@ -212,4 +212,3 @@ def constant_parameters(info_mesh, geo_para):
     Dirichlet_list = list(set(Dirichlet_list))
     return N_GP_T, cell_co, cell_long_term, cell_NJ, cell_NNTJ, mark_list, Dirichlet_list
 
-

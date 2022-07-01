@@ -23,8 +23,8 @@ def PrePoisson(cnt: CNT):
     z_total = cnt.get_length()
     zlength_oxide = 0.2 * z_total
 
-    mesh_whole_min_size = 0.1 * z_total
-    mesh_whole_max_size = 0.2 * z_total
+    mesh_whole_min_size = 0.08 * z_total
+    mesh_whole_max_size = 0.15 * z_total
     mesh_cnt_min_size = 0.7 * mesh_whole_min_size
     mesh_cnt_max_size = 0.7 * mesh_whole_max_size
 
