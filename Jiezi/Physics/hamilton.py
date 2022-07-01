@@ -11,8 +11,10 @@ from Jiezi.LA.matrix_numpy import matrix_numpy
 from Jiezi.LA import operator as op
 from Jiezi.Graph.builder import CNT
 import numpy as np
+from Jiezi.FEM import map
 from Jiezi.NEGF.tests.fake_potential import fake_potential
 from matplotlib import pyplot as plt
+
 
 class hamilton:
     """
@@ -22,6 +24,7 @@ class hamilton:
     Hii: Hii[i]=H_{i,i}
     Hi1: Hi1[i]=H_{i-1,i}
     """
+
     def __init__(self, cnt: CNT, onsite=-0.28, hopping=-2.97):
         # size of both cell hamilton matrix and hopping hamilton matrix are nn * nn
         # layertolayer is to build hopping hamilton
@@ -54,9 +57,12 @@ class hamilton:
         cell_hamilton = np.zeros((self.__nn, self.__nn))
         # onsite value is the diagonal element
         for i in range(self.__nn):
-            atom_number = i + layer_number * self.__nn + 1
-            fake_phi = fake_potential(self.__coordinate[atom_number][2], self.__whole_length)
-            cell_hamilton[i, i] = self.__onsite + fake_phi
+            # # this line is for test
+            # atom_number = i + layer_number * self.__nn + 1
+            # fake_phi = fake_potential(self.__coordinate[atom_number][2], self.__whole_length)
+            # cell_hamilton[i, i] = self.__onsite + fake_phi
+            cell_hamilton[i, i] = self.__onsite
+
         for row, value in self.__total_neighbor.items():
             for column in value:
                 cell_hamilton[row - 1, column - 1] = self.__hopping
@@ -110,6 +116,16 @@ class hamilton:
             self.__Sii.append(Sii)
             self.__Si1.append(Si1)
         self.__Si1.append(op.scamulmat(base_overlap / self.__hopping, self.build_single_H_hopping()))
+
+    def H_add_phi(self, dict_cell, u_cell, cell_co, num_radius, num_z, r_oxide, z_total):
+        for layer_number in range(self.__length):
+            for i in range(self.__nn):
+                atom_number = i + layer_number * self.__nn + 1
+                # atom_coord is a list [x, y, z]
+                atom_coord = self.__coordinate[atom_number]
+                value = self.__onsite + map.projection(dict_cell, u_cell, atom_coord, cell_co,
+                                                                num_radius, num_z, r_oxide, z_total)
+                self.__Hii[layer_number].set_value(i, i, value)
 
     def get_Hii(self):
         return self.__Hii

@@ -72,8 +72,8 @@ def SCBA(E_list, iter_max: int, TOL, ratio, eta, mul, mur, Hii, Hi1, Sii,
                     error = error + abs(sigma_lesser_ph_fullE[ee][zz].get_value(n, n)
                                         - sigma_lesser_ph_fullE_new[ee][zz].get_value(n, n))
         error = error/(len(E_list) * nz * nm)
-        print("iter number is:", iter_c)
-        print("error is:", error)
+        # print("iter number is:", iter_c)
+        # print("error is:", error)
 
         # store the error
         error_store.append(error)

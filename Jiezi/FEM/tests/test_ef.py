@@ -19,6 +19,7 @@ from Jiezi.Physics.rgf import rgf
 from Jiezi.LA.matrix_numpy import matrix_numpy
 from Jiezi.Physics.common import *
 from Jiezi.Physics.quantity import quantity
+from Jiezi.FEM.ef_solver import func_F
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -102,9 +103,11 @@ n_tol, p_tol, J, dos = quantity(E_list, G_R_fullE, G_lesser_fullE, G_greater_ful
                            Sigma_left_lesser_fullE, Sigma_left_greater_fullE,
                            Sigma_right_lesser_fullE, Sigma_right_greater_fullE,
                            Hi1_new)
-print(n_tol)
-print(dos)
-print(J)
-x = range(len(J))
-plt.plot(x, J)
+dos_ef = [i[0] for i in dos]
+
+F = []
+for ef in E_list:
+    F.append(func_F(E_list, 1, dos_ef, n_tol[0], ef))
+
+plt.plot(E_list, F)
 plt.show()
