@@ -7,9 +7,9 @@ import Jiezi.Graph.builder as builder
 
 class Test1(unittest.TestCase):
 
-    def test1(self):
+    def test_get_coordinate(self):
         print("")
-        print(self._testMethodName)
+        print("1", self._testMethodName)
 
         cnt = builder.CNT(4, 2, 1, a_cc=1.44, nonideal=False)
         cnt.construct()
