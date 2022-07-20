@@ -14,7 +14,7 @@ import math
 def quantity(E_list, G_R_fullE, G_lesser_fullE, G_greater_fullE, G1i_lesser_fullE,
              Sigma_left_lesser_fullE, Sigma_left_greater_fullE,
              Sigma_right_lesser_fullE, Sigma_right_greater_fullE,
-             Hi1):
+             Hi1, volume_cell):
     n_tol = []
     p_tol = []
     J = []
@@ -36,12 +36,13 @@ def quantity(E_list, G_R_fullE, G_lesser_fullE, G_greater_fullE, G1i_lesser_full
         # G_n_i[ee]: energy is ee, layer is i. i is constant, ee is different
         G_n_i = []
         G_p_i = []
-        # number of sites per layer
-        num_site = G_lesser_fullE[0][i].get_size()[0]
+        # # number of sites per layer
+        # num_site = G_lesser_fullE[0][i].get_size()[0]
+
         # compute the function G(ee) in location i, which will be integrated
         for ee in range(len(E_list)):
-            G_n_i.append(G_lesser_fullE[ee][i].tre() / num_site)
-            G_p_i.append(G_greater_fullE[ee][i].tre() / num_site)
+            G_n_i.append(G_lesser_fullE[ee][i].tre() / volume_cell)
+            G_p_i.append(G_greater_fullE[ee][i].tre() / volume_cell)
         # n_i, p_i: n of location/layer i
         n_i = integral(E_list, G_n_i) / math.pi
         p_i = integral(E_list, G_p_i) / math.pi
@@ -72,7 +73,7 @@ def quantity(E_list, G_R_fullE, G_lesser_fullE, G_greater_fullE, G1i_lesser_full
     for ee in range(len(E_list)):
         dos_ee = []
         for zz in range(num_layer):
-            dos_ee.append(- G_R_fullE[ee][zz].tre().imag)
+            dos_ee.append(- G_R_fullE[ee][zz].tre().imag / volume_cell)
         dos.append(dos_ee)
 
     return n_tol, p_tol, J, dos

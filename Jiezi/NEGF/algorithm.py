@@ -24,6 +24,9 @@ import matplotlib.pyplot as plt
 # construct the structure
 cnt = builder.CNT(n=4, m=4, Trepeat=3, nonideal=False)
 cnt.construct()
+radius_tube = cnt.get_radius()
+length_single_cell = cnt.get_singlecell_length()
+volume_cell = math.pi * radius_tube ** 2 * length_single_cell
 
 # use salome to build the FEM grid
 geo_para, path_xml = PrePoisson(cnt)
@@ -42,7 +45,7 @@ dict_cell = map.cut(r_oxide, z_total, info_mesh, cut_radius, cut_z)
 
 
 # construct the initial guess of Phi, the value on Dirichlet point is Dirichlet_BC
-Dirichlet_BC = 1.0
+Dirichlet_BC = - 1.0
 phi_guess = [float] * dof_amount
 for i in range(dof_amount):
     phi_guess[i] = 0.0
@@ -124,7 +127,7 @@ while 1:
     n_tol, p_tol, J, dos = quantity(E_list, G_R_fullE, G_lesser_fullE, G_greater_fullE, G1i_lesser_fullE,
                                     Sigma_left_lesser_fullE, Sigma_left_greater_fullE,
                                     Sigma_right_lesser_fullE, Sigma_right_greater_fullE,
-                                    Hi1_new)
+                                    Hi1_new, volume_cell)
 
     # solve poisson equation
     # set the initial value of ef

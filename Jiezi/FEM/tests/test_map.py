@@ -19,7 +19,7 @@ from matplotlib import pyplot as plt
 # 111111111111111111111111111111111111111111111111111111111111111111111111111
 # solve poisson equation by fenics
 # create cnt object
-cnt = CNT(n=4, m=4, Trepeat=3, nonideal=False)
+cnt = CNT(n=4, m=4, Trepeat=3, a_cc=1.44, nonideal=False)
 cnt.construct()
 # use salome to build the FEM grid
 geo_para, path_xml = PrePoisson(cnt)
@@ -35,7 +35,9 @@ V = FunctionSpace(mesh, 'Lagrange', 1)
 # define the sub_boundary, Dirichlet boundary will be marked 1, the other Neumann boundary is 0
 class gate_oxide(SubDomain):
     def inside(self, x, on_boundary):
-        return ((z_translation - DOLFIN_EPS) < x[2] < (z_total - z_translation + DOLFIN_EPS)) and on_boundary
+        tol = 1e-1
+        return ((z_translation - tol) < x[2] < (z_total - z_translation + tol)) and \
+               abs(math.sqrt(x[0] ** 2 + x[1] ** 2) - r_oxide) < tol
 
 
 sub_boundaries = MeshFunction("size_t", mesh, mesh.topology().dim() - 1)
@@ -46,8 +48,10 @@ gate_oxide.mark(sub_boundaries, 1)
 bc = DirichletBC(V, Constant(-1), sub_boundaries, 1)
 bc_0 = DirichletBC(V, Constant(0), sub_boundaries, 1)
 
-file = File("fenics_sub_boundaries.xml")
-file << sub_boundaries
+# file = File("fenics_sub_boundaries.xml")
+# file << sub_boundaries
+
+
 # define parameter--epsilon
 class EPS_FENICS(UserExpression):
     def eval(self, value, x):
@@ -79,8 +83,8 @@ U_k = list(u_k.vector()[:])
 # newton iteration
 # define the weak form of newton iteration
 du = TrialFunction(V)  # u = u_k + omega*du
-a = eps_fenics * dot(grad(du), grad(v)) * dx - 2 * u_k * du * v * dx
-L = - eps_fenics * dot(grad(u_k), grad(v)) * dx + u_k ** 2 * v * dx
+a = eps_fenics * dot(grad(du), grad(v)) * dx - 2e-3 * u_k * du * v * dx
+L = - eps_fenics * dot(grad(u_k), grad(v)) * dx + 1e-3 * u_k ** 2 * v * dx
 
 # start newton iteration
 # relaxation parameter
@@ -119,8 +123,8 @@ for cell_index in range(len(info_mesh)):
 N_GP_T, cell_co, cell_long_term, cell_NJ, cell_NNTJ, mark_list, Dirichlet_list = constant_parameters(info_mesh,
                                                                                                      geo_para)
 # cut the whole area to different with simple geometry
-cut_radius = 1
-cut_z = 1
+cut_radius = 3
+cut_z = 3
 dict_cell = map.cut(r_oxide, z_total, info_mesh, cut_radius, cut_z)
 
 
@@ -191,11 +195,11 @@ def assembly_for_test(info_mesh, N_GP_T, cell_long_term, cell_NJ, cell_NNTJ, Dir
 
 
 def func_f_DFD_for_test(u):
-    return 2 * u
+    return 2e-3 * u
 
 
 def func_f_for_test(u):
-    return u ** 2
+    return 1e-3 * u ** 2
 
 
 # start the loop

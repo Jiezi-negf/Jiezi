@@ -24,6 +24,10 @@ import matplotlib.pyplot as plt
 # construct the structure
 cnt = builder.CNT(n=8, m=0, Trepeat=3, nonideal=False)
 cnt.construct()
+radius_tube = cnt.get_radius()
+length_single_cell = cnt.get_singlecell_length()
+volume_cell = math.pi * radius_tube ** 2 * length_single_cell
+
 
 # build hamilton matrix
 H = hamilton.hamilton(cnt, onsite=-0.28, hopping=-2.97)
@@ -94,7 +98,7 @@ SCBA(E_list, iter_max, TOL, ratio, eta, mul, mur, Hii_new, Hi1_new, Sii_new,
 n_tol, p_tol, J, dos = quantity(E_list, G_R_fullE, G_lesser_fullE, G_greater_fullE, G1i_lesser_fullE,
                            Sigma_left_lesser_fullE, Sigma_left_greater_fullE,
                            Sigma_right_lesser_fullE, Sigma_right_greater_fullE,
-                           Hi1_new)
+                           Hi1_new, volume_cell)
 print(J)
 x = range(len(J))
 plt.plot(x, J)

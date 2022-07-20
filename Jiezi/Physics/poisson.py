@@ -32,12 +32,16 @@ def poisson(info_mesh, N_GP_T, cell_co, cell_long_term, cell_NJ, cell_NNTJ, mark
     # start the newton iteration now
     u_k = copy.deepcopy(u_init)
     dof_amount = len(u_k)
+    poisson_iter = 0
     while 1:
+        poisson_iter += 1
         u_k_cell = map_tocell(info_mesh, u_k)
         A, b = assembly(info_mesh, N_GP_T, cell_long_term, cell_NJ, cell_NNTJ, Dirichlet_list,
              u_k_cell, dof_amount, ef, dos_GP_list, E_list)
         du = np.linalg.solve(A.get_value(), b.get_value())
-        if np.linalg.norm(du, ord=2) < TOL_du:
+        norm_du = np.linalg.norm(du, ord=2)
+        print("poisson iter:", poisson_iter, "error is:", norm_du)
+        if norm_du < TOL_du:
             break
         for i in range(len(u_k)):
             u_k[i] += du[i][0]

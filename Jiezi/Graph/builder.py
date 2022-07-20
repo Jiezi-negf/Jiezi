@@ -156,5 +156,5 @@ class CNT:
 
     def get_mass_desity(self):
         # the unit is g/cm^3
-        rho = self.__nn * 1.993e-23 / (math.pi * (self.__radius * 1e-8)**2 * self.__Tlength * 1e-8)
+        rho = self.__nn * 1.993e-23 / (math.pi * (self.__radius * 1e-8) ** 2 * self.__Tlength * 1e-8)
         return rho

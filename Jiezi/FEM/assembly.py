@@ -74,7 +74,7 @@ def assembly(info_mesh, N_GP_T, cell_long_term, cell_NJ, cell_NNTJ, Dirichlet_li
         A_total.set_value(D_index, D_index, 1.0)
         # set the value of b on Dirichlet point to its value based on the Dirichlet boundary condition
         b_total.set_value((D_index, 0), 0)
-    print("finish the assembly process")
+    # print("finish the assembly process")
     return A_total, b_total
 
 
