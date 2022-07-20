@@ -85,8 +85,9 @@ def N_gausspoint():
 def isDirichlet(point_coordinate, geo_para):
     r_inter, r_outer, r_oxide, z_total, zlength_oxide, z_translation = geo_para
     flag = 0
+    tol = 1e-6
     x, y, z = point_coordinate
-    if abs(x**2 + y**2 - r_oxide**2) < 1e-6 and z_translation - 1e-6 < z < (z_total - z_translation)+1e-6:
+    if abs(math.sqrt(x**2 + y**2) - r_oxide) < tol and z_translation - tol < z < (z_total - z_translation)+tol:
         flag = 1
     return flag
 

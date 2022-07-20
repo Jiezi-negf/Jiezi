@@ -16,75 +16,97 @@ from Jiezi.LA.vector_numpy import vector_numpy
 from Jiezi.LA.matrix_numpy import matrix_numpy
 from Jiezi.LA import operator as op
 
+
 class TestOp(unittest.TestCase):
+    vec = vector_numpy(2)
+    mat = matrix_numpy(2, 2)
+    sca = 2
+    vec.copy([[1, 0]])
+    mat.copy([[1, 1j], [1j, 1]])
 
     def test(self):
-        
-        vec = vector_numpy(2)
-        mat = matrix_numpy(2, 2)
-        sca = 2
-        vec.copy([[1, 0]])
-        mat.copy([[1, 1j], [1j, 1]])
+        self.matmulvec()
+        self.vecmulmat()
+        self.vecdotvec()
+        self.matmulmat()
+        self.matmul_sym()
+        self.scamulvec()
+        self.scamulmat()
+        self.trimatmul()
+        self.addmat()
+        self.addvec()
+        self.inv()
 
-        # test matmulvec
-        self.assertTrue((op.matmulvec(mat, vec.trans()).get_value() == \
+    # test matmulvec
+    def matmulvec(self):
+        self.assertTrue((op.matmulvec(TestOp.mat, TestOp.vec.trans()).get_value() == \
         np.array([[1], [1j]])).all(), "matmulvec is wrong")
 
-        # test vecmulmat
-        self.assertTrue((op.vecmulmat(vec, mat).get_value() == np.array([[1, 1j]])).all(), \
+    # test vecmulmat
+    def vecmulmat(self):
+        self.assertTrue((op.vecmulmat(TestOp.vec, TestOp.mat).get_value() == np.array([[1, 1j]])).all(), \
         "vecmulmat is wrong")
 
-        # test vecmulvec
-        self.assertTrue((op.vecmulvec(vec.trans(), vec).get_value() == \
+    # test vecmulvec
+    def vecmulvec(self):
+        self.assertTrue((op.vecmulvec(TestOp.vec.trans(), TestOp.vec).get_value() == \
         np.array([[1, 0], [0, 0]])).all(), "vecmulvec is wrong")
 
-        # test vecdotvec
-        self.assertEqual(op.vecdotvec(vec, vec.trans()), 1, "vecdotvec is wrong")
+    # test vecdotvec
+    def vecdotvec(self):
+        self.assertEqual(op.vecdotvec(TestOp.vec, TestOp.vec.trans()), 1, "vecdotvec is wrong")
 
-        # test matmulmat
-        self.assertTrue((op.matmulmat(mat, mat).get_value() == \
+    # test matmulmat
+    def matmulmat(self):
+        self.assertTrue((op.matmulmat(TestOp.mat, TestOp.mat).get_value() == \
         np.array([[0, 2j], [2j, 0]])).all(), "matmulmat is wrong")
 
-        # test matmul_sym
-        self.assertTrue((op.matmul_sym(mat.conjugate(), mat).get_value() == \
+    # test matmul_sym
+    def matmul_sym(self):
+        self.assertTrue((op.matmul_sym(TestOp.mat.conjugate(), TestOp.mat).get_value() == \
         np.array([[2, 0], [0, 2]])).all(), "matmul_sym is wrong")
 
-        # test scamulvec
-        self.assertTrue((op.scamulvec(sca, vec).get_value() == np.array([[2, 0]])).all(), \
+    # test scamulvec
+    def scamulvec(self):
+        self.assertTrue((op.scamulvec(TestOp.sca, TestOp.vec).get_value() == np.array([[2, 0]])).all(), \
         "scamulvec_row is wrong")
-        self.assertTrue((op.scamulvec(sca, vec.trans()).get_value() == np.array([[2], [0]])).all(), \
+        self.assertTrue((op.scamulvec(TestOp.sca, TestOp.vec.trans()).get_value() == np.array([[2], [0]])).all(), \
         "scamulvec_column is wrong")
 
-        # test scamulmat
-        self.assertTrue((op.scamulmat(sca, mat).get_value() == \
+    # test scamulmat
+    def scamulmat(self):
+        self.assertTrue((op.scamulmat(TestOp.sca, TestOp.mat).get_value() == \
         np.array([[2, 2j], [2j, 2]])).all(), "scamulmat is wrong")
 
-        # test trimatmul
-        self.assertTrue((op.trimatmul(mat, mat, mat).get_value() == \
+    # test trimatmul
+    def trimatmul(self):
+        self.assertTrue((op.trimatmul(TestOp.mat, TestOp.mat, TestOp.mat).get_value() == \
         np.array([[-2, 2j], [2j, -2]])).all(), "type nnn is wrong")
 
-        self.assertTrue((op.trimatmul(mat, mat, mat, "cnn").get_value() == \
+        self.assertTrue((op.trimatmul(TestOp.mat, TestOp.mat, TestOp.mat, "cnn").get_value() == \
         np.array([[2, 2j], [2j, 2]])).all(), "type one c is wrong")
 
-        self.assertTrue((op.trimatmul(mat, mat, mat, "ccn").get_value() == \
+        self.assertTrue((op.trimatmul(TestOp.mat, TestOp.mat, TestOp.mat, "ccn").get_value() == \
         np.array([[2, -2j], [-2j, 2]])).all(), "type two c is wrong")
             
-        self.assertTrue((op.trimatmul(mat, mat, mat, "ccc").get_value() == \
+        self.assertTrue((op.trimatmul(TestOp.mat, TestOp.mat, TestOp.mat, "ccc").get_value() == \
         np.array([[-2, -2j], [-2j, -2]])).all(), "type ccc is wrong")
 
-        # test addmat
-        self.assertTrue((op.addmat(mat, mat, mat).get_value() == \
+    # test addmat
+    def addmat(self):
+        self.assertTrue((op.addmat(TestOp.mat, TestOp.mat, TestOp.mat).get_value() == \
         np.array([[3, 3j], [3j, 3]])).all(), "addmat is wrong")
 
-        # test addvec
-        self.assertTrue((op.addvec(vec, vec, vec, vec).get_value() == \
+    # test addvec
+    def addvec(self):
+        self.assertTrue((op.addvec(TestOp.vec, TestOp.vec, TestOp.vec, TestOp.vec).get_value() == \
         np.array([[4, 0]])).all(), "addvec is wrong")
 
-        # test inv
-        mat.copy(np.array([[1, 2], [0, 1]]))
-        self.assertTrue((op.inv(mat).get_value() == np.array([[1, -2], [0, 1]])).all(), \
+    # test inv
+    def inv(self):
+        TestOp.mat.copy(np.array([[1, 2], [0, 1]]))
+        self.assertTrue((op.inv(TestOp.mat).get_value() == np.array([[1, -2], [0, 1]])).all(), \
         "inv is wrong")
-
 
 
 if __name__ == "__main__":

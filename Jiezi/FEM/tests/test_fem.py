@@ -18,8 +18,9 @@ from matplotlib import pyplot as plt
 # 111111111111111111111111111111111111111111111111111111111111111111111111111
 # solve poisson equation by fenics
 # create cnt object
-cnt = CNT(n=4, m=4, Trepeat=3, nonideal=False)
+cnt = CNT(n=4, m=4, Trepeat=3, a_cc=10, nonideal=False)
 cnt.construct()
+
 # use salome to build the FEM grid
 geo_para, path_xml = PrePoisson(cnt)
 r_inter, r_outer, r_oxide, z_total, zlength_oxide, z_translation = geo_para
@@ -31,10 +32,13 @@ V = FunctionSpace(mesh, 'Lagrange', 1)
 # print(geo_para)
 
 
+
 # define the sub_boundary, Dirichlet boundary will be marked 1, the other Neumann boundary is 0
 class gate_oxide(SubDomain):
     def inside(self, x, on_boundary):
-        return ((z_translation - DOLFIN_EPS) < x[2] < (z_total - z_translation + DOLFIN_EPS)) and on_boundary
+        tol = 1
+        return ((z_translation - tol) < x[2] < (z_total - z_translation + tol)) and \
+               abs(math.sqrt(x[0] ** 2 + x[1] ** 2) - r_oxide) < tol
 
 
 sub_boundaries = MeshFunction("size_t", mesh, mesh.topology().dim() - 1)
@@ -50,7 +54,7 @@ file << sub_boundaries
 # define parameter--epsilon
 class EPS_FENICS(UserExpression):
     def eval(self, value, x):
-        r = sqrt(x[0] ** 2 + x[1] ** 2)
+        r = math.sqrt(x[0] ** 2 + x[1] ** 2)
         if r < r_inter or (r > r_outer and (x[2] < z_translation or x[2] > (z_total - z_translation))):
             value[0] = epsilon_air
         elif r_outer >= r >= r_inter:

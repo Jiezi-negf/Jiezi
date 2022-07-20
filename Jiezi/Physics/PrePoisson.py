@@ -17,7 +17,7 @@ from Jiezi.Physics.common import *
 def PrePoisson(cnt: CNT):
     # step1: get the geometry parameters from the graph module
     cnt_radius = cnt.get_radius()
-    width_cnt = 0.5 * cnt_radius
+    width_cnt = 0.3 * cnt_radius
     r_inter = cnt_radius - width_cnt / 2
     width_oxide = 0.2 * cnt_radius
     z_total = cnt.get_length()

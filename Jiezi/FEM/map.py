@@ -28,33 +28,77 @@ def map_tocell(info_mesh, u_vec):
     return u_cell
 
 
+# this method split the projection to two parts, one is to find which cell the point belongs to,
+# the other is to compute the function value
+
 def projection(dict_cell, u_cell, coord, cell_co, num_radius, num_z, r_oxide, z_total):
+    coord_ref, cell_index = link_to_cell(dict_cell, coord, cell_co, num_radius, num_z, r_oxide, z_total)
+    value = get_func_value(coord_ref, u_cell, cell_index)
+    return value
+
+
+def link_to_cell(dict_cell, coord, cell_co, num_radius, num_z, r_oxide, z_total):
     x, y, z = coord
     r = math.sqrt(x ** 2 + y ** 2)
     r_index = int(r // (r_oxide / num_radius))
     z_index = int(z // (z_total / num_z))
-    res = 0.0
+    tol = 1e-6
+    coord_ref = [0, 0, 0]
+    index = 0
     for cell_index in dict_cell[(r_index, z_index)]:
         a, b, c, d = cell_co[cell_index][:]
         alpha = a[1] + b[1] * x + c[1] * y + d[1] * z
         beta = a[2] + b[2] * x + c[2] * y + d[2] * z
         gamma = a[3] + b[3] * x + c[3] * y + d[3] * z
-        if 0 <= alpha <= 1 and 0 <= beta <= 1 and 0 <= gamma <= 1 and alpha + beta + gamma <= 1:
-            N = np.array([1 - alpha - beta - gamma, alpha, beta, gamma])
-            u = np.array(u_cell[cell_index])
-            res = np.dot(N, u)
-    return res
+        if 0 - tol <= alpha <= 1 + tol and \
+                0 - tol <= beta <= 1 + tol and \
+                0 - tol <= gamma <= 1 + tol and alpha + beta + gamma <= 1 + tol:
+            coord_ref = [alpha, beta, gamma]
+            index = cell_index
+    return coord_ref, index
 
 
+def get_func_value(coord_ref, u_cell, cell_index):
+    alpha, beta, gamma = coord_ref
+    N = np.array([1 - alpha - beta - gamma, alpha, beta, gamma])
+    u = np.array(u_cell[cell_index])
+    value = np.dot(N, u)
+    return value
+
+# #  this method loop all the cells directly with the cut process
 # def projection(dict_cell, u_cell, coord, cell_co, num_radius, num_z, r_oxide, z_total):
 #     x, y, z = coord
-#     res = 0
-#     for cell_index in range(len(cell_co)):
+#     r = math.sqrt(x ** 2 + y ** 2)
+#     r_index = int(r // (r_oxide / num_radius))
+#     z_index = int(z // (z_total / num_z))
+#     res = 0.0
+#     for cell_index in dict_cell[(r_index, z_index)]:
 #         a, b, c, d = cell_co[cell_index][:]
 #         alpha = a[1] + b[1] * x + c[1] * y + d[1] * z
 #         beta = a[2] + b[2] * x + c[2] * y + d[2] * z
 #         gamma = a[3] + b[3] * x + c[3] * y + d[3] * z
 #         if 0 <= alpha <= 1 and 0 <= beta <= 1 and 0 <= gamma <= 1 and alpha + beta + gamma <= 1:
+#             N = np.array([1 - alpha - beta - gamma, alpha, beta, gamma])
+#             u = np.array(u_cell[cell_index])
+#             res = np.dot(N, u)
+#     if res == 0:
+#         print(coord)
+#     return res
+
+
+# # this method loop all the cells directly without the cut process
+# def projection(dict_cell, u_cell, coord, cell_co, num_radius, num_z, r_oxide, z_total):
+#     x, y, z = coord
+#     res = 0
+#     tol = 1e-5
+#     for cell_index in range(len(cell_co)):
+#         a, b, c, d = cell_co[cell_index][:]
+#         alpha = a[1] + b[1] * x + c[1] * y + d[1] * z
+#         beta = a[2] + b[2] * x + c[2] * y + d[2] * z
+#         gamma = a[3] + b[3] * x + c[3] * y + d[3] * z
+#         if 0 -tol <= alpha <= 1 + tol and \
+#                 0 -tol <= beta <= 1+tol and \
+#                 0-tol <= gamma <= 1+tol and alpha + beta + gamma <= 1+tol:
 #             N = np.array([1 - alpha - beta - gamma, alpha, beta, gamma])
 #             u = np.array(u_cell[cell_index])
 #             res = np.dot(N, u)

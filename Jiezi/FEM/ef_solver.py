@@ -85,9 +85,14 @@ def ef_solver(u_init, N_GP_T, cell_co, dos, density_n, ef_init, mark_list, z_len
                              dos_GP_list[cell_index][GP_index], n_GP_list[cell_index][GP_index],
                              E_list[0], E_list[len(E_list) - 1], 1e-5, 1e-5)
                 ef_cell_i[GP_index] = ef_i
+                # # only compute the first point of every cell, reduce the amount of computation
+                # if GP_index == 0:
+                #     for i in range(1, 4):
+                #         ef_cell_i[i] = ef_i
+                # break
             ef[cell_index] = ef_cell_i
 
-
+    # # this part uses the newton method to solve ef
     # for cell_index in range(len(cell_co)):
     #     ef_cell_i = [None] * 4
     #     dos_cell_i = [None] * 4
@@ -248,6 +253,24 @@ def func_F(E_list, phi, dos, density_n, ef):
     return result
 
 
+def func_derivative_F(E_list, phi, dos, ef):
+    result = 0.0
+    E_step = E_list[1] - E_list[0]
+    diff = -phi - E_list[0]
+    start_normal = int(diff.real // E_step)
+    if diff <= 0:
+        start_index = 0
+    elif -phi > E_list[len(E_list) - 1]:
+        start_index = len(E_list)
+    else:
+        start_index = start_normal
+    end_index = len(E_list)
+    for ee in range(start_index, end_index - 1):
+        result += (dos[ee] * fermi(E_list[ee] - ef) * (1 - fermi(E_list[ee] - ef))
+                   + dos[ee + 1] * fermi(E_list[ee + 1] - ef) * (1 - fermi(E_list[ee + 1] - ef))) * E_step / 2
+    result = result / KT
+    return result
+
 # def func_F(E_list, phi, dos, density_n, ef):
 #     result = ef**3 - 2*ef**2 - +5*ef - 15
 #     return result
@@ -360,3 +383,6 @@ def brent(E_list, phi, dos, density_n, a, b, tol_brent_residual=1e-5, tol_brent_
             b = copy.deepcopy(m)
             iter_brent += 1
             continue
+
+
+
