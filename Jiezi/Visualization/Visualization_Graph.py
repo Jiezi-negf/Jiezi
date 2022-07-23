@@ -34,6 +34,7 @@ def visual(coordinate_a, coordinate_b, total_link):
         z.append(points[i + 1][2])
     mlab.points3d(x, y, z, color=(1, 0, 0), resolution=16, scale_factor=0.8)
 
+    connect = []
     for start, neighbor in total_link.items():
         xx = []
         yy = []
@@ -46,7 +47,8 @@ def visual(coordinate_a, coordinate_b, total_link):
             zz.append(points[start][2])
             zz.append(points[member][2])
         mlab.plot3d(xx, yy, zz)
-
+        connect.append((xx, yy, zz))
+    return x, y, z, connect
 
 # mlab.figure(bgcolor=(1,1,1))
 # surf = mlab.surf(z,colormap="cool")
