@@ -16,6 +16,6 @@ class Test3(unittest.TestCase):
         result = cnt.get_total_neighbor()
 
         self.assertEqual(result[1], [48])
-        self.assertEqual(result[2], [48, 29, 30])
+        self.assertEqual(result[2], [30, 48, 29])
 
 

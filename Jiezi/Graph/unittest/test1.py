@@ -19,8 +19,3 @@ class Test1(unittest.TestCase):
         self.assertEqual(result[0], 0.46740477071675973)
         self.assertEqual(result[1], -2.0478341033216036)
         self.assertEqual(result[2], 2.449209785099792)
-<<<<<<< HEAD
-        
-
-=======
->>>>>>> develop
