@@ -51,4 +51,4 @@ class Test7(unittest.TestCase):
         Sigma_right_lesser, Sigma_right_greater = \
             rgf(ee, E_list, eta_rgf, mul, mur, Hii, Hi1, Sii, sigma_ph, sigma_ph)
 
-        self.assertEqual(G_R_rgf[0].get_value(1, 1), 0.0011413888485991975-0.042457652641137066j)
+        self.assertAlmostEqual(G_R_rgf[0].get_value(1, 1), 0.0011413888485991975-0.042457652641137066j)

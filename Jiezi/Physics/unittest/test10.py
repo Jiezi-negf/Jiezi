@@ -110,4 +110,4 @@ class Test10(unittest.TestCase):
         for ef in E_list:
             F.append(func_F(E_list, 1, dos_ef, n_tol[0], ef))
 
-        self.assertEqual(F[0].real, -0.1124186749781545)
+        self.assertAlmostEqual(F[0].real, -0.10819495065116673)
