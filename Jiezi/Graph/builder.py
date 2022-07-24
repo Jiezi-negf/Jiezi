@@ -122,8 +122,9 @@ class CNT:
         print(self.__interlayer)
 
     def data_plot(self):
-        visual(self.__coord_a, self.__coord_b, self.__total_link_number)
+        x, y, z, connect = visual(self.__coord_a, self.__coord_b, self.__total_link_number)
         mlab.show()
+        return x, y, z, connect
 
     # the following parameters are necessary for constructing hamilton matrix in Physics.hamilton module
     # when the cnt object is regarded as the input parameter of hamilton initialize function, these four

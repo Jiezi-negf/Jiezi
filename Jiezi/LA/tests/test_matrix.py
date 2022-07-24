@@ -20,7 +20,6 @@ from Jiezi.LA.matrix_numpy import matrix_numpy
 class TestMatrix(unittest.TestCase):
     # define variable mat
     mat = matrix_numpy(2, 3)
-
     ele = matrix_numpy(3, 3)
     ele.identity()
 

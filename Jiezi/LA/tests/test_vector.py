@@ -65,7 +65,7 @@ class TestVector(unittest.TestCase):
         "original value can not be changed")
 
     def transpose(self):
-        print(TestVector.vec.trans().get_value())
+        # print(TestVector.vec.trans().get_value())
         self.assertTrue((TestVector.vec.trans().get_value() == \
         np.array([[1 + 3j, 2 + 2j, 0 + 0j]])).all(), "transpose is wrong")
 
