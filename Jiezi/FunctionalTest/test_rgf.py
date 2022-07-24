@@ -6,8 +6,10 @@
 # of this distribution.
 # ==============================================================================
 
-
 import sys
+sys.path.append("../../../")
+sys.path.append("../../")
+
 from Jiezi.Physics.band import subband
 from Jiezi.Physics.modespace import mode_space
 from Jiezi.Physics.rgf import rgf
@@ -15,8 +17,6 @@ from Jiezi.Physics.common import *
 import numpy as np
 from Jiezi.Physics import surface_gf
 import matplotlib.pyplot as plt
-
-sys.path.append("../../../")
 
 from Jiezi.Physics import hamilton, band
 from Jiezi.Graph import builder

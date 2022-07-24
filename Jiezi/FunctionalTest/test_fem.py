@@ -5,6 +5,10 @@
 # Jiezi authors can be found in the file AUTHORS.md at the top-level directory
 # of this distribution.
 # ==============================================================================
+import sys
+sys.path.append("../../../")
+sys.path.append("../../")
+
 import copy
 from Jiezi.Graph.builder import CNT
 from Jiezi.LA.vector_numpy import vector_numpy

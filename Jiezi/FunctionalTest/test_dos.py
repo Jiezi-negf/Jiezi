@@ -6,8 +6,10 @@
 # of this distribution.
 # ==============================================================================
 
-
 import sys
+sys.path.append("../../../")
+sys.path.append("../../")
+
 import matplotlib.pyplot as plt
 from Jiezi.Graph import builder
 from Jiezi.NEGF.tests.fake_potential import fake_potential
@@ -24,8 +26,6 @@ import numpy as np
 from Jiezi.Physics import surface_gf
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
-
-sys.path.append("../../../")
 
 from Jiezi.Physics import hamilton, band
 from Jiezi.Graph import builder

@@ -6,13 +6,13 @@
 # of this distribution.
 # ==============================================================================
 
-
 import sys
 
 
 import numpy as np
 import matplotlib.pyplot as plt
 sys.path.append("../../../")
+sys.path.append("../../")
 
 from Jiezi.Physics import hamilton, band, modespace, surface_gf
 from Jiezi.Graph import builder
