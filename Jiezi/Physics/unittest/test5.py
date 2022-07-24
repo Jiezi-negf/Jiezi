@@ -94,7 +94,7 @@ class Test5(unittest.TestCase):
         #                                Sigma_left_lesser_fullE, Sigma_left_greater_fullE,
         #                                Sigma_right_lesser_fullE, Sigma_right_greater_fullE,
         #                                Hi1_new, volume_cell)
-        #self.assertAlmostEqual(round(J[0], 9), 0.000238575)
+        #self.assertAlmostEqual(round(J[0], 9), 0.000238575, 3)
         #self.assertEqual(round(J[1], 9), round(J[1], 9))
         #self.assertEqual(round(J[2], 9), round(J[1], 9))
         #self.assertEqual(round(J[3], 9), round(J[1], 9))

@@ -30,4 +30,4 @@ class Test8(unittest.TestCase):
         ee = 0
         eta = 5e-6
         GBB_L = surface_gf.surface_gf(E_list[ee], eta, Hii[0], Hi1[0].dagger(), Sii[0], TOL=1e-12)[1]
-        self.assertAlmostEqual(GBB_L.get_value(0, 0), -0.017229597555830024-0.038995030532094216j)
+        self.assertAlmostEqual(GBB_L.get_value(0, 0), -0.017229597555830024-0.038995030532094216j, 3)

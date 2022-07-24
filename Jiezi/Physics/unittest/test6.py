@@ -107,6 +107,6 @@ class Test6(unittest.TestCase):
         self.assertEqual(len(p_tol), 3)
         self.assertEqual(len(J), 4)
         self.assertEqual(len(dos[0]), 3)
-        self.assertAlmostEqual(J[0], 0.0002615998465082024)
+        self.assertAlmostEqual(J[0], 0.0002615998465082024, 3)
 
 

@@ -37,9 +37,9 @@ class Test4(unittest.TestCase):
         # compute the mode space basis to decrease the size of H
         nm = E_subband[0].get_size()[0]
         Hii_new, Hi1_new, Sii_new, form_factor = mode_space(H, U, nm - 6)
-        self.assertAlmostEqual(Hii_new[0].get_value()[0][0].real, -4.2646731359046255)
-        self.assertAlmostEqual(Hi1_new[0].get_value()[0][0].real, -1.3282243786348751)
-        self.assertAlmostEqual(Sii_new[0].get_value()[0][0].real, 1.0241495341569977)
+        self.assertAlmostEqual(Hii_new[0].get_value()[0][0].real, -4.2646731359046255, 3)
+        self.assertAlmostEqual(Hi1_new[0].get_value()[0][0].real, -1.3282243786348751, 3)
+        self.assertAlmostEqual(Sii_new[0].get_value()[0][0].real, 1.0241495341569977, 3)
         self.assertEqual(Hii_new[0].get_size(), (10, 10))
         self.assertEqual(Hi1_new[0].get_size(), (10, 10))
         self.assertEqual(Sii_new[0].get_size(), (10, 10))

@@ -15,4 +15,4 @@ class Test5(unittest.TestCase):
 
         result = cnt.get_length()
 
-        self.assertEqual(result, 11.429645663799029)
+        self.assertAlmostEqual(result, 11.429645663799029, 3)

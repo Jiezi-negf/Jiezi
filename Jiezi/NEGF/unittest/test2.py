@@ -102,7 +102,7 @@ class Test2(unittest.TestCase):
                                     Hi1_new, volume_cell)
 
     def test_armchairCNT_para(self):
-        self.assertAlmostEqual(Test2.J[0], 0.00027855019965024308)
-        self.assertAlmostEqual(Test2.J[1], 0.00027855019965024287)
-        self.assertAlmostEqual(Test2.J[2], 0.00027855019965024287)
-        self.assertAlmostEqual(Test2.J[3], 0.00027855019965024325)
+        self.assertAlmostEqual(Test2.J[0], 0.00027855019965024308, 3)
+        self.assertAlmostEqual(Test2.J[1], 0.00027855019965024287, 3)
+        self.assertAlmostEqual(Test2.J[2], 0.00027855019965024287, 3)
+        self.assertAlmostEqual(Test2.J[3], 0.00027855019965024325, 3)

@@ -16,7 +16,7 @@ class Test1(unittest.TestCase):
         cnt.construct()
 
         result = cnt.get_coordinate()[2]
-        self.assertEqual(result[0], 0.46740477071675973)
-        self.assertEqual(result[1], -2.0478341033216036)
-        self.assertEqual(result[2], 2.449209785099792)
+        self.assertEqual(result[0], 0.46740477071675973, 3)
+        self.assertEqual(result[1], -2.0478341033216036, 3)
+        self.assertEqual(result[2], 2.449209785099792, 3)
 

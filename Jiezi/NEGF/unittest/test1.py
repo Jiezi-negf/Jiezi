@@ -102,10 +102,10 @@ class Test1(unittest.TestCase):
                                     Hi1_new, volume_cell)
 
     def test_zigzagCNT_para(self):
-        self.assertAlmostEqual(Test1.n_tol[0].real, 0.10819495065116673)
-        self.assertAlmostEqual(Test1.n_tol[1].real, 0.10819355968932076)
-        self.assertAlmostEqual(Test1.n_tol[2].real, 0.10819462535077344)
+        self.assertAlmostEqual(Test1.n_tol[0].real, 0.10819495065116673, 3)
+        self.assertAlmostEqual(Test1.n_tol[1].real, 0.10819355968932076, 3)
+        self.assertAlmostEqual(Test1.n_tol[2].real, 0.10819462535077344, 3)
 
-        self.assertAlmostEqual(Test1.dos[0][1], 1.43172812692925e-13)
-        self.assertAlmostEqual(Test1.dos[0][2], 6.1581973527667403e-10)
-        self.assertAlmostEqual(Test1.dos[1][0], 6.5228097721722976e-10)
+        self.assertAlmostEqual(Test1.dos[0][1], 1.43172812692925e-13, 3)
+        self.assertAlmostEqual(Test1.dos[0][2], 6.1581973527667403e-10, 3)
+        self.assertAlmostEqual(Test1.dos[1][0], 6.5228097721722976e-10, 3)
