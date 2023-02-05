@@ -13,6 +13,7 @@ from Jiezi.LA.matrix_numpy import matrix_numpy
 from Jiezi.FEM.shape_function import shape_function
 import numpy as np
 from Jiezi.Physics.common import *
+import matplotlib.pyplot as plt
 
 
 def func_N(point_coord: list):
@@ -28,6 +29,7 @@ def func_N(point_coord: list):
 def mark_zone(info_mesh, geo_para):
     mark_rule = {"air_inter": 0, "cnt": 1, "air_outer": 2, "gate_oxide": 3}
     mark_list = [None] * len(info_mesh)
+    cnt_cell_list = []
     r_inter, r_outer, r_oxide, z_total, zlength_oxide, z_translation = geo_para
     for cell_index in range(len(info_mesh)):
         cell_i = info_mesh[cell_index]
@@ -39,6 +41,7 @@ def mark_zone(info_mesh, geo_para):
                 break
             if r_outer > r > r_inter:
                 mark_list[cell_index] = mark_rule["cnt"]
+                cnt_cell_list.append(cell_index)
                 break
             if r > r_outer and z_translation < dof_z < (z_total - z_translation):
                 mark_list[cell_index] = mark_rule["gate_oxide"]
@@ -46,12 +49,12 @@ def mark_zone(info_mesh, geo_para):
             if r > r_outer and (dof_z < z_translation or dof_z > (z_total - z_translation)):
                 mark_list[cell_index] = mark_rule["air_outer"]
                 break
-    return mark_list
+    return mark_list, cnt_cell_list
 
 
 def epsilon(mark_list, cell_index):
     mark_value = mark_list[cell_index]
-    eps_list = [epsilon_air, epsilon_cnt, epsilon_air, epsilon_oxide]
+    eps_list = [epsilon_air, epsilon_cnt, epsilon_air_outer, epsilon_oxide]
     return eps_list[mark_value]
 
 
@@ -87,8 +90,20 @@ def isDirichlet(point_coordinate, geo_para):
     flag = 0
     tol = 1e-6
     x, y, z = point_coordinate
-    if abs(math.sqrt(x**2 + y**2) - r_oxide) < tol and z_translation - tol < z < (z_total - z_translation)+tol:
-        flag = 1
+    if abs(math.sqrt(x ** 2 + y ** 2) - r_oxide) < tol:
+        if z < z_translation + tol:
+            flag = 1
+        if z_translation - tol < z < z_total - z_translation + tol:
+            flag = 2
+        if z > z_total - z_translation - tol:
+            flag = 3
+    # if abs(math.sqrt(x**2 + y**2) - r_oxide) < tol and z < z_translation + tol:
+    #     flag = 0
+    # if abs(math.sqrt(x ** 2 + y ** 2) - r_oxide) < tol and z_translation - tol < z < (
+    #         z_total - z_translation) + tol:
+    #     flag = 1
+    # if abs(math.sqrt(x**2 + y**2) - r_oxide) < tol and z > z_total - z_translation + tol:
+    #     flag = 2
     return flag
 
 
@@ -107,7 +122,7 @@ def constant_parameters(info_mesh, geo_para):
     volume = 1 / 6
     weight_quadrature = 1 / 4
     # mark_list: the output of "def mark_zone", which can mark the zone by int number
-    mark_list = mark_zone(info_mesh, geo_para)
+    mark_list, cnt_cell_list = mark_zone(info_mesh, geo_para)
 
     # 1 call the N_gausspoint to compute N, N^T, NN^T
     N_GP, N_GP_T, NNT = N_gausspoint()
@@ -124,6 +139,9 @@ def constant_parameters(info_mesh, geo_para):
     cell_NJ = [None] * len(info_mesh)
     cell_NNTJ = [None] * len(info_mesh)
     Dirichlet_list = []
+    Dirichlet_source_list = []
+    Dirichlet_gate_list = []
+    Dirichlet_drain_list = []
 
     for cell_index in range(len(info_mesh)):
         # cell_i is a dict, {vertex1:[x,y,z],vertex2:[x,y,z],... }
@@ -209,7 +227,188 @@ def constant_parameters(info_mesh, geo_para):
         for i in range(4):
             point_coord = dof_coord[i]
             if isDirichlet(point_coord, geo_para) == 1:
-                Dirichlet_list.append(dof_number[i])
-    Dirichlet_list = list(set(Dirichlet_list))
-    return N_GP_T, cell_co, cell_long_term, cell_NJ, cell_NNTJ, mark_list, Dirichlet_list
+                Dirichlet_source_list.append(dof_number[i])
+                continue
+            if isDirichlet(point_coord, geo_para) == 2:
+                Dirichlet_gate_list.append(dof_number[i])
+                continue
+            if isDirichlet(point_coord, geo_para) == 3:
+                Dirichlet_drain_list.append(dof_number[i])
+                continue
+    Dirichlet_source_list = list(set(Dirichlet_source_list))
+    Dirichlet_gate_list = list(set(Dirichlet_gate_list))
+    Dirichlet_drain_list = list(set(Dirichlet_drain_list))
+    Dirichlet_list.append(Dirichlet_source_list)
+    Dirichlet_list.append(Dirichlet_gate_list)
+    Dirichlet_list.append(Dirichlet_drain_list)
+    return N_GP_T, cell_co, cell_long_term, cell_NJ, cell_NNTJ, mark_list, cnt_cell_list, Dirichlet_list
 
+
+def gauss_xyz(co_shapefunc):
+    """
+    give the four sets of coefficients of four shape functions of one cell
+    return the coordinates of four gauss points in physical space xyz
+    :param co_shapefunc: [[a1,a2,a3,a4],[b1,b2...]...]
+    :return: gauss_point_xyz: [[(x), (y), (z)],[(x),(y),(z)],...]
+    """
+    gauss_point_xyz = [None] * 4
+    p = 0.58541
+    q = 0.138197
+    gauss_point_base = [p, q, q, q]
+    for i in range(4):
+        temp = gauss_point_base.copy()
+        temp[i] = p
+        gauss_point = vector_numpy(3)
+        # gauss_point is a column vector
+        gauss_point.copy([temp[1:]])
+        gauss_point = gauss_point.trans()
+
+        ma_0 = matrix_numpy(4, 4)
+        ma_0.copy(co_shapefunc)
+        # transpose to ma_0 = [[a1,b1,c1,d1],[a2,b2,c2,d2],...,[a4,b4,c4,d4]]
+        ma_0 = ma_0.trans()
+        # ma_1 is [[b2,c2,d2],[b3,c3,d3],[b4,c4,d4]]
+        # ma is inv([[b2,c2,d2],[b3,c3,d3],[b4,c4,d4]])
+        ma_1 = matrix_numpy(3, 3)
+        ma_1.copy(ma_0.get_value(1, 4, 1, 4))
+        ma = op.inv(ma_1)
+        # vec_0 is the first column of ma_0
+        # vec_0 = [[a2],[a3],[a4]]
+        vec_0 = vector_numpy(3)
+        vec_0.copy(ma_0.get_value(1, 4, 0, 1))
+        # gauss_point = [[alpha],[beta],[gamma]]
+        # vec is [[alpha],[beta],[gamma]]-[[a2],[a3],[a4]]
+        vec = op.addvec(gauss_point, vec_0.nega())
+        # [[gauss_point_x],[gauss_point_y],[gauss_point_z]] equals ma * vec
+        gauss_point_xyz[i] = op.matmulvec(ma, vec).get_value().transpose()[0].tolist()
+    return gauss_point_xyz
+
+
+def find_dos(coord, dos, z_length):
+    """
+    based on the GPs' coordinate on xyz space, get the layer which it belongs to
+    then get the dos which is just a function of energy.
+    :param coord: coordinate of one gauss point
+    :param dos: from the output of GF, dos[ee][zz] = D(E(ee),z)
+    :param z_length: the whole length of the tube along the z axis
+    :return: dos_GP[ee1, ee2, ...], the index of which is energy
+    """
+    x, y, z = coord
+    length_layer = z_length / len(dos[0])
+    layer_index = int(z.real // length_layer)
+    dos_GP = [row[layer_index] for row in dos]
+    return dos_GP
+
+
+def find_np(coord, density_np, z_length):
+    """
+    based on the GPs' coordinate on xyz space, get the layer which it belongs to.
+    then get the density of electrons or holes.
+    :param coord: coordinate of one gauss point
+    :param density_np: from the output of GF, n[zz] = n(z), p[zz] = p(z)
+    :param z_length: the whole length of the tube along the z axis
+    :return: np_GP, a float type data
+    """
+    x, y, z = coord
+    length_layer = z_length / len(density_np)
+    layer_index = int(z.real // length_layer)
+    np_GP = density_np[layer_index].real
+    return np_GP
+
+
+def get_coord_GP_list(cell_co):
+    """
+    get coordinate of every Gauss Point of every cell
+    :param cell_co: coefficients of every cell
+    :return: coord_GP_list is a 3-level list, coord_GP_list[cell_index] = [GP1[x, y, z], GP2[x, y, z]...]
+    """
+    coord_GP_list = [None] * len(cell_co)
+    for cell_index in range(len(cell_co)):
+        coord_GP_list[cell_index] = gauss_xyz(cell_co[cell_index])
+    return coord_GP_list
+
+
+def get_dos_GP_list(coord_GP_list, dos, z_length, mark_list):
+    """
+    get dos of every Gauss Point of every cell
+    :param coord_GP_list: coord_GP_list[cell_index] = [GP1[x, y, z], GP2[x, y, z]...]
+    :param dos: from the output of GF, dos[ee][zz] = D(E(ee),z)
+    :param z_length: the whole length of the tube along the z axis
+    :return: dos_GP_list, a 3-level list, dos_GP_list[cell_index] = [dos[:][GP1], dos[:][GP2], ...]
+    """
+    dos_GP_list = [None] * len(coord_GP_list)
+    num_energy = len(dos)
+    for cell_index in range(len(coord_GP_list)):
+        if mark_list[cell_index] != 1:
+            # if this cell is not in CNT region, then set dos to zero
+            dos_GP_list_i = [[0.0] * num_energy] * 4
+        else:
+            # if this cell is in CNT region, then set dos value based on NEGF output
+            dos_GP_list_i = [None] * 4
+            for GP_index in range(4):
+                dos_GP_list_i[GP_index] = find_dos(coord_GP_list[cell_index][GP_index], dos, z_length)
+        dos_GP_list[cell_index] = dos_GP_list_i
+    return dos_GP_list
+
+
+def get_np_GP_list(coord_GP_list, density_np, z_length, mark_list):
+    """
+    get n or p of every Gauss Point of every cell
+    :param coord_GP_list: coord_GP_list[cell_index] = [GP1[x, y, z], GP2[x, y, z]...]
+    :param density_np: from the output of GF, n[zz] = n(z), p[zz] = p(z)
+    :param z_length: the whole length of the tube along the z axis
+    :return: np_GP_list, a 3-level list, np_GP_list[cell_index] = [np[GP1], np[GP2], ...]
+    """
+    np_GP_list = [None] * len(coord_GP_list)
+    for cell_index in range(len(coord_GP_list)):
+        if mark_list[cell_index] != 1:
+            np_GP_list_i = [0.0] * 4
+        else:
+            np_GP_list_i = [None] * 4
+            for GP_index in range(4):
+                np_GP_list_i[GP_index] = find_np(coord_GP_list[cell_index][GP_index], density_np, z_length)
+        np_GP_list[cell_index] = np_GP_list_i
+    return np_GP_list
+
+
+def doping(coord_GP_list, zlength_oxide, z_translation, doping_source, doping_drain, doping_channel, mark_list):
+    """
+    set doping concentration of every Gauss Point of every cell
+    :param coord_GP_list: coord_GP_list[cell_index] = [GP1[x, y, z], GP2[x, y, z]...]
+    :param zlength_oxide: the whole length of the tube along the z axis
+    :param z_translation: the start point of gate oxide in z direction
+    :param doping_source: N_D - N_A, i.e. N_{D-A} in source region
+    :param doping_drain: N_D - N_A, i.e. N_{D-A} in drain region
+    :param doping_channel: N_D - N_A, i.e. N_{D-A} in channel region
+    :return: doping_GP_list, a 3-level list, doping_GP_list[cell_index] = [doping[GP1], doping[GP2], ...]
+    """
+    doping_GP_list = [None] * len(coord_GP_list)
+    for cell_index in range(len(coord_GP_list)):
+        if mark_list[cell_index] != 1:
+            doping_GP_list_i = [0.0] * 4
+        else:
+            doping_GP_list_i = [float] * 4
+            for GP_index in range(4):
+                x, y, z = coord_GP_list[cell_index][GP_index]
+                if z.real < z_translation:
+                    doping_GP_list_i[GP_index] = doping_source
+                elif z.real < z_translation + zlength_oxide:
+                    doping_GP_list_i[GP_index] = doping_channel
+                else:
+                    doping_GP_list_i[GP_index] = doping_drain
+        doping_GP_list[cell_index] = doping_GP_list_i
+    return doping_GP_list
+
+
+# a = [(0.0034572369685743724+0j), (0.002680160837190706+0j), (0.0019124049899249106+0j), (0.0012428728427696174+0j),
+#       (0.0007689273642102201+0j), (0.0006848924676253319+0j), (0.0010295048911840828+0j), (0.0018112301366284985+0j),
+#       (0.0028924140519903394+0j), (0.0041230524065758375+0j)]
+# b = [0.9956599607932615, 0.9950547696662598, 0.9951972926952809, 0.9867066164938678, 1.0108604301134547,
+#      1.2451215515189975, 1.8218731445466385, 1.9943501156287846, 1.9939555592694795, 1.9939538853813874]
+# plt.subplot(1, 2, 1)
+# plt.title("phi")
+# plt.plot(np.arange(len(b)), b, color="green")
+# plt.subplot(1, 2, 2)
+# plt.title("electron")
+# plt.plot(np.arange(len(a)), a, color="red")
+# plt.show()

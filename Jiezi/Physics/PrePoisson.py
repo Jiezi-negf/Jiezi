@@ -14,17 +14,25 @@ from Jiezi.Graph.builder import CNT
 from Jiezi.Physics.common import *
 
 
-def PrePoisson(cnt: CNT):
+def PrePoisson(cnt: CNT, width_cnt_scale, width_oxide_scale, z_length_oxide_scale):
     # step1: get the geometry parameters from the graph module
+    # cnt_radius = cnt.get_radius()
+    # width_cnt = 0.3 * cnt_radius
+    # r_inter = cnt_radius - width_cnt / 2
+    # # width_oxide = 0.2 * cnt_radius
+    # z_total = cnt.get_length()
+    # # zlength_oxide = zlength_oxide_ratio * z_total
     cnt_radius = cnt.get_radius()
-    width_cnt = 0.3 * cnt_radius
+    width_cnt = width_cnt_scale * cnt_radius
     r_inter = cnt_radius - width_cnt / 2
-    width_oxide = 0.2 * cnt_radius
+    width_oxide = width_oxide_scale * cnt_radius
     z_total = cnt.get_length()
-    zlength_oxide = 0.2 * z_total
+    zlength_oxide = z_length_oxide_scale * z_total
 
-    mesh_whole_min_size = 0.08 * z_total
-    mesh_whole_max_size = 0.15 * z_total
+    # mesh_whole_min_size = 1 * width_cnt
+    # mesh_whole_max_size = 1.5 * width_cnt
+    mesh_whole_min_size = 0.5 * width_cnt
+    mesh_whole_max_size = 0.8 * width_cnt
     mesh_cnt_min_size = 0.7 * mesh_whole_min_size
     mesh_cnt_max_size = 0.7 * mesh_whole_max_size
 

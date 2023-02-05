@@ -40,6 +40,6 @@ def create_dof(path):
         for j in range(2, 6):
             tmp_dict[int(tmp_line[j])-1] = dof_coord[int(tmp_line[j])-1]
         cell_vol[i] = tmp_dict
-    return cell_vol, nb_dof
+    return cell_vol, nb_dof, dof_coord
 
 

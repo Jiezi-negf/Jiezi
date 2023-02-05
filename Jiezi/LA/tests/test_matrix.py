@@ -22,6 +22,9 @@ class TestMatrix(unittest.TestCase):
     mat = matrix_numpy(2, 3)
     ele = matrix_numpy(3, 3)
     ele.identity()
+    mat_swap = matrix_numpy(3, 3)
+    mat_swap.copy(np.arange(1, 10, 1).reshape(3, 3))
+
 
     def test(self):
         # make sure testing order
@@ -41,6 +44,7 @@ class TestMatrix(unittest.TestCase):
         self.det()
         self.copy()
         self.eigen()
+        self.swap_index()
 
     def init(self):
         self.assertTrue((TestMatrix.mat.get_value()
@@ -151,6 +155,11 @@ class TestMatrix(unittest.TestCase):
         self.assertTrue((TestMatrix.mat.eigenvec().get_value() == \
                          np.array([[0, 0, 1], [0, 1, 0], [1, 0, 0]])).all(),
                         "eigenvec is wrong")
+
+    def swap_index(self):
+        self.assertTrue((TestMatrix.mat_swap.swap_index(0, 1).get_value() == \
+                         np.array([[5, 4, 6], [2, 1, 3], [8, 7, 9]])).all(),
+                        "swap_index is wrong")
 
 
 if __name__ == "__main__":

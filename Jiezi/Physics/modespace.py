@@ -11,15 +11,28 @@ from Jiezi.LA import operator as op
 
 
 def mode_space(H: hamilton, U, nm: int):
-    Hii = H.get_Hii()
-    Hi1 = H.get_Hi1()
-    Sii = H.get_Sii()
+    """
+    transform the real-space matrix to mode-space matrix by U, which is the eigenvector of H(k=0)
+    :param H: real-space hamiltonian matrix
+    :param U: matrix composed of eigenvector at k=0
+    :param nm: the amount of bands which should be remained in the transform process, the choice of bands
+                is around the fermi energy EF.
+    :return: new Hii Hi1 Sii(the data structure is the same as old H, but the dimension is reduced)
+            and form_factor which will be used in phonon model
+    """
+    Hii = H.get_Hii().copy()
+    Hi1 = H.get_Hi1().copy()
+    Sii = H.get_Sii().copy()
     nz = len(Hii)
     U_new = []
     U_new_i = matrix_numpy()
+    U_unitary = []
+    # use qr decomposition to do gram-schmidt process for original U which is not unitary now
     for i in range(nz):
+        U_unitary_i = op.qr_decomp(U[i])
+        U_unitary.append(U_unitary_i)
         nn = U[i].get_size()[0]
-        U_new_i.copy(U[i].get_value(0, nn, nn//2 - nm//2, nn//2 + nm//2))
+        U_new_i.copy(U_unitary_i.get_value(0, nn, nn//2 - nm//2, nn//2 + nm//2))
         U_new.append(U_new_i)
     # transfer the Hii and Sii
     for i in range(nz):
@@ -41,4 +54,4 @@ def mode_space(H: hamilton, U, nm: int):
     for i in range(nz):
         form_factor_i = op.matmul_sym(U_new[i].dagger(), U_new[i])
         form_factor.append(form_factor_i)
-    return Hii, Hi1, Sii, form_factor
+    return Hii, Hi1, Sii, form_factor, U_new

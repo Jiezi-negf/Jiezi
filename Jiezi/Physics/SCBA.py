@@ -10,10 +10,13 @@
 from Jiezi.Physics.phonon import phonon
 from Jiezi.Physics.rgf import rgf
 from Jiezi.LA import operator as op
+from Jiezi.Physics.common import time_it
 
 
+@ time_it
 def SCBA(E_list, iter_max: int, TOL, ratio, eta, mul, mur, Hii, Hi1, Sii,
          sigma_lesser_ph, sigma_r_ph, form_factor, Dac, Dop, omega):
+    print("NEGF solver(SCBA loop) start")
     # initialize
     iter_c = 0
     nz = len(sigma_lesser_ph[0])

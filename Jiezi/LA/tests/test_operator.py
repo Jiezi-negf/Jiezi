@@ -12,6 +12,7 @@ import unittest
 
 sys.path.append("../../../")
 
+
 from Jiezi.LA.vector_numpy import vector_numpy
 from Jiezi.LA.matrix_numpy import matrix_numpy
 from Jiezi.LA import operator as op
@@ -36,6 +37,7 @@ class TestOp(unittest.TestCase):
         self.addmat()
         self.addvec()
         self.inv()
+        self.qr_decomp()
 
     # test matmulvec
     def matmulvec(self):
@@ -108,6 +110,14 @@ class TestOp(unittest.TestCase):
         self.assertTrue((op.inv(TestOp.mat).get_value() == np.array([[1, -2], [0, 1]])).all(), \
         "inv is wrong")
 
+    # test qr decomposition
+    def qr_decomp(self):
+        TestOp.mat.copy(np.array([[1, 2, 2], [2, 1, 2], [1, 2, 1]]))
+        self.assertTrue(np.linalg.norm(op.inv(TestOp.mat).get_value()-
+                         np.array([[-4.08248290e-01, 5.77350269e-01, -7.07106781e-01],
+                                   [-8.16496581e-01, -5.77350269e-01, -3.33066907e-16],
+                                   [-4.08248290e-01, 5.77350269e-01, 7.07106781e-01]]) < 1e-6),
+                        "qr decomposition is wrong")
 
 if __name__ == "__main__":
     unittest.main()

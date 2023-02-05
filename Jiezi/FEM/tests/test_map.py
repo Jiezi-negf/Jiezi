@@ -111,7 +111,7 @@ while res_fenics > tol_fenics and iter_fenics < max_iter_fenics:
 # 222222222222222222222222222222222222222222222222222222222222222222222222222222222
 # solve poisson equation by my code
 path = "/home/zjy/salome/SALOME-9.3.0-UB18.04-SRC/myPro/" + 'Mesh_whole.dat'
-info_mesh, dof_amount = create_dof(path)
+info_mesh, dof_amount, dof_coord_list = create_dof(path)
 z = []
 for cell_index in range(len(info_mesh)):
     # cell_i is a dict, {vertex1:[x,y,z],vertex2:[x,y,z],... }
@@ -120,7 +120,7 @@ for cell_index in range(len(info_mesh)):
     for i in range(len(dof_coord)):
         z.append(dof_coord[i][2])
 
-N_GP_T, cell_co, cell_long_term, cell_NJ, cell_NNTJ, mark_list, Dirichlet_list = constant_parameters(info_mesh,
+N_GP_T, cell_co, cell_long_term, cell_NJ, cell_NNTJ, mark_list, cnt_cell_list, Dirichlet_list = constant_parameters(info_mesh,
                                                                                                      geo_para)
 # cut the whole area to different with simple geometry
 cut_radius = 3

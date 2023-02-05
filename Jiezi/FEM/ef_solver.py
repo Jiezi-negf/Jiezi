@@ -12,10 +12,12 @@ from Jiezi.LA.vector_numpy import vector_numpy
 from Jiezi.LA import operator as op
 from Jiezi.Physics.common import *
 import numpy as np
-from scipy.optimize import root, fsolve
+import matplotlib.pyplot as plt
 
 
-def ef_solver(u_init, N_GP_T, cell_co, dos, density_n, ef_init, mark_list, z_length, E_list, TOL):
+@ time_it
+def ef_solver(u_init, N_GP_T, dos_GP_list, n_GP_list, p_GP_list, ef_init_n, ef_init_p,
+              cnt_cell_list, E_list, Ec, Eg, TOL_ef):
     """
     loop all the cell.
     In every loop, first call the gauss_xyz to get four gauss_point_xyz of the specific cell
@@ -26,71 +28,58 @@ def ef_solver(u_init, N_GP_T, cell_co, dos, density_n, ef_init, mark_list, z_len
             at the beginning of poisson solver, u_init is the initial value of newton iteration
     :param N_GP_T:
             values of shape functions on GPs, cooperate with u_init to get values of u on GPs
-            N_GP_T[cell_index] = vec, vec is vector_numpy(4), which is a column vector
-    :param cell_co:
-            coefficients of shape functions in each cell
-            cell_co[cell_index] = [a[x,x,x,x] b[...] c[...] d[...]]
-    :param dos: from the output of GF, dos[ee][zz] = D(E(ee),z)
-    :param density_n: from the output of GF, dos[zz] = n(z)
+            N_GP_T[GP_index] = vec, vec is vector_numpy(4), which is a column vector
+    :param dos_GP_list: dos value on each gauss point
+            dos_GP_list[cell_index] = dos_cell_i, dos_cell_i[GP_index] = dos_GP,
+            dos_GP[ee] = dos of value E_list[ee].
+    :param n_GP_list: n on each gauss point
+            n_GP_list[cell_index] = n_cell_i, n_cell_i[GP_index] = n
+    :param p_GP_list: p on each gauss point
+            p_GP_list[cell_index] = p_cell_i, p_cell_i[GP_index] = p
     :param ef_init:
             initial value of ef in the iteration of ef_solver
             ef_init[cell_index] = [value1, value2, value3, value4], may be[0,0,0,0]
     :param mark_list: the mark value list of all cells
-    :param z_length:
-            the whole length of the tube along the z axis, used by "def find_dos" and "def find_n"
     :param E_list: energy sampling points set, which is same as the GF solver
-    :param TOL: tolerance of ef_solver interation
+    :param Ec: energy of the bottom of the conduction band
+    :param Eg: energy of the band gap
+    :param TOL_ef: tolerance of ef_solver interation
     :return:
-            1 ef: ef[cell_index] = [value1, value2, value3, value4]
-
-            2 dos_GP_list: dos value on each gauss point
-            dos_GP_list[cell_index] = dos_cell_i, dos_cell_i[GP_index] = dos_GP,
-            dos_GP[ee] = dos of value E_list[ee].
+            1 ef_n: ef_n[cell_index] = [value1, value2, value3, value4]
+            2 ef_p: ef_p[cell_index] = [value1, value2, value3, value4]
+            3 ef_flag: TRUE express that all the ef has been solved successfully
     """
-    # every ef[i] stores a list [], which stores the values of gf on four GPs of cell i
-    ef = [None] * len(cell_co)
-    dos_GP_list = [None] * len(cell_co)
-    n_GP_list = [None] * len(cell_co)
-    u_GP_list = [None] * len(cell_co)
-    for cell_index in range(len(cell_co)):
-        dos_cell_i = [None] * 4
-        n_cell_i  = [None] * 4
-        gauss_point_xyz = gauss_xyz(cell_co[cell_index])
-        # u_GP_cell is a list, the length of which is 4, which stores the phi value on the four GP of cell_index
-        u_GP_cell = [None] * 4
+
+    # set ef_flag TRUE, if ef of every point is computed successfully, ef_flag keep TRUE, otherwise the value
+    # will be set FALSE
+    ef_flag = True
+
+    for cnt_cell_index in cnt_cell_list:
+        if not ef_flag:
+            break
         for GP_index in range(4):
+            # u_GP_cell is a list, the length of which is 4, which stores the phi value on the four GP of cell_index
             u_init_vec = vector_numpy(4)
-            u_init_vec.copy(np.array([u_init[cell_index]]).transpose())
-            u_GP_cell[GP_index] = op.vecdotvec(N_GP_T[GP_index], u_init_vec)
-        u_GP_list[cell_index] = u_GP_cell
-
-        for GP_index in range(4):
-            coord = gauss_point_xyz[GP_index]
-            dos_GP = find_dos(coord, dos, z_length)
-            n_GP = find_n(coord, density_n, z_length)
-            dos_cell_i[GP_index] = dos_GP
-            n_cell_i[GP_index] = n_GP
-        n_GP_list[cell_index] = n_cell_i
-        dos_GP_list[cell_index] = dos_cell_i
-
-    for cell_index in range(len(cell_co)):
-        if mark_list[cell_index] != 1:
-            ef_cell_i = [-1e2] * 4
-            ef[cell_index] = ef_cell_i
-            continue
-        else:
-            ef_cell_i = [None] * 4
-            for GP_index in range(4):
-                ef_i = brent(E_list, u_GP_list[cell_index][GP_index],
-                             dos_GP_list[cell_index][GP_index], n_GP_list[cell_index][GP_index],
-                             E_list[0], E_list[len(E_list) - 1], 1e-5, 1e-5)
-                ef_cell_i[GP_index] = ef_i
-                # # only compute the first point of every cell, reduce the amount of computation
-                # if GP_index == 0:
-                #     for i in range(1, 4):
-                #         ef_cell_i[i] = ef_i
-                # break
-            ef[cell_index] = ef_cell_i
+            u_init_vec.copy(u_init[cnt_cell_index].reshape(u_init[cnt_cell_index].shape[0], 1))
+            u_GP = op.vecdotvec(N_GP_T[GP_index], u_init_vec)
+            ef_n_i = brent("n", E_list, Ec, Eg, u_GP,
+                           dos_GP_list[cnt_cell_index][GP_index], n_GP_list[cnt_cell_index][GP_index],
+                           E_list[0]-5, E_list[len(E_list) - 1]+5, TOL_ef, TOL_ef)
+            ef_p_i = brent("p", E_list, Ec, Eg, u_GP,
+                           dos_GP_list[cnt_cell_index][GP_index], p_GP_list[cnt_cell_index][GP_index],
+                           E_list[0]-5, E_list[len(E_list) - 1]+5, TOL_ef, TOL_ef)
+            # test if the function has root, if there is no root in the interval, break the loop
+            if ef_n_i == None or ef_p_i == None:
+                print("ef_solver failed in this NEGF-Poisson big loop")
+                ef_flag = False
+                break
+            ef_init_n[cnt_cell_index, GP_index] = ef_n_i
+            ef_init_p[cnt_cell_index, GP_index] = ef_p_i
+            # # only compute the first point of every cell, reduce the amount of computation
+            # if GP_index == 0:
+            #     for i in range(1, 4):
+            #         ef_cell_i[i] = ef_i
+            # break
 
     # # this part uses the newton method to solve ef
     # for cell_index in range(len(cell_co)):
@@ -125,152 +114,104 @@ def ef_solver(u_init, N_GP_T, cell_co, dos, density_n, ef_init, mark_list, z_len
     #
     #     ef[cell_index] = ef_cell_i
     #     dos_GP_list[cell_index] = dos_cell_i
-
-    return ef, dos_GP_list
-
-
-def gauss_xyz(co_shapefunc):
-    """
-    give the four sets of coefficients of four shape functions of one cell
-    return the coordinates of four gauss points in physical space xyz
-    :param co_shapefunc: [[a1,a2,a3,a4],[b1,b2...]...]
-    :return: gauss_point_xyz: [[(x), (y), (z)],[(x),(y),(z)],...]
-    """
-    gauss_point_xyz = [None] * 4
-    p = 0.58541
-    q = 0.138197
-    gauss_point_base = [p, q, q, q]
-    for i in range(4):
-        temp = gauss_point_base.copy()
-        temp[i] = p
-        gauss_point = vector_numpy(3)
-        # gauss_point is a column vector
-        gauss_point.copy([temp[1:]])
-        gauss_point = gauss_point.trans()
-
-        ma_0 = matrix_numpy(4, 4)
-        ma_0.copy(co_shapefunc)
-        # transpose to ma_0 = [[a1,b1,c1,d1],[a2,b2,c2,d2],...,[a4,b4,c4,d4]]
-        ma_0 = ma_0.trans()
-        # ma_1 is [[b2,c2,d2],[b3,c3,d3],[b4,c4,d4]]
-        # ma is inv([[b2,c2,d2],[b3,c3,d3],[b4,c4,d4]])
-        ma_1 = matrix_numpy(3, 3)
-        ma_1.copy(ma_0.get_value(1, 4, 1, 4))
-        ma = op.inv(ma_1)
-        # vec_0 is the first column of ma_0
-        # vec_0 = [[a2],[a3],[a4]]
-        vec_0 = vector_numpy(3)
-        vec_0.copy(ma_0.get_value(1, 4, 0, 1))
-        # gauss_point = [[alpha],[beta],[gamma]]
-        # vec is [[alpha],[beta],[gamma]]-[[a2],[a3],[a4]]
-        vec = op.addvec(gauss_point, vec_0.nega())
-        # [[gauss_point_x],[gauss_point_y],[gauss_point_z]] equals ma * vec
-        gauss_point_xyz[i] = op.matmulvec(ma, vec).get_value().transpose()[0].tolist()
-    return gauss_point_xyz
+    return ef_init_n, ef_init_p, ef_flag
 
 
-def find_dos(coord, dos, z_length):
-    """
-    based on the GPs' coordination on xyz space, get the layer which it belongs to
-    then get the dos which is just a function of energy.
-    :param coord: coordination of one gauss point
-    :param dos: from the output of GF, dos[ee][zz] = D(E(ee),z)
-    :param z_length: the whole length of the tube along the z axis
-    :return: dos_GP[ee1, ee2, ...], the index of which is energy
-    """
-    x, y, z = coord
-    length_layer = z_length / len(dos[0])
-    layer_index = int(z.real // length_layer)
-    dos_GP = [row[layer_index] for row in dos]
-    return dos_GP
+# def integral_ef_n_up(start, dos_GP, E_list, ef_i):
+#     """
+#     if I use newton iteration to solve Ef, this function will be used
+#     """
+#     result = 0.0
+#     E_step = E_list[1] - E_list[0]
+#     diff = start - E_list[0]
+#     start_normal = int(diff // E_step)
+#     if diff <= 0:
+#         start_index = 0
+#     else:
+#         start_index = start_normal
+#     end_index = len(E_list)
+#     for ee in range(start_index, end_index - 1):
+#         result += (dos_GP[ee] * fermi(E_list[ee] - ef_i)
+#                    + dos_GP[ee + 1] * fermi(E_list[ee + 1] - ef_i)) * E_step / 2
+#     return result
+#
+#
+# def integral_ef_n_bottom(start, dos_GP, E_list, ef_i):
+#     """
+#     if I use newton iteration to solve Ef, this function will be used
+#     """
+#     result = 0.0
+#     E_step = E_list[1] - E_list[0]
+#     diff = start - E_list[0]
+#     start_normal = int(diff // E_step)
+#     if diff <= 0:
+#         start_index = 0
+#     else:
+#         start_index = start_normal
+#     end_index = len(E_list)
+#     for ee in range(start_index, end_index - 1):
+#         result += (dos_GP[ee] * fermi(E_list[ee] - ef_i) * (1 - fermi(E_list[ee] - ef_i))
+#                    + dos_GP[ee + 1] * fermi(E_list[ee + 1] - ef_i) * (1 - fermi(E_list[ee + 1] - ef_i))
+#                    ) * E_step / 2
+#     return result
 
-
-def find_n(coord, density_n, z_length):
-    """
-    based on the GPs' coordination on xyz space, get the layer which it belongs to.
-    then get the density of electrons.
-    :param coord: coordination of one gauss point
-    :param density_n: from the output of GF, dos[zz] = n(z)
-    :param z_length: the whole length of the tube along the z axis
-    :return: n_GP, a float type data
-    """
-    x, y, z = coord
-    length_layer = z_length / len(density_n)
-    layer_index = int(z.real // length_layer)
-    n_GP = density_n[layer_index].real
-    return n_GP
-
-
-def integral_ef_up(start, dos_GP, E_list, ef_i):
+# @ jit
+def func_F(flag_np, E_list, Ec, Eg, phi, dos, density_np, ef):
     result = 0.0
     E_step = E_list[1] - E_list[0]
-    diff = start - E_list[0]
-    start_normal = int(diff // E_step)
-    if diff <= 0:
-        start_index = 0
+    if flag_np == "n":
+        diff = Ec - E_list[0]
+        start_normal = int(diff.real // E_step)
+        end_index = len(E_list) - 1
+        if diff <= 0:
+            start_index = 0
+        elif Ec > E_list[end_index]:
+            start_index = end_index
+        else:
+            start_index = start_normal
+        for ee in range(start_index, end_index):
+            result += (dos[ee] * fermi(E_list[ee] - phi - ef)
+                       + dos[ee + 1] * fermi(E_list[ee + 1] - phi - ef)) * E_step / 2
+        result -= density_np
     else:
-        start_index = start_normal
-    end_index = len(E_list)
-    for ee in range(start_index, end_index - 1):
-        result += (dos_GP[ee] * fermi(E_list[ee] - ef_i)
-                   + dos_GP[ee + 1] * fermi(E_list[ee + 1] - ef_i)) * E_step / 2
+        diff = Ec - Eg - E_list[0]
+        start_index = 0
+        end_normal = int(diff.real // E_step)
+        if diff <= 0:
+            end_index = 0
+        elif Ec - Eg > E_list[len(E_list) - 1]:
+            end_index = len(E_list) - 1
+        else:
+            end_index = end_normal
+        for ee in range(start_index, end_index):
+            result += (dos[ee] * (1 - fermi(E_list[ee] - phi - ef))
+                       + dos[ee + 1] * (1 - fermi(E_list[ee + 1] - phi - ef))) * E_step / 2
+        result -= density_np
     return result
 
 
-def integral_ef_bottom(start, dos_GP, E_list, ef_i):
-    result = 0.0
-    E_step = E_list[1] - E_list[0]
-    diff = start - E_list[0]
-    start_normal = int(diff // E_step)
-    if diff <= 0:
-        start_index = 0
-    else:
-        start_index = start_normal
-    end_index = len(E_list)
-    for ee in range(start_index, end_index - 1):
-        result += (dos_GP[ee] * fermi(E_list[ee] - ef_i) * (1 - fermi(E_list[ee] - ef_i))
-                   + dos_GP[ee + 1] * fermi(E_list[ee + 1] - ef_i) * (1 - fermi(E_list[ee + 1] - ef_i))
-                   ) * E_step / 2
-    return result
+# def func_derivative_F(E_list, phi, dos, ef):
+#     """
+#     if I use newton iteration to solve Ef, this function will be used
+#     """
+#     result = 0.0
+#     E_step = E_list[1] - E_list[0]
+#     diff = -phi - E_list[0]
+#     start_normal = int(diff.real // E_step)
+#     if diff <= 0:
+#         start_index = 0
+#     elif -phi > E_list[len(E_list) - 1]:
+#         start_index = len(E_list)
+#     else:
+#         start_index = start_normal
+#     end_index = len(E_list)
+#     for ee in range(start_index, end_index - 1):
+#         result += (dos[ee] * fermi(E_list[ee] - ef) * (1 - fermi(E_list[ee] - ef))
+#                    + dos[ee + 1] * fermi(E_list[ee + 1] - ef) * (1 - fermi(E_list[ee + 1] - ef))) * E_step / 2
+#     result = result / KT
+#     return result
 
-
-def func_F(E_list, phi, dos, density_n, ef):
-    result = 0.0
-    E_step = E_list[1] - E_list[0]
-    diff = -phi - E_list[0]
-    start_normal = int(diff.real // E_step)
-    if diff <= 0:
-        start_index = 0
-    elif -phi > E_list[len(E_list) - 1]:
-        start_index = len(E_list)
-    else:
-        start_index = start_normal
-    end_index = len(E_list)
-    for ee in range(start_index, end_index - 1):
-        result += (dos[ee] * fermi(E_list[ee] - ef)
-                   + dos[ee + 1] * fermi(E_list[ee + 1] - ef)) * E_step / 2
-    result -= density_n
-    return result
-
-
-def func_derivative_F(E_list, phi, dos, ef):
-    result = 0.0
-    E_step = E_list[1] - E_list[0]
-    diff = -phi - E_list[0]
-    start_normal = int(diff.real // E_step)
-    if diff <= 0:
-        start_index = 0
-    elif -phi > E_list[len(E_list) - 1]:
-        start_index = len(E_list)
-    else:
-        start_index = start_normal
-    end_index = len(E_list)
-    for ee in range(start_index, end_index - 1):
-        result += (dos[ee] * fermi(E_list[ee] - ef) * (1 - fermi(E_list[ee] - ef))
-                   + dos[ee + 1] * fermi(E_list[ee + 1] - ef) * (1 - fermi(E_list[ee + 1] - ef))) * E_step / 2
-    result = result / KT
-    return result
-
+# # for testing the function "brent"
 # def func_F(E_list, phi, dos, density_n, ef):
 #     result = ef**3 - 2*ef**2 - +5*ef - 15
 #     return result
@@ -279,17 +220,17 @@ def func_derivative_F(E_list, phi, dos, ef):
 #     return res
 
 
-def secant(E_list, phi, dos, density_n, ef_0, ef_1):
-    f_0 = func_F(E_list, phi, dos, density_n, ef_0)
-    f_1 = func_F(E_list, phi, dos, density_n, ef_1)
+def secant(flag_np, E_list, Ec, Eg, phi, dos, density_np, ef_0, ef_1):
+    f_0 = func_F(flag_np, E_list, Ec, Eg, phi, dos, density_np, ef_0)
+    f_1 = func_F(flag_np, E_list, Ec, Eg, phi, dos, density_np, ef_1)
     ef_2 = ef_0 - f_0 * (ef_1 - ef_0) / (f_1 - f_0)
     return ef_2
 
 
-def IQI(E_list, phi, dos, density_n, ef_0, ef_1, ef_2):
-    f_0 = func_F(E_list, phi, dos, density_n, ef_0)
-    f_1 = func_F(E_list, phi, dos, density_n, ef_1)
-    f_2 = func_F(E_list, phi, dos, density_n, ef_2)
+def IQI(flag_np, E_list, Ec, Eg, phi, dos, density_np, ef_0, ef_1, ef_2):
+    f_0 = func_F(flag_np, E_list, Ec, Eg, phi, dos, density_np, ef_0)
+    f_1 = func_F(flag_np, E_list, Ec, Eg, phi, dos, density_np, ef_1)
+    f_2 = func_F(flag_np, E_list, Ec, Eg, phi, dos, density_np, ef_2)
     result = f_1 * f_2 / (f_0 - f_1) / (f_0 - f_2) * ef_0 \
              + f_0 * f_2 / (f_1 - f_0) / (f_1 - f_2) * ef_1 \
              + f_0 * f_1 / (f_2 - f_0) / (f_2 - f_1) * ef_2
@@ -307,12 +248,16 @@ def between(a, b, x):
         return False
 
 
-def brent(E_list, phi, dos, density_n, a, b, tol_brent_residual=1e-5, tol_brent_bisection=1e-5):
-    f_a = func_F(E_list, phi, dos, density_n, a)
-    f_b = func_F(E_list, phi, dos, density_n, b)
-    # test if a and b are set reasonably
+def brent(flag_np, E_list, Ec, Eg, phi, dos, density_np, a, b, tol_brent_residual=1e-5, tol_brent_bisection=1e-5):
+    f_a = func_F(flag_np, E_list, Ec, Eg, phi, dos, density_np, a)
+    f_b = func_F(flag_np, E_list, Ec, Eg, phi, dos, density_np, b)
+    # test if there is root between a and b, i.e. if the equation has solution
     if f_a * f_b > 0:
-        print("ERROR: the sign of f(a) and f(b) must be different!")
+        print("ERROR: the sign of f(a) and f(b) must be different!", "a:", a, "fa:", f_a, "b:", b, "f_b:", f_b)
+        # print(phi, dos, density_n)
+        # plt.plot(E_list, dos)
+        # plt.show()
+        return
     # make sure f(b) is closer to 0 than f(a), if not, swap a and b
     if abs(f_a) < abs(f_b):
         a, b = swap(a, b)
@@ -326,33 +271,35 @@ def brent(E_list, phi, dos, density_n, a, b, tol_brent_residual=1e-5, tol_brent_
     # start the loop
     while 1:
         # make sure f(b) is closer to 0 than f(a), if not, swap a and b
-        if abs(func_F(E_list, phi, dos, density_n, a)) < abs(func_F(E_list, phi, dos, density_n, b)):
+        if abs(func_F(flag_np, E_list, Ec, Eg, phi, dos, density_np, a)) < \
+                abs(func_F(flag_np, E_list, Ec, Eg, phi, dos, density_np, b)):
             a, b = swap(a, b)
         # test if the iteration is converged
-        if abs(a - b) < tol_brent_bisection or abs(func_F(E_list, phi, dos, density_n, b)) < tol_brent_residual:
+        if abs(a - b) < tol_brent_bisection or abs(func_F(flag_np, E_list, Ec, Eg, phi, dos, density_np, b)) \
+                < tol_brent_residual:
             # print("the number of iteration in brent method is:", iter_brent)
             return b
         # compute f(a), f(b), f(c), m, k
-        f_a = func_F(E_list, phi, dos, density_n, a)
-        f_b = func_F(E_list, phi, dos, density_n, b)
-        f_c = func_F(E_list, phi, dos, density_n, c)
+        f_a = func_F(flag_np, E_list, Ec, Eg, phi, dos, density_np, a)
+        f_b = func_F(flag_np, E_list, Ec, Eg, phi, dos, density_np, b)
+        f_c = func_F(flag_np, E_list, Ec, Eg, phi, dos, density_np, c)
         m = (a + b) / 2
-        f_m = func_F(E_list, phi, dos, density_n, m)
+        f_m = func_F(flag_np, E_list, Ec, Eg, phi, dos, density_np, m)
         k = (3 * a + b) / 4
         # compute s
         if f_a != f_c and f_b != f_c:
-            s = IQI(E_list, phi, dos, density_n, a, b, c)
+            s = IQI(flag_np, E_list, Ec, Eg, phi, dos, density_np, a, b, c)
         elif b != c and f_b != f_c:
-            s = secant(E_list, phi, dos, density_n, b, c)
+            s = secant(flag_np, E_list, Ec, Eg, phi, dos, density_np, b, c)
         else:
             s = m
-        f_s = func_F(E_list, phi, dos, density_n, s)
+        f_s = func_F(flag_np, E_list, Ec, Eg, phi, dos, density_np, s)
         # compute flag_ill
         if flag_bisection is True:
             flag_ill = abs(s - b) < (1 / 2) * abs(b - c)
         else:
             flag_ill = (c == d or abs(s - b) < (1 / 2) * abs(c - d))
-        # renew the a b c
+        # renew a b c
         if flag_ill and between(k, b, s) and f_s * f_a < 0:
             flag_bisection = False
             d = copy.deepcopy(c)

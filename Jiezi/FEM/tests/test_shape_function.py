@@ -9,10 +9,7 @@
 
 import sys
 import numpy as np
-from Jiezi.FEM.ef_solver import gauss_xyz
-from Jiezi.LA.vector_numpy import vector_numpy
-from Jiezi.FEM.ef_solver import gauss_xyz
-import matplotlib.pyplot as plt
+
 
 
 sys.path.append("../../../")

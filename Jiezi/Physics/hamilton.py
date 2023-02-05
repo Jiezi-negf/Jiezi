@@ -48,8 +48,7 @@ class hamilton:
     def build_single_H_cell(self, layer_number):
         """
         cell hamilton matrix is the matrix of a single cell, which is the diagonal element of the big matrix H
-        It should be noticed that the potential felt by the atom is dependent on its z coordinate.
-        In other word, in this version, the potential varies only along the translation vector (t_1, t_2)
+        the electrostatic potential phi has not been added to this matrix in this function
         :return: matrix_numpy type, hamilton matrix of one single cell
         """
         # put the hopping and onsite value in the cell hamilton array
@@ -57,7 +56,7 @@ class hamilton:
         cell_hamilton = np.zeros((self.__nn, self.__nn))
         # onsite value is the diagonal element
         for i in range(self.__nn):
-            # # this line is for test
+            # # the following lines is for test
             # atom_number = i + layer_number * self.__nn + 1
             # fake_phi = fake_potential(self.__coordinate[atom_number][2], self.__whole_length)
             # cell_hamilton[i, i] = self.__onsite + fake_phi
@@ -118,14 +117,34 @@ class hamilton:
         self.__Si1.append(op.scamulmat(base_overlap / self.__hopping, self.build_single_H_hopping()))
 
     def H_add_phi(self, dict_cell, u_cell, cell_co, num_radius, num_z, r_oxide, z_total):
+        """
+        add electrostatic potential to the elements on the main diagonal line of the Hii according to the
+        atom position;
+        the function map.projection is used to get the potential based on the atom position.
+        :param dict_cell: refer to function map.projection
+        :param u_cell: refer to function map.projection
+        :param cell_co: refer to function map.projection
+        :param num_radius: refer to function map.projection
+        :param num_z: refer to function map.projection
+        :param r_oxide: refer to function map.projection
+        :param z_total: refer to function map.projection
+        :return: layer_phi_list. the average value of phi added on each layer.
+        layer_phi_list[layer_index] is average phi added on this layer
+        the onsite value of every atom is changed by the potential phi
+        """
+        layer_phi_list = [float] * self.__length
         for layer_number in range(self.__length):
+            layer_phi = 0.0
             for i in range(self.__nn):
                 atom_number = i + layer_number * self.__nn + 1
                 # atom_coord is a list [x, y, z]
                 atom_coord = self.__coordinate[atom_number]
-                value = self.__onsite + map.projection(dict_cell, u_cell, atom_coord, cell_co,
-                                                                num_radius, num_z, r_oxide, z_total)
+                phi_atom_i = map.projection(dict_cell, u_cell, atom_coord, cell_co, num_radius, num_z, r_oxide, z_total)
+                value = self.__Hii[layer_number].get_value(i, i) - phi_atom_i
                 self.__Hii[layer_number].set_value(i, i, value)
+                layer_phi += phi_atom_i
+            layer_phi_list[layer_number] = layer_phi / self.__nn
+        return layer_phi_list
 
     def get_Hii(self):
         return self.__Hii

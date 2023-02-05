@@ -13,18 +13,16 @@ def map_tocell(info_mesh, u_vec):
     """
     map the u_vec which is from dof_0 to dof_N to u_cell whose oder is depends on cell
     :param info_mesh: [{14:[x,y,z], 25:[x,y,z], 3:[x,y,z], 6:[x,y,z]},{},{},...]
-    :param u_vec: [2.1, 3, 1.2,...]
-    :return: u_cell: [[5.2, 6, 4.2, 2.3], [], ...]
+    :param u_vec: numpy.array, shape is (dof_amount, 1), [[2.1], [3], [1.2],...]
+    :return: u_cell: numpy.array, shape is (cell_amount, 4), [[5.2, 6, 4.2, 2.3], [], ...]
     """
     cell_amount = len(info_mesh)
-    u_cell = [None] * cell_amount
+    u_cell = np.empty([cell_amount, 4])
     for cell_index in range(cell_amount):
-        u_cell_i = [None] * 4
         cell_i = info_mesh[cell_index]
         dof_number = list(cell_i.keys())
         for i in range(4):
-            u_cell_i[i] = u_vec[dof_number[i]]
-        u_cell[cell_index] = u_cell_i
+            u_cell[cell_index, i] = u_vec[dof_number[i], 0]
     return u_cell
 
 
@@ -39,6 +37,8 @@ def projection(dict_cell, u_cell, coord, cell_co, num_radius, num_z, r_oxide, z_
 
 def link_to_cell(dict_cell, coord, cell_co, num_radius, num_z, r_oxide, z_total):
     x, y, z = coord
+    if z < 1e-6:
+        z = 0.0
     r = math.sqrt(x ** 2 + y ** 2)
     r_index = int(r // (r_oxide / num_radius))
     z_index = int(z // (z_total / num_z))
@@ -61,7 +61,7 @@ def link_to_cell(dict_cell, coord, cell_co, num_radius, num_z, r_oxide, z_total)
 def get_func_value(coord_ref, u_cell, cell_index):
     alpha, beta, gamma = coord_ref
     N = np.array([1 - alpha - beta - gamma, alpha, beta, gamma])
-    u = np.array(u_cell[cell_index])
+    u = u_cell[cell_index]
     value = np.dot(N, u)
     return value
 

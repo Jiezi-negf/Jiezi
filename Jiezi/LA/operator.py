@@ -143,3 +143,17 @@ def inv(mat):
         temp = matrix_numpy(mat.get_size()[0], mat.get_size()[1])
         temp.copy(np.linalg.inv(mat.get_value()))
         return temp
+
+
+def qr_decomp(mat):
+    if isinstance(mat, matrix_numpy):
+        temp = matrix_numpy(mat.get_size()[0], mat.get_size()[1])
+        temp.copy(np.linalg.qr(mat.get_value())[0])
+        return temp
+
+
+def general_inv(mat):
+    if isinstance(mat, matrix_numpy):
+        left = matmulmat(inv(matmulmat(mat, mat.dagger())), mat)
+        right = matmulmat(mat.dagger(), inv(matmulmat(mat, mat.dagger())))
+        return left, right

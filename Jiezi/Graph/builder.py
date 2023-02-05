@@ -23,7 +23,7 @@ def nonideal():
 class CNT:
     __name__ = "Carbon Nanotube"
 
-    def __init__(self, n: int, m: int, Trepeat: int, a_cc=1.44, nonideal=False):
+    def __init__(self, n: int, m: int, Trepeat: int, a_cc=1.42536, nonideal=False):
         assert 0 <= m <= n, "Condition 0 <= m <= n does not fill!"
         assert Trepeat >= 0, "Repeatation must be positive!"
         # (n,m) is chirality indices, (t_1,t_2) is translation vector, which is normal to (n,m)
@@ -155,7 +155,7 @@ class CNT:
     def get_singlecell_length(self):
         return self.__Tlength
 
-    def get_mass_desity(self):
+    def get_mass_density(self):
         # the unit is g/cm^3
         rho = self.__nn * 1.993e-23 / (math.pi * (self.__radius * 1e-8) ** 2 * self.__Tlength * 1e-8)
         return rho

@@ -43,7 +43,7 @@ E_subband, U = subband(H, k=0)
 
 # compute the mode space basis to decrease the size of H
 nm = E_subband[0].get_size()[0]
-Hii_new, Hi1_new, Sii_new, form_factor = mode_space(H, U, nm-10)
+Hii_new, Hi1_new, Sii_new, form_factor, U_new = mode_space(H, U, nm-10)
 # Hii_new = H.get_Hii()
 # Hi1_new = H.get_Hi1()
 # Sii_new = H.get_Sii()
@@ -98,7 +98,7 @@ SCBA(E_list, iter_max, TOL, ratio, eta, mul, mur, Hii_new, Hi1_new, Sii_new,
 n_tol, p_tol, J, dos = quantity(E_list, G_R_fullE, G_lesser_fullE, G_greater_fullE, G1i_lesser_fullE,
                            Sigma_left_lesser_fullE, Sigma_left_greater_fullE,
                            Sigma_right_lesser_fullE, Sigma_right_greater_fullE,
-                           Hi1_new, volume_cell)
+                           Hi1_new, volume_cell, U_new)
 print(J)
 x = range(len(J))
 plt.plot(x, J)

@@ -17,10 +17,8 @@ def subband(H: hamilton, k):
     """
     this function is to calculate the eigen energy with the specific "k"
     the formula is: [H_{i-1,i}*exp(-j*ka)+H_{i,i}+H_{i,i+1}*exp(j*ka)] \psi =ES_{i,i}\psi
-    :param Hii: Hii[i]=H_{i,i}
-    :param Hi1: Hi1[i]=H_{i-1,i}
-    :param Sii: base overlap
-    :param k:
+    :param H: hamilton object
+    :param k: k point in K-space
     :return: subband[i] are eigen energy, U[i] are eigen vectors
     """
     Hii = H.get_Hii()
@@ -30,14 +28,41 @@ def subband(H: hamilton, k):
     sub_band = []
     U = []
     for i in range(len(Hii)):
-        H_temp = op.addmat(Hii[i], op.scamulmat(np.exp(-k * 1j), Hi1[i].trans()),
+        H_temp = op.addmat(Hii[i], op.scamulmat(np.exp(-k * 1j), Hi1[i].dagger()),
                            op.scamulmat(np.exp(k * 1j), Hi1[i + 1]))
-        S_temp = op.addmat(Sii[i], op.scamulmat(np.exp(-k * 1j), Si1[i].trans()),
+        S_temp = op.addmat(Sii[i], op.scamulmat(np.exp(-k * 1j), Si1[i].dagger()),
                            op.scamulmat(np.exp(k * 1j), Si1[i + 1]))
         H_temp = op.matmulmat(op.inv(S_temp), H_temp)
         sub_band.append(H_temp.eigenvalue())
         U.append(H_temp.eigenvec())
     return sub_band, U
+
+
+def get_EcEg(H: hamilton):
+    """
+    compute bottom of conduction band energy Ec and band gap Eg
+    :param H: hamilton object
+    :return: Ec and Eg
+    """
+    Hii = H.get_Hii()
+    Hi1 = H.get_Hi1()
+    Sii = H.get_Sii()
+    Si1 = H.get_Si1()
+    H_temp = op.addmat(Hii[0], Hi1[0].dagger(), Hi1[1])
+    S_temp = op.addmat(Sii[0], Si1[0].dagger(), Si1[1])
+    H_temp = op.matmulmat(op.inv(S_temp), H_temp)
+    energy_list = H_temp.eigenvalue().get_value()
+    Ec = 0.0
+    Eg = 0.0
+    for i in range(len(energy_list)):
+        energy = energy_list[i]
+        if energy < 0:
+            continue
+        else:
+            Ec = energy
+            Eg = energy - energy_list[i-1]
+            break
+    return Ec, Eg
 
 
 def band_structure(H: hamilton, start, end, step):

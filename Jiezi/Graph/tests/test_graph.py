@@ -11,10 +11,19 @@ import sys
 sys.path.append("../../../")
 import Jiezi.Graph.builder as builder
 
-cnt = builder.CNT(4, 2, 1, a_cc=1.44, nonideal=False)
+cnt = builder.CNT(5, 5, 1, a_cc=1.42536, nonideal=False)
 
 cnt.construct()
-# cnt.data_print()
-cnt.data_plot()
-# print(cnt.get_coordinate()[2])
+cnt.data_print()
+
+# cnt.data_plot()
+print(cnt.get_coordinate())
+print(cnt.get_nn())
+print(cnt.get_radius())
+print(cnt.get_singlecell_length())
 print(cnt.get_length())
+volume_cell = 3.14 * cnt.get_radius() ** 2 * cnt.get_singlecell_length()
+# doping_line = 1
+# doping_volume = doping_line * cnt.get_singlecell_length() / volume_cell
+# print(doping_volume)
+

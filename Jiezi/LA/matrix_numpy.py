@@ -135,3 +135,14 @@ class matrix_numpy(matrix):
         temp = matrix_numpy(self.get_size()[0], self.get_size()[1])
         temp.copy(vec)
         return temp
+
+    def swap_index(self, a, b):
+        res = matrix_numpy(self.__row, self.__column)
+        temp = np.copy(self.get_value())
+        temp[[a, b], :] = temp[[b, a], :]
+        temp[:, [a, b]] = temp[:, [b, a]]
+        res.copy(temp)
+        return res
+
+
+
