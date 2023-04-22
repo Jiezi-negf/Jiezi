@@ -12,8 +12,8 @@ from Jiezi.LA import operator as op
 from Jiezi.Graph.builder import CNT
 import numpy as np
 from Jiezi.FEM import map
-from Jiezi.NEGF.tests.fake_potential import fake_potential
-from matplotlib import pyplot as plt
+# from Jiezi.NEGF.tests.fake_potential import fake_potential
+# from matplotlib import pyplot as plt
 
 
 class hamilton:
@@ -44,6 +44,9 @@ class hamilton:
         self.__Hi1 = []
         self.__Sii = []
         self.__Si1 = []
+        self.__H00_L = matrix_numpy()
+        self.__H00_R = matrix_numpy()
+        self.__S00 = matrix_numpy()
 
     def build_single_H_cell(self, layer_number):
         """
@@ -115,6 +118,7 @@ class hamilton:
             self.__Sii.append(Sii)
             self.__Si1.append(Si1)
         self.__Si1.append(op.scamulmat(base_overlap / self.__hopping, self.build_single_H_hopping()))
+        self.__S00 = self.__Sii[0]
 
     def H_add_phi(self, dict_cell, u_cell, cell_co, num_radius, num_z, r_oxide, z_total):
         """
@@ -145,6 +149,82 @@ class hamilton:
                 layer_phi += phi_atom_i
             layer_phi_list[layer_number] = layer_phi / self.__nn
         return layer_phi_list
+
+    def H_defect_band(self, cell_start, cell_repeat):
+        # link several cell together to form a supercell in order to satisfy a reasonable defect density
+        atom_amount = self.__nn * cell_repeat
+        Hii_defect = matrix_numpy(atom_amount, atom_amount)
+        Hi1_defect = matrix_numpy(atom_amount, atom_amount)
+        Sii_defect = matrix_numpy(atom_amount, atom_amount)
+        Si1_defect = matrix_numpy(atom_amount, atom_amount)
+
+        for i in range(cell_repeat):
+            Hii_defect.set_block_value(i * self.__nn, (i + 1) * self.__nn,
+                                       i * self.__nn, (i + 1) * self.__nn,
+                                       self.__Hii[i + cell_start])
+            Sii_defect.set_block_value(i * self.__nn, (i + 1) * self.__nn,
+                                       i * self.__nn, (i + 1) * self.__nn,
+                                       self.__Sii[i + cell_start])
+            if i < cell_repeat - 1:
+                Hii_defect.set_block_value(i * self.__nn, (i + 1) * self.__nn,
+                                           (i + 1) * self.__nn, (i + 2) * self.__nn,
+                                           self.__Hi1[i + 1 + cell_start])
+                Hii_defect.set_block_value((i + 1) * self.__nn, (i + 2) * self.__nn,
+                                           i * self.__nn, (i + 1) * self.__nn,
+                                           self.__Hi1[i + 1 + cell_start].dagger())
+
+                Sii_defect.set_block_value(i * self.__nn, (i + 1) * self.__nn,
+                                           (i + 1) * self.__nn, (i + 2) * self.__nn,
+                                           self.__Si1[i + 1 + cell_start])
+                Sii_defect.set_block_value((i + 1) * self.__nn, (i + 2) * self.__nn,
+                                           i * self.__nn, (i + 1) * self.__nn,
+                                           self.__Si1[i + 1 + cell_start].dagger())
+        Hi1_defect.set_block_value((cell_repeat - 1) * self.__nn, cell_repeat * self.__nn,
+                                   0, self.__nn,
+                                   self.__Hi1[0])
+        Si1_defect.set_block_value((cell_repeat - 1) * self.__nn, cell_repeat * self.__nn,
+                                   0, self.__nn,
+                                   self.__Si1[0])
+        return Hii_defect, Hi1_defect, Sii_defect, Si1_defect
+
+    def H_add_defect(self, defect_index, defect_energy):
+        for index in defect_index:
+            layer_index = (index - 1) // self.__nn
+            index_inter = index - layer_index * self.__nn
+            # change the onsite value of Hii
+            self.__Hii[layer_index].set_value(index_inter - 1, index_inter - 1, defect_energy)
+            # change the hopping value of Hii
+            for index_neighbor_inter in self.__total_neighbor[index_inter]:
+                self.__Hii[layer_index].set_value(index_inter - 1, index_neighbor_inter - 1, 0)
+                self.__Hii[layer_index].set_value(index_neighbor_inter - 1, index_inter - 1, 0)
+            # change value of Hi1 if the defect atom is between two layers
+            for link_pair in self.__layertolayer:
+                m, n = link_pair
+                if index_inter == m:
+                    self.__Hi1[layer_index + 1].set_value(index_inter - 1, n - self.__nn - 1, 0)
+                if index_inter + self.__nn == n:
+                    self.__Hi1[layer_index].set_value(m - 1, index_inter - 1, 0)
+
+    def H_readw90(self, M0_w90, M1_w90):
+        # size_M is the size of the big matrix contains CNT+graphene
+        size_M = M0_w90.get_size()[0]
+        # the initialized value of S00 is self.__Sii[0], but for this case, S00 need to be identical matrix
+        self.__S00.copy(np.eye(size_M))
+        # set the block value of Hii and Hi1 in channel scope
+        Hii_channel = M0_w90.get_value(40, 72, 40, 72)
+        Hi1_channel = M1_w90.get_value(40, 72, 40, 72)
+        for zz in range(self.__length):
+            self.__Hii[zz].copy(Hii_channel)
+        for zz in range(1, self.__length):
+            self.__Hi1[zz].copy(Hi1_channel)
+        # set the coupling matrix between channel and left contact
+        self.__Hi1[0] = M1_w90.get_value(0, 72, 40, 72)
+        # set the coupling matrix between channel and right contact
+        self.__Hi1[self.__length] = M1_w90.get_value(40, 72, 0, 72)
+        # set H00 used for surface_gf computation
+        self.__H00_L.copy(M0_w90.get_value())
+        self.__H00_R.copy(M0_w90.get_value())
+
 
     def get_Hii(self):
         return self.__Hii

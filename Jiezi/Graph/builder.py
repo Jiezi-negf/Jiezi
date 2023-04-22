@@ -5,13 +5,13 @@
 # Jiezi authors can be found in the file AUTHORS.md at the top-level directory
 # of this distribution.
 # ==============================================================================
-import numpy as np
-import matplotlib.pyplot as plt
-from mayavi import mlab
+# import numpy as np
+# import matplotlib.pyplot as plt
 import math
 from Jiezi.Graph import cell
 from Jiezi.Graph import extend
-from Jiezi.Visualization.Visualization_Graph import visual
+# from Jiezi.Visualization.Visualization_Graph import visual
+# from mayavi import mlab
 
 """ CNT class """
 
@@ -121,10 +121,10 @@ class CNT:
         print("layer to layer is:")
         print(self.__interlayer)
 
-    def data_plot(self):
-        x, y, z, connect = visual(self.__coord_a, self.__coord_b, self.__total_link_number)
-        mlab.show()
-        return x, y, z, connect
+    # def data_plot(self):
+    #     x, y, z, connect = visual(self.__coord_a, self.__coord_b, self.__total_link_number)
+    #     mlab.show()
+    #     return x, y, z, connect
 
     # the following parameters are necessary for constructing hamilton matrix in Physics.hamilton module
     # when the cnt object is regarded as the input parameter of hamilton initialize function, these four

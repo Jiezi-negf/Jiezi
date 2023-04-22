@@ -12,7 +12,7 @@ from Jiezi.LA.vector_numpy import vector_numpy
 from Jiezi.LA import operator as op
 from Jiezi.Physics.common import *
 import numpy as np
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
 
 @ time_it
@@ -64,22 +64,27 @@ def ef_solver(u_init, N_GP_T, dos_GP_list, n_GP_list, p_GP_list, ef_init_n, ef_i
             u_GP = op.vecdotvec(N_GP_T[GP_index], u_init_vec)
             ef_n_i = brent("n", E_list, Ec, Eg, u_GP,
                            dos_GP_list[cnt_cell_index][GP_index], n_GP_list[cnt_cell_index][GP_index],
-                           E_list[0]-5, E_list[len(E_list) - 1]+5, TOL_ef, TOL_ef)
+                           E_list[0]-10, E_list[len(E_list) - 1]+10, TOL_ef, TOL_ef)
             ef_p_i = brent("p", E_list, Ec, Eg, u_GP,
                            dos_GP_list[cnt_cell_index][GP_index], p_GP_list[cnt_cell_index][GP_index],
-                           E_list[0]-5, E_list[len(E_list) - 1]+5, TOL_ef, TOL_ef)
+                           E_list[0]-10, E_list[len(E_list) - 1]+10, TOL_ef, TOL_ef)
             # test if the function has root, if there is no root in the interval, break the loop
-            if ef_n_i == None or ef_p_i == None:
-                print("ef_solver failed in this NEGF-Poisson big loop")
+            if ef_n_i == None:
+                print("ef_solver failed during ef_n solution")
+                ef_flag = False
+                break
+            if ef_p_i == None:
+                print("ef_solver failed during ef_p solution")
                 ef_flag = False
                 break
             ef_init_n[cnt_cell_index, GP_index] = ef_n_i
             ef_init_p[cnt_cell_index, GP_index] = ef_p_i
-            # # only compute the first point of every cell, reduce the amount of computation
-            # if GP_index == 0:
-            #     for i in range(1, 4):
-            #         ef_cell_i[i] = ef_i
-            # break
+            # only compute the first point of every cell, reduce the amount of computation
+            if GP_index == 0:
+                for i in range(1, 4):
+                    ef_init_n[cnt_cell_index, i] = ef_n_i
+                    ef_init_p[cnt_cell_index, i] = ef_p_i
+            break
 
     # # this part uses the newton method to solve ef
     # for cell_index in range(len(cell_co)):
@@ -159,33 +164,49 @@ def ef_solver(u_init, N_GP_T, dos_GP_list, n_GP_list, p_GP_list, ef_init_n, ef_i
 def func_F(flag_np, E_list, Ec, Eg, phi, dos, density_np, ef):
     result = 0.0
     E_step = E_list[1] - E_list[0]
+    # if flag_np == "n":
+    #     diff = Ec - E_list[0]
+    #     start_normal = int(diff.real // E_step)
+    #     end_index = len(E_list) - 1
+    #     if diff <= 0:
+    #         start_index = 0
+    #     elif Ec > E_list[end_index]:
+    #         start_index = end_index
+    #     else:
+    #         start_index = start_normal
+    #     for ee in range(start_index, end_index):
+    #         result += (dos[ee] * fermi(E_list[ee] - phi - ef)
+    #                    + dos[ee + 1] * fermi(E_list[ee + 1] - phi - ef)) * E_step / 2
+    #     result -= density_np
+    # else:
+    #     diff = Ec - Eg - E_list[0]
+    #     start_index = 0
+    #     end_normal = int(diff.real // E_step)
+    #     if diff <= 0:
+    #         end_index = 0
+    #     elif Ec - Eg > E_list[len(E_list) - 1]:
+    #         end_index = len(E_list) - 1
+    #     else:
+    #         end_index = end_normal
+    #     for ee in range(start_index, end_index):
+    #         result += (dos[ee] * (1 - fermi(E_list[ee] - phi - ef))
+    #                    + dos[ee + 1] * (1 - fermi(E_list[ee + 1] - phi - ef))) * E_step / 2
+    #     result -= density_np
     if flag_np == "n":
-        diff = Ec - E_list[0]
-        start_normal = int(diff.real // E_step)
-        end_index = len(E_list) - 1
-        if diff <= 0:
-            start_index = 0
-        elif Ec > E_list[end_index]:
-            start_index = end_index
-        else:
-            start_index = start_normal
-        for ee in range(start_index, end_index):
-            result += (dos[ee] * fermi(E_list[ee] - phi - ef)
-                       + dos[ee + 1] * fermi(E_list[ee + 1] - phi - ef)) * E_step / 2
+        for ee in range(0, len(E_list) - 1):
+            if ee < 0:
+                continue
+            else:
+                result += (dos[ee] * fermi(E_list[ee] - phi - ef)
+                           + dos[ee + 1] * fermi(E_list[ee + 1] - phi - ef)) * E_step / 2
         result -= density_np
     else:
-        diff = Ec - Eg - E_list[0]
-        start_index = 0
-        end_normal = int(diff.real // E_step)
-        if diff <= 0:
-            end_index = 0
-        elif Ec - Eg > E_list[len(E_list) - 1]:
-            end_index = len(E_list) - 1
-        else:
-            end_index = end_normal
-        for ee in range(start_index, end_index):
-            result += (dos[ee] * (1 - fermi(E_list[ee] - phi - ef))
-                       + dos[ee + 1] * (1 - fermi(E_list[ee + 1] - phi - ef))) * E_step / 2
+        for ee in range(0, len(E_list) - 1):
+            if ee > 0:
+                continue
+            else:
+                result += (dos[ee] * (1 - fermi(E_list[ee] - phi - ef))
+                           + dos[ee + 1] * (1 - fermi(E_list[ee + 1] - phi - ef))) * E_step / 2
         result -= density_np
     return result
 
@@ -252,12 +273,20 @@ def brent(flag_np, E_list, Ec, Eg, phi, dos, density_np, a, b, tol_brent_residua
     f_a = func_F(flag_np, E_list, Ec, Eg, phi, dos, density_np, a)
     f_b = func_F(flag_np, E_list, Ec, Eg, phi, dos, density_np, b)
     # test if there is root between a and b, i.e. if the equation has solution
-    if f_a * f_b > 0:
-        print("ERROR: the sign of f(a) and f(b) must be different!", "a:", a, "fa:", f_a, "b:", b, "f_b:", f_b)
-        # print(phi, dos, density_n)
-        # plt.plot(E_list, dos)
-        # plt.show()
-        return
+    if flag_np == "n" and f_a > 0 and f_b > 0:
+        return a - 10
+    if flag_np == "n" and f_a < 0 and f_b < 0:
+        return b + 10
+    if flag_np == "p" and f_a > 0 and f_b > 0:
+        return b + 10
+    if flag_np == "p" and f_a < 0 and f_b < 0:
+        return a - 10
+    # if f_a * f_b > 0:
+    #     print("ERROR: the sign of f(a) and f(b) must be different!", "a:", a, "fa:", f_a, "b:", b, "f_b:", f_b)
+    #     # print(phi, dos, density_n)
+    #     # plt.plot(E_list, dos)
+    #     # plt.show()
+    #     return
     # make sure f(b) is closer to 0 than f(a), if not, swap a and b
     if abs(f_a) < abs(f_b):
         a, b = swap(a, b)

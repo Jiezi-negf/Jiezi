@@ -11,6 +11,7 @@ from Jiezi.LA.vector_numpy import vector_numpy
 from Jiezi.LA import operator as op
 import numpy as np
 import matplotlib.pyplot as plt
+from Jiezi.Physics.common import ifdagger
 
 
 def read_hamiltonian(path_hr):
@@ -57,6 +58,14 @@ def subband_k(hr_set, r_set, r_1, r_2, r_3, k_1, k_2, k_3, k):
 
 path_hr = "/home/zjy/wannier90/wannier90-3.1.0/project/with_relax" + "/wannier90_hr.dat"
 r_set, hr_set = read_hamiltonian(path_hr)
+
+# test if hr_set[i]^dagger equals hr_set[2*10-i]
+error = 0.0
+for i in range(9):
+    addition = op.addmat(hr_set[i], hr_set[2*10 - i])
+    error += ifdagger(addition)
+print(error)
+
 # extract hamiltonian matrix of CNT
 hr_cnt_set = [None] * len(hr_set)
 for i in range(len(hr_set)):
@@ -72,6 +81,13 @@ for i in range(len(hr_set)):
     ## un-swapped matrix
     # hr_cnt_set[i].copy(hr_set[i].get_value(40, 72, 40, 72))
 # print(hr_cnt_set[0].get_size())
+# test if hr_set[i]^dagger equals hr_set[2*10-i]
+error = 0.0
+for i in range(9):
+    addition = op.addmat(hr_cnt_set[i], hr_cnt_set[2*10 - i])
+    error += ifdagger(addition)
+print(error)
+
 
 r_1 = vector_numpy(3)
 r_2 = vector_numpy(3)
@@ -108,3 +124,5 @@ plt.show()
 #         sub_band, U = subband(H, k)
 #         band.append(sub_band[0])
 #     return k_total, band
+
+

@@ -35,7 +35,8 @@ Hi1 = H.get_Hi1()
 Sii = H.get_Sii()
 Si1 = H.get_Si1()
 E_list = [-0.3]
-
+mul = 0.0
+mur = 0.0
 ee = 0
 eta_rgf = 5e-6
 eta_sg = 5e-6

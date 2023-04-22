@@ -8,6 +8,15 @@
 
 
 def create_dof(path):
+    """
+    according to the output .dat file from the salome, create the data structure which I can use in python code
+    to store information of mesh
+    :param path: path of the .dat file which stores the mesh information
+    :return: cell_vol is a dict which looks like
+                \{node_{i,1}:(x,y,z),node_{i,2}:(x,y,z),node_{i,3}:(x,y,z),node_{i,4}:(x,y,z)\}
+             nb_dof is the amount of the dof(degree of freedom, which is the grid point including the inter point)
+             dof_coord is a list which looks like [[x, y, z], [x, y, z]...]
+    """
     with open(path) as file:
         lines = [line.rstrip('\n') for line in file]  # 将所有行按顺序合成一行，形成一个字符串数组，每一个元素就是以前的每一行
 

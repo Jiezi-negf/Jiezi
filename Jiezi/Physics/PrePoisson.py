@@ -14,7 +14,7 @@ from Jiezi.Graph.builder import CNT
 from Jiezi.Physics.common import *
 
 
-def PrePoisson(cnt: CNT, width_cnt_scale, width_oxide_scale, z_length_oxide_scale):
+def PrePoisson(cnt: CNT, width_cnt_scale, width_oxide_scale, z_length_oxide_scale, z_isolation):
     # step1: get the geometry parameters from the graph module
     # cnt_radius = cnt.get_radius()
     # width_cnt = 0.3 * cnt_radius
@@ -76,6 +76,6 @@ def PrePoisson(cnt: CNT, width_cnt_scale, width_oxide_scale, z_length_oxide_scal
     r_outer = r_inter + width_cnt
     r_oxide = r_outer + width_oxide
     z_translation = 0.5 * (z_total - zlength_oxide)
-    geo_para = [r_inter, r_outer, r_oxide, z_total, zlength_oxide, z_translation]
+    geo_para = [r_inter, r_outer, r_oxide, z_total, zlength_oxide, z_translation, z_isolation]
     path_xml = "/home/zjy/salome/SALOME-9.3.0-UB18.04-SRC/myPro/"
     return geo_para, path_xml

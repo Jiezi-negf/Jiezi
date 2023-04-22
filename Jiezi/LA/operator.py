@@ -157,3 +157,4 @@ def general_inv(mat):
         left = matmulmat(inv(matmulmat(mat, mat.dagger())), mat)
         right = matmulmat(mat.dagger(), inv(matmulmat(mat, mat.dagger())))
         return left, right
+

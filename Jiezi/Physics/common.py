@@ -15,8 +15,6 @@ import time
 h = 4.1357e-15
 h_bar = h/(2 * math.pi)
 q_unit = 1.6e-19
-mul = 0.0
-mur = 0.0
 # mul = -1.0
 # mur = -2.0
 KT = 0.026
@@ -29,7 +27,7 @@ epsilon_0 = 8.854e-22 / q_unit
 epsilon_air = 1.0 * epsilon_0
 epsilon_cnt = 6.9 * epsilon_0
 epsilon_oxide = 3.9 * epsilon_0
-epsilon_air_outer = 1000.0 * epsilon_0
+epsilon_air_outer = 1000 * epsilon_0
 # epsilon_air = 1.0 * epsilon_0
 # epsilon_cnt = 1.0 * epsilon_0
 # epsilon_oxide = 1.0 * epsilon_0

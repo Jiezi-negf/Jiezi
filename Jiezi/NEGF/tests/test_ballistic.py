@@ -28,7 +28,8 @@ cnt.construct()
 radius_tube = cnt.get_radius()
 length_single_cell = cnt.get_singlecell_length()
 volume_cell = math.pi * radius_tube ** 2 * length_single_cell
-
+mul = 0.0
+mur = 0.0
 # build hamilton matrix
 H = hamilton.hamilton(cnt, onsite=-0.28, hopping=-2.97)
 H.build_H()

@@ -13,7 +13,6 @@ from Jiezi.LA.matrix_numpy import matrix_numpy
 from Jiezi.FEM.shape_function import shape_function
 import numpy as np
 from Jiezi.Physics.common import *
-import matplotlib.pyplot as plt
 
 
 def func_N(point_coord: list):
@@ -27,10 +26,18 @@ def func_N(point_coord: list):
 
 
 def mark_zone(info_mesh, geo_para):
+    """
+    classify each cell to its own area and give each one a number(0/1/2/3)
+    :param info_mesh: information of the mesh consists of the composition of the points of each cell and coordinate
+            of each point and the order of each cell
+    :param geo_para: parameters used to define the geometry
+    :return: mark_list: the area number of each cell
+             cnt_cell_list: the cell index of all the cell which is classified into CNT area
+    """
     mark_rule = {"air_inter": 0, "cnt": 1, "air_outer": 2, "gate_oxide": 3}
     mark_list = [None] * len(info_mesh)
     cnt_cell_list = []
-    r_inter, r_outer, r_oxide, z_total, zlength_oxide, z_translation = geo_para
+    r_inter, r_outer, r_oxide, z_total, zlength_oxide, z_translation, z_isolation = geo_para
     for cell_index in range(len(info_mesh)):
         cell_i = info_mesh[cell_index]
         dof_coord = list(cell_i.values())
@@ -86,16 +93,25 @@ def N_gausspoint():
 
 
 def isDirichlet(point_coordinate, geo_para):
-    r_inter, r_outer, r_oxide, z_total, zlength_oxide, z_translation = geo_para
+    """
+    judge if the given point is on the Dirichlet boundary, if it is, determine whcih part of Dirichlet boundary it's
+    belong to
+    :param point_coordinate: coordinate of the given point, (x, y, z)
+    :param geo_para: parameters used to define the geometry
+    :return: flag==1 indicates that the given point is belong to the electrode of electrostatic doing near the source
+    flag==2 indicates that the given point is belong to the electrode of gate
+    flag==3 indicates that the given point is belong to the electrode of electrostatic doing near the drain
+    """
+    r_inter, r_outer, r_oxide, z_total, zlength_oxide, z_translation, z_isolation = geo_para
     flag = 0
     tol = 1e-6
     x, y, z = point_coordinate
     if abs(math.sqrt(x ** 2 + y ** 2) - r_oxide) < tol:
-        if z < z_translation + tol:
+        if z < z_translation - z_isolation + tol:
             flag = 1
         if z_translation - tol < z < z_total - z_translation + tol:
             flag = 2
-        if z > z_total - z_translation - tol:
+        if z > z_total - z_translation + z_isolation - tol:
             flag = 3
     # if abs(math.sqrt(x**2 + y**2) - r_oxide) < tol and z < z_translation + tol:
     #     flag = 0
@@ -117,7 +133,9 @@ def constant_parameters(info_mesh, geo_para):
         3 determinant of Jacobian matrix |J_e|: [|J_e of cell1|, |J_e of cell2|, ... ]
         4 long term (the frst term on the left hand)
         5 compute N*|J|*weight_quadrature*volume and N*N^T*|J|*weight_quadrature*volume
-        6 find all points on the Dirichlet boundary
+        6 Classify each cell into its own area and assign an area number
+        7 get the cell index of all the cell which is classified into CNT area
+        8 find all points on the Dirichlet boundary
     """
     volume = 1 / 6
     weight_quadrature = 1 / 4
@@ -398,6 +416,46 @@ def doping(coord_GP_list, zlength_oxide, z_translation, doping_source, doping_dr
                     doping_GP_list_i[GP_index] = doping_drain
         doping_GP_list[cell_index] = doping_GP_list_i
     return doping_GP_list
+
+
+def fixedChargeInit(coord_GP_list):
+    """
+    initialize the list storing the fixed charge on every gauss point of each cell
+    :param coord_GP_list: list storing the coordinate of every gauss point of each cell
+    :return: fixedCharge_GP_list
+    """
+    size = len(coord_GP_list)
+    fixedCharge_GP_list = [None] * size
+    for cell_index in range(size):
+        fixedCharge_GP_list_i = [0.0] * 4
+        fixedCharge_GP_list[cell_index] = fixedCharge_GP_list_i
+    return fixedCharge_GP_list
+
+
+def addFixedCharge(fixedCharge_GP_list, coord_GP_list, mark_list, scope, density):
+    """
+    add fixed charge value to the initialized list
+    after the initialization, this function can be called more than one time because in some case
+    I want to define different density to different area
+    :param fixedCharge_GP_list: the initialized list
+    :param coord_GP_list: list storing the coordinate of every gauss point of each cell
+    :param mark_list: the area number of each cell
+    :param scope: define where should be added fixed charge (include the radius scope and the scope in z axis)
+    :param density: define the density of fixed charge
+    :return: no return value, after this function executed, the fixed charge has been added to specific gauss points
+    """
+    size = len(fixedCharge_GP_list)
+    radius_min, radius_max, z_min, z_max = scope
+    for cell_index in range(size):
+        if mark_list[cell_index] != 0 and mark_list[cell_index] != 1:
+            continue
+        else:
+            for GP_index in range(4):
+                x, y, z = coord_GP_list[cell_index][GP_index]
+                radius2 = x.real ** 2 + y.real ** 2
+                flag = radius_min ** 2 <= radius2 <= radius_max ** 2 and z_min <= z.real <= z_max
+                if flag:
+                    fixedCharge_GP_list[cell_index][GP_index] += density
 
 
 # a = [(0.0034572369685743724+0j), (0.002680160837190706+0j), (0.0019124049899249106+0j), (0.0012428728427696174+0j),

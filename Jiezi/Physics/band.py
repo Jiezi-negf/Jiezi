@@ -38,6 +38,18 @@ def subband(H: hamilton, k):
     return sub_band, U
 
 
+def subband_defect(H: hamilton, k, cell_start, cell_repeat):
+    Hii_defect, Hi1_defect, Sii_defect, Si1_defect = H.H_defect_band(cell_start, cell_repeat)
+    H_temp = op.addmat(Hii_defect, op.scamulmat(np.exp(-k * 1j * cell_repeat), Hi1_defect.dagger()),
+                       op.scamulmat(np.exp(k * 1j * cell_repeat), Hi1_defect))
+    S_temp = op.addmat(Sii_defect, op.scamulmat(np.exp(-k * 1j * cell_repeat), Si1_defect.dagger()),
+                       op.scamulmat(np.exp(k * 1j * cell_repeat), Si1_defect))
+    H_temp = op.matmulmat(op.inv(S_temp), H_temp)
+    sub_band = H_temp.eigenvalue()
+    U = H_temp.eigenvec()
+    return sub_band, U
+
+
 def get_EcEg(H: hamilton):
     """
     compute bottom of conduction band energy Ec and band gap Eg
@@ -79,3 +91,20 @@ def band_structure(H: hamilton, start, end, step):
         sub_band, U = subband(H, k)
         band.append(sub_band[0])
     return k_total, band
+
+
+def band_structure_defect(H: hamilton, start, end, step, cell_start, cell_repeat):
+    """
+    plot the band structure by scanning the k from start to end
+    :param start: the beginning of k
+    :param end: the end of k
+    :param step: the step of k
+    :return: the list of k, every k has a list of subband value
+    """
+    k_total = np.arange(start, end, step)
+    band = []
+    for k in k_total:
+        sub_band, U = subband_defect(H, k, cell_start, cell_repeat)
+        band.append(sub_band)
+    return k_total, band
+

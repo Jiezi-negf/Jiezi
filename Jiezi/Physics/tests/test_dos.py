@@ -33,6 +33,8 @@ from Jiezi.Graph import builder
 cnt = builder.CNT(n=4, m=0, Trepeat=3, nonideal=False)
 cnt.construct()
 phi = 1.0
+mul = 0.0
+mur = 0.0
 H = hamilton.hamilton(cnt, onsite=-phi-0.28, hopping=-2.97)
 H.build_H()
 H.build_S(base_overlap=0.018)

@@ -12,7 +12,7 @@ import numpy as np
 from itertools import combinations
 
 
-def trans_VTK_xml(func_value_vec, dof_coord_list, info_mesh, path_Files):
+def phi2VTK(func_value_vec, dof_coord_list, info_mesh, path_Files):
     # create root element
     root = ET.Element("VTKFile")
     root.set("type", "UnstructuredGrid")
@@ -100,8 +100,8 @@ def trans_VTK_xml(func_value_vec, dof_coord_list, info_mesh, path_Files):
     DataArray_Cells_types_elem.set("type", "UInt8")
     DataArray_Cells_types_elem.set("Name", "types")
     DataArray_Cells_types_elem.set("format", "ascii")
-    # because all the grid are tetrahedron, the type of which is 5
-    types_list = ["5"] * num_cells
+    # because all the grid are tetrahedron, the type of which is 10
+    types_list = ["10"] * num_cells
     types_string = " ".join(types_list)
     # write text of DataArray(types)
     DataArray_Cells_types_elem.text = types_string
@@ -133,9 +133,68 @@ def trans_VTK_xml(func_value_vec, dof_coord_list, info_mesh, path_Files):
 
     # write out the whole xml format data to be a .vtu file
     xmlstr = minidom.parseString(ET.tostring(root)).toprettyxml(indent=" ")
-    output_file = '/quantity.vtu'
+    output_file = '/Potential3D.vtu'
     with open(path_Files + output_file, 'w') as f:
         f.write(xmlstr)
+
+
+def atomPos2XYZ(dict_coordinate, path):
+    """
+    write the atom position to a file as .xyz format
+    :param dict_coordinate: cnt.get_coordinate()
+    :param path: choose a path to save the file, maybe 'Jiezi/Jiezi/Files'
+    :return: None
+    """
+    coord_list = list(dict_coordinate.values())
+    num_points = len(coord_list)
+    lines = [None] * (num_points + 2)
+    lines[0] = str(num_points)+'\n'
+    lines[1] = "Jiezi output atom position"+'\n'
+    for point_index in range(num_points):
+        x, y, z = coord_list[point_index]
+        line = 'C'+'\t'+str(x)+'\t'+str(y)+'\t'+str(z)+'\n'
+        lines[point_index+2] = line
+    with open(path+"cnt_atom.xyz", "w") as f:
+        f.writelines(lines)
+
+
+def spectrumXY2Dat(E_list, length_single_cell, num_cell, path, fileName):
+    # number of cell(for current, the size is bigger, should be plus 1)
+    if fileName == "SpectrumXYForCurrent.dat":
+        num_pos = num_cell + 1
+    else:
+        num_pos = num_cell
+    # number of energy
+    num_energy = len(E_list)
+    lines = [None] * (num_pos * num_energy)
+    for ee in range(num_energy):
+        for zz in range(num_pos):
+            coord_z = (zz + 0.5) * length_single_cell
+            line = str(E_list[ee]) + '\t' + str(coord_z) + '\n'
+            lines[ee * num_pos + zz] = line
+    with open(path + '/' + fileName, 'w') as f:
+        f.writelines(lines)
+
+
+def spectrumZ2Dat(quantity, path, fileName):
+    # number of position
+    num_pos = len(quantity[0])
+    # number of energy
+    num_energy = len(quantity)
+    lines = [None] * (num_pos * num_energy)
+    for ee in range(num_energy):
+        for zz in range(num_pos):
+            line = str(quantity[ee][zz]) + '\n'
+            lines[ee * num_pos + zz] = line
+    with open(path + '/' + fileName, 'w') as f:
+        f.writelines(lines)
+
+
+
+
+
+
+
 
 # dof_coord_list = [[2.35752646, 0.0, 42.7608], [2.35752646, 0.0, 27.79452], [2.35752646, 0.0, 14.96628]]
 # info_mesh = [{886: [-0.68894701, 2.25461372, 1.51794568], 825: [-0.2416354, 2.34511052, 0.75620287],
