@@ -10,21 +10,23 @@ import sys
 
 sys.path.append(os.path.abspath(__file__ + "/../../.."))
 
-from multiprocessing import Process
-from Jiezi.NEGF.serial import serial
-
+from multiprocessing import Pool
+from Jiezi.NEGF.normal import normal
 
 if __name__ == "__main__":
-    pro_list = []
-    Dirichlet_BC_gate = 1.0
+    input_list = []
     mul = 0.0
-    mur_start = -1.0
-    mur_step = 0.1
-    num_mur = 2
-    for i in range(num_mur):
-        mur = mur_start + mur_step * i
-        p = Process(target=serial, args=(mul, mur, Dirichlet_BC_gate, i))
-        p.start()
-        pro_list.append(p)
-    for i in pro_list:
-        i.join()
+    mur = -0.3
+    V_gate_start = -1.0
+    V_gate_step = 0.0
+    num_iter = 4
+    for i in range(num_iter):
+        V_gate = V_gate_start + i * V_gate_step
+        input_list.append((mul, mur, V_gate, i))
+    pool = Pool(processes=num_iter)
+    pool.starmap_async(normal, input_list)
+    pool.close()
+    pool.join()
+
+
+

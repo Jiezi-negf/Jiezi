@@ -9,11 +9,7 @@
 
 import sys
 import numpy as np
-
-
-
 sys.path.append("../../../")
-
 from Jiezi.FEM.shape_function import shape_function
 
 coord = [1, 2, 1]

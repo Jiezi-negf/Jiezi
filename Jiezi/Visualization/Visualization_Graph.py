@@ -10,14 +10,17 @@ import numpy as np
 from mayavi import mlab
 
 
-def visual(coordinate_a, coordinate_b, total_link):
+def visual(cnt):
     """
     visualize the atoms and the connection among them
-    :param coordinate_a: dict, {1:([,,],2;[,,]...}
-    :param coordinate_b: dict, {1:([,,],2;[,,]...}
-    :param total_link: relationship of neighbors
+    coordinate_a: dict, {1:([,,],2;[,,]...}
+    coordinate_b: dict, {1:([,,],2;[,,]...}
+    total_link: relationship of neighbors
     :return: points and lines connecting the atom and its neighbors
     """
+    coordinate_a = cnt.get_coordinateA()
+    coordinate_b = cnt.get_coordinateB()
+    total_link = cnt.get_total_neighbor()
     x = []
     y = []
     z = []
@@ -48,7 +51,8 @@ def visual(coordinate_a, coordinate_b, total_link):
             zz.append(points[member][2])
         mlab.plot3d(xx, yy, zz)
         connect.append((xx, yy, zz))
-    return x, y, z, connect
+    mlab.show()
+    return
 
 # mlab.figure(bgcolor=(1,1,1))
 # surf = mlab.surf(z,colormap="cool")

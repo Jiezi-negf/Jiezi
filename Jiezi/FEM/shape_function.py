@@ -9,6 +9,7 @@
 
 def shape_function(dof_coord):
     """
+    compute the coefficients of four shape functions of specific cell based on its degree of freedom information
     :param dof_coord: the coordinates of every dof of one specific cell_vol
     data format is [[x1,y1,z1],[x2,...],...,[x4,...]]
     :return: the coefficients of four shape functions of specific cell_vol

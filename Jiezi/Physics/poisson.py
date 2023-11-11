@@ -5,6 +5,8 @@
 # Jiezi authors can be found in the file AUTHORS.md at the top-level directory
 # of this distribution.
 # ==============================================================================
+import profile
+import time
 
 import numpy as np
 # import math
@@ -44,11 +46,11 @@ def poisson_nonlinear(info_mesh, N_GP_T, cell_long_term, cell_NJ, cell_NNTJ, cnt
                       ef_init_n, ef_init_p, mark_list,
                       Dirichlet_list, Dirichlet_value, E_list, Ec, Eg, TOL_ef, TOL_du, iter_NonLinearPoisson_max,
                       dos_GP_list, n_GP_list, p_GP_list, doping_GP_list, fixedCharge_GP_list, u_init, dof_amount):
+
     print("non-linear poisson solver(with ef solver) start")
     # call a mapping function to map the u_init which is defined following the dof order to
     # u_init_cell which is defined following the cell structure
     u_init_cell = map_tocell(info_mesh, u_init)
-
     # solve the fermi energy level on gauss points of every cell
     ef_n, ef_p, ef_flag = \
         ef_solver(u_init_cell, N_GP_T, dos_GP_list, n_GP_list, p_GP_list, ef_init_n, ef_init_p,
@@ -70,10 +72,12 @@ def poisson_nonlinear(info_mesh, N_GP_T, cell_long_term, cell_NJ, cell_NNTJ, cnt
             if norm_du < TOL_du:
                 break
             u_k = u_k + du
+
         # if non-linear Poisson can't converge, then start linear poisson solver
-        print("non-linear poisson solver reached the iteration times limit!")
-        u_k = poisson_linear(info_mesh, cell_long_term, cell_NJ, Dirichlet_list, Dirichlet_value,
-                             dof_amount, doping_GP_list, fixedCharge_GP_list, n_GP_list, p_GP_list)
+        if poisson_iter == iter_NonLinearPoisson_max:
+            print("non-linear poisson solver reached the iteration times limit!")
+            u_k = poisson_linear(info_mesh, cell_long_term, cell_NJ, Dirichlet_list, Dirichlet_value,
+                                 dof_amount, doping_GP_list, fixedCharge_GP_list, n_GP_list, p_GP_list)
     else:
         u_k = poisson_linear(info_mesh, cell_long_term, cell_NJ, Dirichlet_list, Dirichlet_value,
                              dof_amount, doping_GP_list, fixedCharge_GP_list, n_GP_list, p_GP_list)

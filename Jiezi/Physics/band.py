@@ -28,10 +28,16 @@ def subband(H: hamilton, k):
     sub_band = []
     U = []
     for i in range(len(Hii)):
-        H_temp = op.addmat(Hii[i], op.scamulmat(np.exp(-k * 1j), Hi1[i].dagger()),
-                           op.scamulmat(np.exp(k * 1j), Hi1[i + 1]))
-        S_temp = op.addmat(Sii[i], op.scamulmat(np.exp(-k * 1j), Si1[i].dagger()),
-                           op.scamulmat(np.exp(k * 1j), Si1[i + 1]))
+        if i == 0 or i == len(Hii) - 1:
+            H_temp = op.addmat(Hii[1], op.scamulmat(np.exp(-k * 1j), Hi1[1].dagger()),
+                               op.scamulmat(np.exp(k * 1j), Hi1[1]))
+            S_temp = op.addmat(Sii[1], op.scamulmat(np.exp(-k * 1j), Si1[1].dagger()),
+                               op.scamulmat(np.exp(k * 1j), Si1[1]))
+        else:
+            H_temp = op.addmat(Hii[i], op.scamulmat(np.exp(-k * 1j), Hi1[i].dagger()),
+                               op.scamulmat(np.exp(k * 1j), Hi1[i + 1]))
+            S_temp = op.addmat(Sii[i], op.scamulmat(np.exp(-k * 1j), Si1[i].dagger()),
+                               op.scamulmat(np.exp(k * 1j), Si1[i + 1]))
         H_temp = op.matmulmat(op.inv(S_temp), H_temp)
         sub_band.append(H_temp.eigenvalue())
         U.append(H_temp.eigenvec())

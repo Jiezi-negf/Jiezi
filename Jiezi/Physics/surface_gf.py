@@ -45,11 +45,12 @@ def surface_gf(E, eta, H00, H10, S00, iter_max=100, TOL=1e-10):
         row = alpha_new.get_size()[0]
         column = alpha_new.get_size()[1]
 
-        sum = 0.0
-        for i in range(row):
-            for j in range(column):
-                sum += np.sqrt(alpha_new.get_value(i, j).real ** 2 +
-                               alpha_new.get_value(i, j).imag ** 2)
+        # sum = 0.0
+        # for i in range(row):
+        #     for j in range(column):
+        #         sum += np.sqrt(alpha_new.get_value(i, j).real ** 2 +
+        #                        alpha_new.get_value(i, j).imag ** 2)
+        sum = np.linalg.norm(alpha_new.get_value(), ord='fro')
         # print(
         #     'iter number of surface GF loop is: {iter}, error of {iter} loop is: {error}'.format(iter=iter_c,
         #                                                                                          error=sum))
@@ -65,7 +66,7 @@ def surface_gf(E, eta, H00, H10, S00, iter_max=100, TOL=1e-10):
     return G00, GBB
 
 
-def surface_gf_dumb(E, eta, H00, H10, S00, iter_max=100, TOL=1e-10):
+def surface_gf_dumb(E, eta, H00, H10, S00, iter_max=500, TOL=1e-10):
     """
     when computing left contact, H10 is Hi1.dagger.
     H10 is Hi1 for right contact.
@@ -82,13 +83,14 @@ def surface_gf_dumb(E, eta, H00, H10, S00, iter_max=100, TOL=1e-10):
         iter_c += 1
         g_i = op.inv(op.addmat(w, H00.nega(), op.trimatmul(H10, g_0, H10, type="nnc").nega()))
         delta = op.addmat(g_i, g_0.nega())
-        sum = 0.0
-        for i in range(row):
-            for j in range(column):
-                sum += np.sqrt(delta.get_value(i, j).real ** 2 + delta.get_value(i, j).imag ** 2)
-        print(
-            'iter number of surface GF loop is: {iter}, error of {iter} loop is: {error}'.format(
-                iter=iter_c, error=sum))
+        # sum = 0.0
+        # for i in range(row):
+        #     for j in range(column):
+        #         sum += np.sqrt(delta.get_value(i, j).real ** 2 + delta.get_value(i, j).imag ** 2)
+        sum = np.linalg.norm(delta.get_value(), ord='fro')
+        # print(
+        #     'iter number of surface GF loop is: {iter}, error of {iter} loop is: {error}'.format(
+        #         iter=iter_c, error=sum))
         if sum < TOL:
             G00.copy(g_i.get_value())
             break

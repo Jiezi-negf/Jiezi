@@ -11,7 +11,7 @@ import math
 from Jiezi.Graph import cell
 from Jiezi.Graph import extend
 # from Jiezi.Visualization.Visualization_Graph import visual
-# from mayavi import mlab
+
 
 """ CNT class """
 
@@ -140,6 +140,12 @@ class CNT:
 
     def get_Trepeat(self):
         return self.__Trepeat
+
+    def get_coordinateA(self):
+        return self.__coord_a
+
+    def get_coordinateB(self):
+        return self.__coord_b
 
     def get_coordinate(self):
         coordinate_ab = self.__coord_a.copy()

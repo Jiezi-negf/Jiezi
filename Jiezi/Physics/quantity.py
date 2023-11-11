@@ -11,7 +11,7 @@ from Jiezi.Physics.common import *
 from Jiezi.LA import operator as op
 import math
 
-
+@ time_it
 def carrierSpectrum(E_list, G_lesser_fullE, G_greater_fullE, volume_cell):
     # number of layer
     num_layer = len(G_lesser_fullE[0])
@@ -33,7 +33,7 @@ def carrierSpectrum(E_list, G_lesser_fullE, G_greater_fullE, volume_cell):
         p_spectrum[ee] = p_spectrum_ee
     return n_spectrum, p_spectrum
 
-
+@ time_it
 def carrierQuantity(E_list, layer_phi_list, n_spectrum, p_spectrum):
     # energy step
     E_step = E_list[1] - E_list[0]
@@ -57,7 +57,7 @@ def carrierQuantity(E_list, layer_phi_list, n_spectrum, p_spectrum):
         p_density[zz] = p_density_zz
     return n_density, p_density
 
-
+@ time_it
 def densityOfStates(E_list, G_R_fullE, volume_cell):
     # number of layer
     num_layer = len(G_R_fullE[0])
@@ -73,7 +73,7 @@ def densityOfStates(E_list, G_R_fullE, volume_cell):
         dos[ee] = dos_ee
     return dos
 
-
+@ time_it
 def currentSpectrum(E_list, G_lesser_fullE, G_greater_fullE, G1i_lesser_fullE,
                     Sigma_left_lesser_fullE, Sigma_left_greater_fullE,
                     Sigma_right_lesser_fullE, Sigma_right_greater_fullE,
@@ -112,7 +112,7 @@ def currentSpectrum(E_list, G_lesser_fullE, G_greater_fullE, G1i_lesser_fullE,
         JTimesEnergy_spectrum[ee] = JTimesEnergy_spectrum_ee
     return J_spectrum, JTimesEnergy_spectrum
 
-
+@ time_it
 def currentQuantity(E_list, J_spectrum, JTimesEnergy_spectrum):
     # number of layer
     num_layer = len(J_spectrum[0]) - 1

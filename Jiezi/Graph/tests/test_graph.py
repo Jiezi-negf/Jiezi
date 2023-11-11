@@ -12,14 +12,14 @@ sys.path.append("../../../")
 import Jiezi.Graph.builder as builder
 from Jiezi.Visualization.Data2File import atomPos2XYZ
 
-cnt = builder.CNT(13, 0, 4, a_cc=1.42536, nonideal=False)
+cnt = builder.CNT(8, 0, 1, a_cc=1.42536)
 cnt.construct()
 cnt.data_print()
 # cnt.data_plot()
 path = '../../Files/'
 atomPos2XYZ(cnt.get_coordinate(), path)
 
-# cnt.data_plot()
+cnt.data_print()
 print(cnt.get_coordinate())
 print(cnt.get_nn())
 print(cnt.get_radius())

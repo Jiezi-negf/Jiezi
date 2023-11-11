@@ -11,10 +11,12 @@ from Jiezi.Physics.phonon import phonon
 from Jiezi.Physics.rgf import rgf
 from Jiezi.LA import operator as op
 from Jiezi.Physics.common import time_it
+import time
 
 
 @ time_it
-def SCBA(E_list, iter_max: int, TOL, ratio, eta, mul, mur, Hii, Hi1, Sii,
+def SCBA(E_list, iter_max: int, TOL, ratio, eta, mul, mur, Hii, Hi1, Sii, S00,
+            lead_H00_L, lead_H00_R, lead_H10_L, lead_H10_R,
          sigma_lesser_ph, sigma_r_ph, form_factor, Dac, Dop, omega):
     print("NEGF solver(SCBA loop) start")
     # initialize
@@ -38,12 +40,16 @@ def SCBA(E_list, iter_max: int, TOL, ratio, eta, mul, mur, Hii, Hi1, Sii,
     Sigma_right_greater_fullE = [None] * len(E_list)
 
     error_store = []
+
     while iter_c <= iter_max:
         # phonon result ---> GF
+        time0 = time.time()
         for ee in range(len(E_list)):
             G_R_ee, G_lesser_ee, G_greater_ee, G1i_lesser_ee, \
             Sigma_left_lesser_ee, Sigma_left_greater_ee, Sigma_right_lesser_ee, Sigma_right_greater_ee = \
-                rgf(ee, E_list, eta, mul, mur, Hii, Hi1, Sii, sigma_lesser_ph_fullE, sigma_r_ph_fullE)
+                rgf(ee, E_list, eta, mul, mur, Hii, Hi1, Sii, S00,
+                    lead_H00_L, lead_H00_R, lead_H10_L, lead_H10_R,
+                    sigma_lesser_ph_fullE, sigma_r_ph_fullE)
             # G_R_fullE, G_lesser_fullE, G_greater_fullE, G1i_lesser_fullE : [[], [], ...]
             # for example, length of G_lesser_fullE is len(E_list)
             # length of G_lesser_fullE[ee] is nz
@@ -59,24 +65,26 @@ def SCBA(E_list, iter_max: int, TOL, ratio, eta, mul, mur, Hii, Hi1, Sii,
             Sigma_left_greater_fullE[ee] = Sigma_left_greater_ee
             Sigma_right_lesser_fullE[ee] = Sigma_right_lesser_ee
             Sigma_right_greater_fullE[ee] = Sigma_right_greater_ee
-
-        # GF result ---> phonon
-        for ee in range(len(E_list)):
-            sigma_lesser_ph_ee, sigma_r_ph_ee = \
-                phonon(ee, E_list, form_factor, G_lesser_fullE, G_greater_fullE, Dac, Dop, omega)
-            sigma_lesser_ph_fullE_new[ee] = sigma_lesser_ph_ee
-            sigma_r_ph_fullE_new[ee] = sigma_r_ph_ee
-
+        time1 = time.time()
+        print("time cost by SCBA rgf part:", time1 - time0)
+        # # GF result ---> phonon
+        # time0 = time.time()
+        # for ee in range(len(E_list)):
+        #     sigma_lesser_ph_ee, sigma_r_ph_ee = \
+        #         phonon(ee, E_list, form_factor, G_lesser_fullE, G_greater_fullE, Dac, Dop, omega)
+        #     sigma_lesser_ph_fullE_new[ee] = sigma_lesser_ph_ee
+        #     sigma_r_ph_fullE_new[ee] = sigma_r_ph_ee
+        # time1 = time.time()
+        # print("time cost by SCBA phonon part:", time1 - time0)
         # evaluate error
         error = 0.0
-        for ee in range(len(E_list)):
-            for zz in range(nz):
-                for n in range(nm):
-                    error = error + abs(sigma_lesser_ph_fullE[ee][zz].get_value(n, n)
-                                        - sigma_lesser_ph_fullE_new[ee][zz].get_value(n, n))
-        error = error/(len(E_list) * nz * nm)
-        # print("iter number is:", iter_c)
-        # print("error is:", error)
+        # for ee in range(len(E_list)):
+        #     for zz in range(nz):
+        #         for n in range(nm):
+        #             error = error + abs(sigma_lesser_ph_fullE[ee][zz].get_value(n, n)
+        #                                 - sigma_lesser_ph_fullE_new[ee][zz].get_value(n, n))
+        # error = error/(len(E_list) * nz * nm)
+
 
         # store the error
         error_store.append(error)

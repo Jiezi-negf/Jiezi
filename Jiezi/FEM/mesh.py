@@ -18,15 +18,19 @@ def create_dof(path):
              dof_coord is a list which looks like [[x, y, z], [x, y, z]...]
     """
     with open(path) as file:
-        lines = [line.rstrip('\n') for line in file]  # 将所有行按顺序合成一行，形成一个字符串数组，每一个元素就是以前的每一行
-
-    first_line = lines[0].split(' ')  # 首行遇见空格就分割，将字符串数组分隔开
-    nb_dof = int(first_line[0])  # 首行第一个元素是节点总数，第二个元素是element的总数，包含了1D边edge，2D面facet，3D体volume
+        # link every row to one row by order to form a string type list, each element of which is each origin row
+        lines = [line.rstrip('\n') for line in file]
+    # split the first line which is a string type list by blank space
+    first_line = lines[0].split(' ')
+    # the first number in the first line is the amount of dofs
+    nb_dof = int(first_line[0])
+    # the second number in the first is the amount of elements, consist of 1D edge, 2D facet, 3D volume
     nb_cell = int(first_line[1])
 
     # filling all dofs
     dof_coord = [list] * nb_dof
-    for i in range(0, nb_dof):  # for in range语句的范围是个左闭右开区间
+    # the scope of this sentence "for in range" is [,)
+    for i in range(0, nb_dof):
         tmp_line = lines[i + 1].split(' ')
         tmp_coord = [float] * 3
         for j in range(0, 3):

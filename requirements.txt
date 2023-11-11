@@ -1,0 +1,4 @@
+matplotlib
+mayavi
+numpy
+scipy

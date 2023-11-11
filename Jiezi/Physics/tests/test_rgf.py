@@ -8,15 +8,16 @@
 
 
 import sys
+sys.path.append("../../../")
 from Jiezi.Physics.band import subband
 from Jiezi.Physics.modespace import mode_space
-from Jiezi.Physics.rgf import rgf
+from Jiezi.Physics.rgf_origin import rgf
 from Jiezi.Physics.common import *
 import numpy as np
 from Jiezi.Physics import surface_gf
 import matplotlib.pyplot as plt
 
-sys.path.append("../../../")
+
 
 from Jiezi.Physics import hamilton, band
 from Jiezi.Graph import builder
@@ -34,6 +35,9 @@ Hii = H.get_Hii()
 Hi1 = H.get_Hi1()
 Sii = H.get_Sii()
 Si1 = H.get_Si1()
+S00 = H.get_S00()
+lead_H00_L, lead_H00_R = H.get_lead_H00()
+lead_H10_L, lead_H10_R = H.get_lead_H10()
 E_list = [-0.3]
 mul = 0.0
 mur = 0.0
@@ -56,6 +60,11 @@ for i in range(len(E_list)):
 G_R_rgf, G_lesser, G_greater, G1i_lesser, Sigma_left_lesser, Sigma_left_greater, \
     Sigma_right_lesser, Sigma_right_greater = \
     rgf(ee, E_list, eta_rgf, mul, mur, Hii, Hi1, Sii, sigma_ph, sigma_ph)
+# G_R_rgf, G_lesser, G_greater, G1i_lesser, \
+#             Sigma_left_lesser, Sigma_left_greate, Sigma_right_lesser, Sigma_right_greater = \
+#                 rgf(ee, E_list, eta_rgf, mul, mur, Hii, Hi1, Sii, S00,
+#                     lead_H00_L, lead_H00_R, lead_H10_L, lead_H10_R,
+#                     sigma_ph, sigma_ph)
 
 # compute the surface GF of left lead
 G00_L = surface_gf.surface_gf(E_list[ee], eta_sg, Hii[0], Hi1[0].dagger(), Sii[0], TOL=1e-10)[0]

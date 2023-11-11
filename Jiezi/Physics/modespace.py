@@ -39,15 +39,15 @@ def mode_space(H: hamilton, U, nm: int):
         Hii[i] = op.trimatmul(U_new[i], Hii[i], U_new[i], type="cnn")
         Sii[i] = op.trimatmul(U_new[i], Sii[i], U_new[i], type="cnn")
 
-    # the head of Hi1 follow the different rule as follows
-    Hi1[0] = op.trimatmul(U_new[0], Hi1[0], U_new[0], type="cnn")
+    # # the head of Hi1 follow the different rule as follows
+    # Hi1[0] = op.trimatmul(U_new[0], Hi1[0], U_new[0], type="cnn")
 
     # transfer the Hi1
     for i in range(1, nz):
         Hi1[i] = op.trimatmul(U_new[i - 1], Hi1[i], U_new[i], type="cnn")
 
-    # the tail of Hi1 follow the different rule as follows
-    Hi1[nz] = op.trimatmul(U_new[nz - 1], Hi1[nz], U_new[nz - 1], type="cnn")
+    # # the tail of Hi1 follow the different rule as follows
+    # Hi1[nz] = op.trimatmul(U_new[nz - 1], Hi1[nz], U_new[nz - 1], type="cnn")
 
     # compute form_factor
     form_factor = []

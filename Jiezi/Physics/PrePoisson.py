@@ -8,7 +8,6 @@
 
 import sys
 import os
-
 sys.path.append("../../../")
 from Jiezi.Graph.builder import CNT
 from Jiezi.Physics.common import *
@@ -29,8 +28,10 @@ def PrePoisson(cnt: CNT, width_cnt_scale, width_oxide_scale, z_length_oxide_scal
     z_total = cnt.get_length()
     zlength_oxide = z_length_oxide_scale * z_total
 
-    # mesh_whole_min_size = 1 * width_cnt
-    # mesh_whole_max_size = 1.5 * width_cnt
+    # mesh_whole_min_size = 1.5 * width_cnt
+    # mesh_whole_max_size = 3 * width_cnt
+    # mesh_cnt_min_size = 0.3 * mesh_whole_min_size
+    # mesh_cnt_max_size = 0.2 * mesh_whole_max_size
     mesh_whole_min_size = 0.5 * width_cnt
     mesh_whole_max_size = 0.8 * width_cnt
     mesh_cnt_min_size = 0.7 * mesh_whole_min_size
@@ -38,10 +39,10 @@ def PrePoisson(cnt: CNT, width_cnt_scale, width_oxide_scale, z_length_oxide_scal
 
     # step2: determine where the salome script file is and where the Mesh_whole.dat file is
     path_salome_bin = "/home/zjy/salome/SALOME-9.3.0-UB18.04-SRC"
-    path_salome_script = "/home/zjy/salome/SALOME-9.3.0-UB18.04-SRC/myPro/cnt_whole_test.py"
+    path_salome_script = path_salome_bin + "/myPro/cnt_whole_test.py"
     path_salome_dat = path_salome_bin + "/myPro/" + "Mesh_whole.dat"
-    path_salome_kill = "/home/zjy/salome/SALOME-9.3.0-UB18.04-SRC/BINARIES-UB18.04/KERNEL/bin/salome/killSalome.py"
-    path_salome2fenics = "/home/zjy/salome/SALOME-9.3.0-UB18.04-SRC/myPro/salome2fenics.py"
+    path_salome_kill = path_salome_bin + "/BINARIES-UB18.04/KERNEL/bin/salome/killSalome.py"
+    path_salome2fenics = path_salome_bin + "/myPro/salome2fenics.py"
 
     # step3: change the geometry parameters and the mesh parameters of the salome script
     file_data = ""
@@ -77,5 +78,5 @@ def PrePoisson(cnt: CNT, width_cnt_scale, width_oxide_scale, z_length_oxide_scal
     r_oxide = r_outer + width_oxide
     z_translation = 0.5 * (z_total - zlength_oxide)
     geo_para = [r_inter, r_outer, r_oxide, z_total, zlength_oxide, z_translation, z_isolation]
-    path_xml = "/home/zjy/salome/SALOME-9.3.0-UB18.04-SRC/myPro/"
+    path_xml = path_salome_bin + "/myPro/"
     return geo_para, path_xml

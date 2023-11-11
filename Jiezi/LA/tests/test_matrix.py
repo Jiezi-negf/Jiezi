@@ -15,8 +15,6 @@ sys.path.append("../../../")
 from Jiezi.LA.matrix_numpy import matrix_numpy
 
 
-# TODO: test function is created only for testing reason purpose.
-# However, each test should be stand alone, not depend on the testing order
 class TestMatrix(unittest.TestCase):
     # define variable mat
     mat = matrix_numpy(2, 3)

@@ -53,19 +53,23 @@ def ef_solver(u_init, N_GP_T, dos_GP_list, n_GP_list, p_GP_list, ef_init_n, ef_i
     # set ef_flag TRUE, if ef of every point is computed successfully, ef_flag keep TRUE, otherwise the value
     # will be set FALSE
     ef_flag = True
-
+    E_start = E_list[0]
+    E_step = E_list[1] - E_list[0]
+    zero_index = - int(E_start // E_step)
+    E_list_n = E_list[zero_index:]
+    E_list_p = E_list[0:zero_index + 1]
     for cnt_cell_index in cnt_cell_list:
         if not ef_flag:
             break
         for GP_index in range(4):
             # u_GP_cell is a list, the length of which is 4, which stores the phi value on the four GP of cell_index
-            u_init_vec = vector_numpy(4)
+            u_init_vec = vector_numpy(4, "float")
             u_init_vec.copy(u_init[cnt_cell_index].reshape(u_init[cnt_cell_index].shape[0], 1))
             u_GP = op.vecdotvec(N_GP_T[GP_index], u_init_vec)
-            ef_n_i = brent("n", E_list, Ec, Eg, u_GP,
+            ef_n_i = brent("n", zero_index, E_list, E_list_n, E_step, Ec, Eg, u_GP,
                            dos_GP_list[cnt_cell_index][GP_index], n_GP_list[cnt_cell_index][GP_index],
                            E_list[0]-10, E_list[len(E_list) - 1]+10, TOL_ef, TOL_ef)
-            ef_p_i = brent("p", E_list, Ec, Eg, u_GP,
+            ef_p_i = brent("p", zero_index, E_list, E_list_p, E_step, Ec, Eg, u_GP,
                            dos_GP_list[cnt_cell_index][GP_index], p_GP_list[cnt_cell_index][GP_index],
                            E_list[0]-10, E_list[len(E_list) - 1]+10, TOL_ef, TOL_ef)
             # test if the function has root, if there is no root in the interval, break the loop
@@ -160,10 +164,15 @@ def ef_solver(u_init, N_GP_T, dos_GP_list, n_GP_list, p_GP_list, ef_init_n, ef_i
 #                    ) * E_step / 2
 #     return result
 
-# @ jit
-def func_F(flag_np, E_list, Ec, Eg, phi, dos, density_np, ef):
-    result = 0.0
-    E_step = E_list[1] - E_list[0]
+
+def func_F(flag_np, zero_index, E_list, E_list_np, E_step, Ec, Eg, phi, dos, density_np, ef):
+    dos_np = np.array(dos)
+    E_list_np = np.array(E_list_np)
+    if flag_np == "n":
+        result = np.trapz(dos_np[zero_index:] * fermi(E_list_np - phi - ef), dx=E_step) - density_np
+    else:
+        result = np.trapz(dos_np[0:zero_index + 1] * (1 - fermi(E_list_np - phi - ef)), dx=E_step) - density_np
+    # print("ef_solver func_F np.trapz:", result)
     # if flag_np == "n":
     #     diff = Ec - E_list[0]
     #     start_normal = int(diff.real // E_step)
@@ -192,22 +201,20 @@ def func_F(flag_np, E_list, Ec, Eg, phi, dos, density_np, ef):
     #         result += (dos[ee] * (1 - fermi(E_list[ee] - phi - ef))
     #                    + dos[ee + 1] * (1 - fermi(E_list[ee + 1] - phi - ef))) * E_step / 2
     #     result -= density_np
-    if flag_np == "n":
-        for ee in range(0, len(E_list) - 1):
-            if ee < 0:
-                continue
-            else:
-                result += (dos[ee] * fermi(E_list[ee] - phi - ef)
-                           + dos[ee + 1] * fermi(E_list[ee + 1] - phi - ef)) * E_step / 2
-        result -= density_np
-    else:
-        for ee in range(0, len(E_list) - 1):
-            if ee > 0:
-                continue
-            else:
-                result += (dos[ee] * (1 - fermi(E_list[ee] - phi - ef))
-                           + dos[ee + 1] * (1 - fermi(E_list[ee + 1] - phi - ef))) * E_step / 2
-        result -= density_np
+
+    # res = 0.0
+    # if flag_np == "n":
+    #     for ee in range(0, len(E_list) - 1):
+    #         if E_list[ee] > 0:
+    #             res += (dos[ee] * fermi(E_list[ee] - phi - ef)
+    #                        + dos[ee + 1] * fermi(E_list[ee + 1] - phi - ef)) * E_step / 2
+    # else:
+    #     for ee in range(0, len(E_list) - 1):
+    #         if E_list[ee] < 0:
+    #             res += (dos[ee] * (1 - fermi(E_list[ee] - phi - ef))
+    #                        + dos[ee + 1] * (1 - fermi(E_list[ee + 1] - phi - ef))) * E_step / 2
+    # res -= density_np
+    # print("ef_solver fun_F loop:", res)
     return result
 
 
@@ -241,17 +248,17 @@ def func_F(flag_np, E_list, Ec, Eg, phi, dos, density_np, ef):
 #     return res
 
 
-def secant(flag_np, E_list, Ec, Eg, phi, dos, density_np, ef_0, ef_1):
-    f_0 = func_F(flag_np, E_list, Ec, Eg, phi, dos, density_np, ef_0)
-    f_1 = func_F(flag_np, E_list, Ec, Eg, phi, dos, density_np, ef_1)
+def secant(flag_np, zero_index, E_list, E_list_np, E_step, Ec, Eg, phi, dos, density_np, ef_0, ef_1):
+    f_0 = func_F(flag_np, zero_index, E_list, E_list_np, E_step, Ec, Eg, phi, dos, density_np, ef_0)
+    f_1 = func_F(flag_np, zero_index, E_list, E_list_np, E_step, Ec, Eg, phi, dos, density_np, ef_1)
     ef_2 = ef_0 - f_0 * (ef_1 - ef_0) / (f_1 - f_0)
     return ef_2
 
 
-def IQI(flag_np, E_list, Ec, Eg, phi, dos, density_np, ef_0, ef_1, ef_2):
-    f_0 = func_F(flag_np, E_list, Ec, Eg, phi, dos, density_np, ef_0)
-    f_1 = func_F(flag_np, E_list, Ec, Eg, phi, dos, density_np, ef_1)
-    f_2 = func_F(flag_np, E_list, Ec, Eg, phi, dos, density_np, ef_2)
+def IQI(flag_np, zero_index, E_list, E_list_np, E_step, Ec, Eg, phi, dos, density_np, ef_0, ef_1, ef_2):
+    f_0 = func_F(flag_np, zero_index, E_list, E_list_np, E_step, Ec, Eg, phi, dos, density_np, ef_0)
+    f_1 = func_F(flag_np, zero_index, E_list, E_list_np, E_step, Ec, Eg, phi, dos, density_np, ef_1)
+    f_2 = func_F(flag_np, zero_index, E_list, E_list_np, E_step, Ec, Eg, phi, dos, density_np, ef_2)
     result = f_1 * f_2 / (f_0 - f_1) / (f_0 - f_2) * ef_0 \
              + f_0 * f_2 / (f_1 - f_0) / (f_1 - f_2) * ef_1 \
              + f_0 * f_1 / (f_2 - f_0) / (f_2 - f_1) * ef_2
@@ -269,9 +276,13 @@ def between(a, b, x):
         return False
 
 
-def brent(flag_np, E_list, Ec, Eg, phi, dos, density_np, a, b, tol_brent_residual=1e-5, tol_brent_bisection=1e-5):
-    f_a = func_F(flag_np, E_list, Ec, Eg, phi, dos, density_np, a)
-    f_b = func_F(flag_np, E_list, Ec, Eg, phi, dos, density_np, b)
+def brent(flag_np, zero_index, E_list, E_list_np, E_step, Ec, Eg, phi, dos, density_np, a, b,
+          tol_brent_residual=1e-5, tol_brent_bisection=1e-5):
+    """
+    a robust algorithm for seeking roots of equation
+    """
+    f_a = func_F(flag_np, zero_index, E_list, E_list_np, E_step, Ec, Eg, phi, dos, density_np, a)
+    f_b = func_F(flag_np, zero_index, E_list, E_list_np, E_step, Ec, Eg, phi, dos, density_np, b)
     # test if there is root between a and b, i.e. if the equation has solution
     if flag_np == "n" and f_a > 0 and f_b > 0:
         return a - 10
@@ -300,29 +311,30 @@ def brent(flag_np, E_list, Ec, Eg, phi, dos, density_np, a, b, tol_brent_residua
     # start the loop
     while 1:
         # make sure f(b) is closer to 0 than f(a), if not, swap a and b
-        if abs(func_F(flag_np, E_list, Ec, Eg, phi, dos, density_np, a)) < \
-                abs(func_F(flag_np, E_list, Ec, Eg, phi, dos, density_np, b)):
+        if abs(func_F(flag_np, zero_index, E_list, E_list_np, E_step, Ec, Eg, phi, dos, density_np, a)) < \
+                abs(func_F(flag_np, zero_index, E_list, E_list_np, E_step, Ec, Eg, phi, dos, density_np, b)):
             a, b = swap(a, b)
         # test if the iteration is converged
-        if abs(a - b) < tol_brent_bisection or abs(func_F(flag_np, E_list, Ec, Eg, phi, dos, density_np, b)) \
+        if abs(a - b) < tol_brent_bisection or abs(func_F(flag_np, zero_index, E_list, E_list_np, E_step,
+                                                          Ec, Eg, phi, dos, density_np, b)) \
                 < tol_brent_residual:
             # print("the number of iteration in brent method is:", iter_brent)
             return b
         # compute f(a), f(b), f(c), m, k
-        f_a = func_F(flag_np, E_list, Ec, Eg, phi, dos, density_np, a)
-        f_b = func_F(flag_np, E_list, Ec, Eg, phi, dos, density_np, b)
-        f_c = func_F(flag_np, E_list, Ec, Eg, phi, dos, density_np, c)
+        f_a = func_F(flag_np, zero_index, E_list, E_list_np, E_step, Ec, Eg, phi, dos, density_np, a)
+        f_b = func_F(flag_np, zero_index, E_list, E_list_np, E_step, Ec, Eg, phi, dos, density_np, b)
+        f_c = func_F(flag_np, zero_index, E_list, E_list_np, E_step, Ec, Eg, phi, dos, density_np, c)
         m = (a + b) / 2
-        f_m = func_F(flag_np, E_list, Ec, Eg, phi, dos, density_np, m)
+        f_m = func_F(flag_np, zero_index, E_list, E_list_np, E_step, Ec, Eg, phi, dos, density_np, m)
         k = (3 * a + b) / 4
         # compute s
         if f_a != f_c and f_b != f_c:
-            s = IQI(flag_np, E_list, Ec, Eg, phi, dos, density_np, a, b, c)
+            s = IQI(flag_np, zero_index, E_list, E_list_np, E_step, Ec, Eg, phi, dos, density_np, a, b, c)
         elif b != c and f_b != f_c:
-            s = secant(flag_np, E_list, Ec, Eg, phi, dos, density_np, b, c)
+            s = secant(flag_np, zero_index, E_list, E_list_np, E_step, Ec, Eg, phi, dos, density_np, b, c)
         else:
             s = m
-        f_s = func_F(flag_np, E_list, Ec, Eg, phi, dos, density_np, s)
+        f_s = func_F(flag_np, zero_index, E_list, E_list_np, E_step, Ec, Eg, phi, dos, density_np, s)
         # compute flag_ill
         if flag_bisection is True:
             flag_ill = abs(s - b) < (1 / 2) * abs(b - c)

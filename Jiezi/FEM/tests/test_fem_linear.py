@@ -245,7 +245,7 @@ nb_vert = int(first_line[0])
 # create sub_element "vertices"
 vertices = [list] * nb_vert
 # filling all vertices
-for i in range(nb_vert):  # for in range语句的范围是个左闭右开区间
+for i in range(nb_vert):
     tmp_line = lines[i + 1].split(' ')
     temp_coord = [float] * 3
     temp_coord[0] = round(float(tmp_line[1]), 8)

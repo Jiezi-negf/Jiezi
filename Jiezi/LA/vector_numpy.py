@@ -5,7 +5,7 @@
 # Jiezi authors can be found in the file AUTHORS.md at the top-level directory
 # of this distribution.
 # ==============================================================================
-
+import numpy
 import numpy as np
 from Jiezi.LA.base_linalg import vector
 
@@ -15,9 +15,10 @@ class vector_numpy(vector):
     vector is defined as row vector by default
     """
 
-    def __init__(self, n: int = 2):
-        self.__value = np.zeros(n, dtype=complex, order="C").reshape(-1, 1)
+    def __init__(self, n: int = 2, type="complex"):
+        self.__value = np.zeros(n, dtype=type, order="C").reshape(-1, 1)
         self.__size = n
+        self.__type = type
 
     def get_size(self):
         return self.__value.shape
@@ -49,33 +50,33 @@ class vector_numpy(vector):
         the reason why I construct the temporary variable "temp" is to avoid changing the original value,
         because the following function is just for operation, the value of "self" should not be changed
         """
-        temp = vector_numpy(self.__size)
+        temp = vector_numpy(self.__size, self.__type)
         temp.copy(self.get_value().imag)
         return temp
 
     def real(self):
-        temp = vector_numpy(self.__size)
+        temp = vector_numpy(self.__size, self.__type)
         temp.copy(self.get_value().real)
         return temp
 
     def trans(self):
-        temp = vector_numpy(self.__size)
+        temp = vector_numpy(self.__size, self.__type)
         temp.copy(self.get_value().T)
         return temp
 
     def conjugate(self):
-        temp = vector_numpy(self.__size)
+        temp = vector_numpy(self.__size, self.__type)
         temp.copy(np.conjugate(self.get_value()))
         return temp
 
     def dagger(self):
-        temp = vector_numpy(self.__size)
+        temp = vector_numpy(self.__size, self.__type)
         temp.copy(np.conjugate(self.get_value()))
         temp.copy(temp.get_value().reshape(self.__size, 1))
         return temp
 
     def nega(self):
-        temp = vector_numpy(self.__size)
+        temp = vector_numpy(self.__size, self.__type)
         temp.copy(np.negative(self.get_value()))
         return temp
 
@@ -88,3 +89,6 @@ class vector_numpy(vector):
 
     def print(self):
         print(self.__value)
+
+    def get_type(self):
+        return self.__type

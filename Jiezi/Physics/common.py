@@ -6,6 +6,8 @@
 # of this distribution.
 # ==============================================================================
 import math
+import sys
+
 from Jiezi.LA import operator as op
 from Jiezi.LA.matrix_numpy import matrix_numpy
 import numpy as np
@@ -27,23 +29,35 @@ epsilon_0 = 8.854e-22 / q_unit
 epsilon_air = 1.0 * epsilon_0
 epsilon_cnt = 6.9 * epsilon_0
 epsilon_oxide = 3.9 * epsilon_0
-epsilon_air_outer = 1000 * epsilon_0
+epsilon_air_outer = 3.9 * epsilon_0
 # epsilon_air = 1.0 * epsilon_0
 # epsilon_cnt = 1.0 * epsilon_0
 # epsilon_oxide = 1.0 * epsilon_0
 # epsilon_air_outer = 1.0 * epsilon_0
+
+
+def time_it(func):
+    def inner(*args, **kw):
+        start = time.time()
+        back = func(*args, **kw)
+        end = time.time()
+        print("Time cost of", func.__name__, "function:", end-start, "seconds")
+        return back
+    return inner
+
 
 def bose(E, BOSE=1.0, TEMP=1.0):
     return 1.0 / (math.exp(E /KT) - 1.0)
 
 
 def fermi(x):
-    if x / KT < -709:
-        res = 1.0
-    elif x / KT > 709:
-        res = 0.0
-    else:
-        res = 1.0 / (1.0 + np.exp(x / KT))
+    # if x / KT < -709:
+    #     res = 1.0
+    # elif x / KT > 709:
+    #     res = 0.0
+    # else:
+    #     res = 1.0 / (1.0 + np.exp(x / KT))
+    res = 1.0 / (1.0 + np.exp(x / KT))
     return res
 
 
@@ -53,7 +67,7 @@ def heaviside(x):
     else:
         return 0.0
 
-
+@ time_it
 def integral(E, G):
     E_num = len(E)
     result = 0.0
@@ -70,13 +84,3 @@ def ifdagger(mat: matrix_numpy):
         for j in range(col):
             error += np.sqrt(delta.get_value(i, j).imag ** 2 + delta.get_value(i, j).real ** 2)
     return error
-
-
-def time_it(func):
-    def inner(*args, **kw):
-        start = time.time()
-        back = func(*args, **kw)
-        end = time.time()
-        print("Time cost of", func.__name__, "function:", end-start, "seconds")
-        return back
-    return inner

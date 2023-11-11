@@ -13,10 +13,11 @@ from Jiezi.LA.vector_numpy import vector_numpy
 
 
 class matrix_numpy(matrix):
-    def __init__(self, row: int = 2, column: int = 2):
-        self.__value = np.zeros((row, column), dtype=complex, order="C")
+    def __init__(self, row: int = 2, column: int = 2, type="complex"):
+        self.__value = np.zeros((row, column), dtype=type, order="C")
         self.__row = row
         self.__column = column
+        self.__type = type
 
     def get_size(self):
         return self.__value.shape
@@ -50,33 +51,33 @@ class matrix_numpy(matrix):
             return np.copy(self.__value[index[0]:index[1], index[2]:index[3]])
 
     def imaginary(self):
-        temp = matrix_numpy(self.__row, self.__column)
+        temp = matrix_numpy(self.__row, self.__column, self.__type)
         temp.copy(self.get_value().imag)
         return temp
 
     def real(self):
-        temp = matrix_numpy(self.__row, self.__column)
+        temp = matrix_numpy(self.__row, self.__column, self.__type)
         temp.copy(self.get_value().real)
         return temp
 
     def trans(self):
-        temp = matrix_numpy(self.__row, self.__column)
+        temp = matrix_numpy(self.__row, self.__column, self.__type)
         temp.copy(np.transpose(self.get_value()))
         return temp
 
     def conjugate(self):
-        temp = matrix_numpy(self.__row, self.__column)
+        temp = matrix_numpy(self.__row, self.__column, self.__type)
         temp.copy(np.conjugate(self.get_value()))
         return temp
 
     def dagger(self):
-        temp = matrix_numpy(self.__row, self.__column)
+        temp = matrix_numpy(self.__row, self.__column, self.__type)
         temp.copy(np.conjugate(self.get_value()))
         temp.copy(np.transpose(temp.__value))
         return temp
 
     def nega(self):
-        temp = matrix_numpy(self.__row, self.__column)
+        temp = matrix_numpy(self.__row, self.__column, self.__type)
         temp.copy(np.negative(self.get_value()))
         return temp
 
@@ -100,9 +101,10 @@ class matrix_numpy(matrix):
         """
         source must be the numpy type parameter rather than matrix or vector
         """
-        self.__value = np.asarray(source, dtype=complex)
+        self.__value = np.asarray(source)
         self.__row = self.__value.shape[0]
         self.__column = self.__value.shape[1]
+        # self.__type = self.__value.dtype
 
     def print(self):
         print(self.__value)
@@ -117,7 +119,7 @@ class matrix_numpy(matrix):
         value = []
         for i in sorted_index:
             value.append(value_unsorted[i])
-        temp = vector_numpy(self.get_size()[0])
+        temp = vector_numpy(self.get_size()[0], self.__type)
         temp.copy(value)
         return temp
 
@@ -132,17 +134,25 @@ class matrix_numpy(matrix):
         vec = np.copy(vec_unsorted)
         for i in range(len(sorted_index)):
             vec[:, i] = vec_unsorted[:, sorted_index[i]]
-        temp = matrix_numpy(self.get_size()[0], self.get_size()[1])
+        temp = matrix_numpy(self.get_size()[0], self.get_size()[1], self.__type)
         temp.copy(vec)
         return temp
 
     def swap_index(self, a, b):
-        res = matrix_numpy(self.__row, self.__column)
+        res = matrix_numpy(self.__row, self.__column, self.__type)
         temp = np.copy(self.get_value())
         temp[[a, b], :] = temp[[b, a], :]
         temp[:, [a, b]] = temp[:, [b, a]]
         res.copy(temp)
         return res
 
+    def diag(self):
+        temp = matrix_numpy()
+        temp.copy(self.get_value())
+        temp.copy(np.diag(temp.get_value().diagonal()))
+        return temp
 
+
+    def get_type(self):
+        return self.__type
 

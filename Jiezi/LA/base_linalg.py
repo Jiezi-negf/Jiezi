@@ -55,6 +55,10 @@ class vector(abc.ABC):
     def print(self):
         pass
 
+    @abc.abstractmethod
+    def get_type(self):
+        pass
+
 
 class matrix(abc.ABC):
     @abc.abstractmethod
@@ -123,4 +127,12 @@ class matrix(abc.ABC):
 
     @abc.abstractmethod
     def eigenvec(self):
+        pass
+
+    @abc.abstractmethod
+    def swap_index(self):
+        pass
+
+    @abc.abstractmethod
+    def get_type(self):
         pass

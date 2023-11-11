@@ -10,9 +10,12 @@ from Jiezi.LA import operator as op
 from Jiezi.LA.matrix_numpy import matrix_numpy
 from Jiezi.Physics.surface_gf import surface_gf
 from Jiezi.Physics.common import *
+import numpy as np
 
 
-def rgf(ee, E_list, eta, mul, mur, Hii, Hi1, Sii, sigma_lesser_ph, sigma_r_ph):
+def rgf(ee, E_list, eta, mul, mur, Hii, Hi1, Sii, S00,
+        lead_H00_L, lead_H00_R, lead_H10_L, lead_H10_R,
+        sigma_lesser_ph, sigma_r_ph):
     g_R = []
     g_lesser = []
     G_greater = []
@@ -21,8 +24,11 @@ def rgf(ee, E_list, eta, mul, mur, Hii, Hi1, Sii, sigma_lesser_ph, sigma_r_ph):
     eta_rgf = 0.0
 
     # 1 compute left contact's surface GF and self-energy
-    H00 = op.addmat(Hii[0], op.matmulmat(sigma_r_ph[ee][0], Sii[0]))
-    G00 = surface_gf(E_list[ee], eta, H00, Hi1[0].dagger(), Sii[0])[0]
+    # H00 = op.addmat(Hii[0], op.matmulmat(sigma_r_ph[ee][0], Sii[0]))
+    # G00 = surface_gf(E_list[ee], eta, H00, Hi1[0].dagger(), Sii[0])[0]
+
+    H00 = lead_H00_L
+    G00 = surface_gf(E_list[ee], eta, H00, lead_H10_L.dagger(), S00)[0]
     Sigma_left_R = op.trimatmul(Hi1[0], G00, Hi1[0], type="cnn")
     Sigma_left_lesser = op.scamulmat(fermi(E_list[ee] - mul),
                                      op.scamulmat(complex(0.0, 1.0),
@@ -62,8 +68,11 @@ def rgf(ee, E_list, eta, mul, mur, Hii, Hi1, Sii, sigma_lesser_ph, sigma_r_ph):
         g_lesser.append(g_i_lesser)
 
     # 6 compute right contact's surface GF and self-energy
-    H00 = op.addmat(Hii[nz - 1], op.matmulmat(sigma_r_ph[ee][nz - 1], Sii[nz - 1]))
-    G00 = surface_gf(E_list[ee], eta, H00, Hi1[nz], Sii[nz - 1])[0]
+    # H00 = op.addmat(Hii[nz - 1], op.matmulmat(sigma_r_ph[ee][nz - 1], Sii[nz - 1]))
+    # G00 = surface_gf(E_list[ee], eta, H00, Hi1[nz], Sii[nz - 1])[0]
+
+    H00 = lead_H00_R
+    G00 = surface_gf(E_list[ee], eta, H00, lead_H10_R, S00)[0]
     Sigma_right_R = op.trimatmul(Hi1[nz], G00, Hi1[nz], type="nnc")
     Sigma_right_lesser = op.scamulmat(fermi(E_list[ee] - mur),
                                       op.scamulmat(complex(0, 1),
@@ -132,3 +141,4 @@ def rgf(ee, E_list, eta, mul, mur, Hii, Hi1, Sii, sigma_lesser_ph, sigma_r_ph):
     # print("the number of energy is:", ee, "energy is:", E_list[ee])
     return G_R, G_lesser, G_greater, G1i_lesser, \
            Sigma_left_lesser, Sigma_left_greater, Sigma_right_lesser, Sigma_right_greater
+

@@ -154,22 +154,22 @@ def atomPos2XYZ(dict_coordinate, path):
         x, y, z = coord_list[point_index]
         line = 'C'+'\t'+str(x)+'\t'+str(y)+'\t'+str(z)+'\n'
         lines[point_index+2] = line
-    with open(path+"cnt_atom.xyz", "w") as f:
+    with open(path+"/cnt_atom.xyz", "w") as f:
         f.writelines(lines)
 
 
-def spectrumXY2Dat(E_list, length_single_cell, num_cell, path, fileName):
+def spectrumXY2Dat(E_list, length_single_cell, num_cell, num_supercell, path, fileName):
     # number of cell(for current, the size is bigger, should be plus 1)
     if fileName == "SpectrumXYForCurrent.dat":
-        num_pos = num_cell + 1
+        num_pos = int(num_cell / num_supercell) + 1
     else:
-        num_pos = num_cell
+        num_pos = int(num_cell / num_supercell)
     # number of energy
     num_energy = len(E_list)
     lines = [None] * (num_pos * num_energy)
     for ee in range(num_energy):
         for zz in range(num_pos):
-            coord_z = (zz + 0.5) * length_single_cell
+            coord_z = (zz + 0.5) * length_single_cell * num_supercell
             line = str(E_list[ee]) + '\t' + str(coord_z) + '\n'
             lines[ee * num_pos + zz] = line
     with open(path + '/' + fileName, 'w') as f:

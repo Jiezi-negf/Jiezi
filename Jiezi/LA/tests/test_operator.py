@@ -6,11 +6,12 @@
 # of this distribution.
 # ==============================================================================
 
+import os
 import sys
 import numpy as np
 import unittest
 
-sys.path.append("../../../")
+sys.path.append(os.path.abspath(__file__ + "/../../.."))
 
 
 from Jiezi.LA.vector_numpy import vector_numpy

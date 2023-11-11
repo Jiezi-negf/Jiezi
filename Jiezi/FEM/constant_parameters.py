@@ -81,7 +81,7 @@ def N_gausspoint():
     gauss_point_base = [p, q, q, q]
     # create the four gauss points
     for i in range(4):
-        vec = vector_numpy(4)
+        vec = vector_numpy(4, "float")
         temp = gauss_point_base.copy()
         temp[i] = p
         gauss_point = temp[1:]
@@ -94,7 +94,7 @@ def N_gausspoint():
 
 def isDirichlet(point_coordinate, geo_para):
     """
-    judge if the given point is on the Dirichlet boundary, if it is, determine whcih part of Dirichlet boundary it's
+    test if the given point is on the Dirichlet boundary, if it is, determine whcih part of Dirichlet boundary it's
     belong to
     :param point_coordinate: coordinate of the given point, (x, y, z)
     :param geo_para: parameters used to define the geometry
@@ -145,11 +145,11 @@ def constant_parameters(info_mesh, geo_para):
     # 1 call the N_gausspoint to compute N, N^T, NN^T
     N_GP, N_GP_T, NNT = N_gausspoint()
 
-    N_alpha = vector_numpy(4)
+    N_alpha = vector_numpy(4, "float")
     N_alpha.copy([[-1, 1, 0, 0]])
-    N_beta = vector_numpy(4)
+    N_beta = vector_numpy(4, "float")
     N_beta.copy([[-1, 0, 1, 0]])
-    N_gamma = vector_numpy(4)
+    N_gamma = vector_numpy(4, "float")
     N_gamma.copy([[-1, 0, 0, 1]])
 
     cell_co = [None] * len(info_mesh)
@@ -189,9 +189,9 @@ def constant_parameters(info_mesh, geo_para):
         det_jacobian = np.linalg.det(jacob2)
 
         # 4 compute the long term
-        alpha_xyz = vector_numpy(3)
-        beta_xyz = vector_numpy(3)
-        gamma_xyz = vector_numpy(3)
+        alpha_xyz = vector_numpy(3, "float")
+        beta_xyz = vector_numpy(3, "float")
+        gamma_xyz = vector_numpy(3, "float")
         alpha_xyz.copy([[ele[1] for ele in co_shapefunc[1:]]])
         beta_xyz.copy([[ele[2] for ele in co_shapefunc[1:]]])
         gamma_xyz.copy([[ele[3] for ele in co_shapefunc[1:]]])
@@ -276,23 +276,23 @@ def gauss_xyz(co_shapefunc):
     for i in range(4):
         temp = gauss_point_base.copy()
         temp[i] = p
-        gauss_point = vector_numpy(3)
+        gauss_point = vector_numpy(3, "float")
         # gauss_point is a column vector
         gauss_point.copy([temp[1:]])
         gauss_point = gauss_point.trans()
 
-        ma_0 = matrix_numpy(4, 4)
+        ma_0 = matrix_numpy(4, 4, "float")
         ma_0.copy(co_shapefunc)
         # transpose to ma_0 = [[a1,b1,c1,d1],[a2,b2,c2,d2],...,[a4,b4,c4,d4]]
         ma_0 = ma_0.trans()
         # ma_1 is [[b2,c2,d2],[b3,c3,d3],[b4,c4,d4]]
         # ma is inv([[b2,c2,d2],[b3,c3,d3],[b4,c4,d4]])
-        ma_1 = matrix_numpy(3, 3)
+        ma_1 = matrix_numpy(3, 3, "float")
         ma_1.copy(ma_0.get_value(1, 4, 1, 4))
         ma = op.inv(ma_1)
         # vec_0 is the first column of ma_0
         # vec_0 = [[a2],[a3],[a4]]
-        vec_0 = vector_numpy(3)
+        vec_0 = vector_numpy(3, "float")
         vec_0.copy(ma_0.get_value(1, 4, 0, 1))
         # gauss_point = [[alpha],[beta],[gamma]]
         # vec is [[alpha],[beta],[gamma]]-[[a2],[a3],[a4]]
@@ -457,16 +457,3 @@ def addFixedCharge(fixedCharge_GP_list, coord_GP_list, mark_list, scope, density
                 if flag:
                     fixedCharge_GP_list[cell_index][GP_index] += density
 
-
-# a = [(0.0034572369685743724+0j), (0.002680160837190706+0j), (0.0019124049899249106+0j), (0.0012428728427696174+0j),
-#       (0.0007689273642102201+0j), (0.0006848924676253319+0j), (0.0010295048911840828+0j), (0.0018112301366284985+0j),
-#       (0.0028924140519903394+0j), (0.0041230524065758375+0j)]
-# b = [0.9956599607932615, 0.9950547696662598, 0.9951972926952809, 0.9867066164938678, 1.0108604301134547,
-#      1.2451215515189975, 1.8218731445466385, 1.9943501156287846, 1.9939555592694795, 1.9939538853813874]
-# plt.subplot(1, 2, 1)
-# plt.title("phi")
-# plt.plot(np.arange(len(b)), b, color="green")
-# plt.subplot(1, 2, 2)
-# plt.title("electron")
-# plt.plot(np.arange(len(a)), a, color="red")
-# plt.show()

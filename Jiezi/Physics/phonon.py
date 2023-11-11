@@ -53,7 +53,7 @@ def phonon(ee, E_list, form_factor, G_lesser, G_greater, Dac, Dop, omega):
             sigma_lesser_ph_zz.set_value(i, i, temp_lesser_new)
             sigma_greater_ph_zz.set_value(i, i, temp_greater_new)
             # compute retarded phonon self-energy
-            sigma_r_ph_zz = op.scamulmat(0.5, op.addmat(sigma_greater_ph_zz, sigma_lesser_ph_zz.nega()))
+            sigma_r_ph_zz = op.scamulmat(complex(0, -0.5), op.addmat(sigma_greater_ph_zz, sigma_lesser_ph_zz))
         sigma_lesser_ph.append(sigma_lesser_ph_zz)
         sigma_r_ph.append(sigma_r_ph_zz)
     return sigma_lesser_ph, sigma_r_ph
