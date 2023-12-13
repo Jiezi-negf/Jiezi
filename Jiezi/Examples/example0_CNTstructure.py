@@ -12,7 +12,7 @@ from Jiezi.Visualization.Data2File import atomPos2XYZ
 from Jiezi.Graph import builder
 from Jiezi.Visualization.Visualization_Graph import visual
 
-cnt80 = builder.CNT(8, 0, 1, a_cc=1.42536)
+cnt80 = builder.CNT(5, 5, 4, a_cc=1.42536)
 cnt80.construct()
 cnt80.data_print()
 

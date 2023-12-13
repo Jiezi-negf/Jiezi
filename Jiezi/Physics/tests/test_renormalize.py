@@ -29,7 +29,11 @@ size = Hii_cell.get_size()[0]
 x_init = hamilton.opValueInit2(Hii_cell, Hi1_cell, size)
 L = 1
 k_points = np.arange(-np.pi / L, np.pi / L, 0.05)
-k_points_double = k_points / 2
+
+L_2 = 2 * L
+L_4 = 4 * L
+k_points_2 = k_points / 2
+k_points_4 = k_points / 4
 
 # # ***** read the immediate optimized result Hii, Hi1 *****
 # Hii_middle = matrix_numpy(size, size)
@@ -84,23 +88,22 @@ num_E = 1000
 k_list = np.linspace(-np.pi / L, np.pi / L, num_k)
 E_list = np.linspace(-6, 6, num_E)
 dos = np.zeros((num_k, num_E))
+iter_n = 1
 
 # plot dos of k and E which is computed from G(k, E)
 for i, k in enumerate(k_list):
     for j, E in enumerate(E_list):
-        dos[i, j] = hamilton.dosOfKE_SanchoRubio(Hii_cell, Hi1_cell, E, eta, k, 2 * L)
-    # # plot E-K relationship on specific k point
-    # eigenvalue_list = hamilton.compute_band(Hii_cell, Hi1_cell, L, list([k]))
-    # plt.scatter(eigenvalue_list, np.zeros(eigenvalue_list.size))
-    # # plot dos of E on specific E point
-    # plt.plot(E_list, dos[i, :])
-# plt.show()
+        Hi1_new, beta, epsilon_s, Hii_new = hamilton.renormal_SanchoRubio(Hii_cell, Hi1_cell, E, eta, iter_n)
+        dos[i, j] = hamilton.dosOfKE_SanchoRubio(Hii_new, Hi1_new, E, eta, k, L)
+
 
 # plot band structure
 Hii_double, Hi1_double = hamilton.H_extendSize(Hii_cell, Hi1_cell, 2)
-bandArray_double = hamilton.compute_band(Hii_double, Hi1_double, 2 * L, k_points)
+bandArray_double = hamilton.compute_band(Hii_double, Hi1_double, L_2, k_points_2)
 plt.plot(k_points, bandArray_double, color="green", label="double cell")
 plt.ylim(-6, 6)
+
+
 x, y = np.meshgrid(k_list, E_list)
 fig, ax = plt.subplots()
 # c = ax.pcolormesh(x, y, dos.T, shading='gouraud', vmin=0, vmax=50)

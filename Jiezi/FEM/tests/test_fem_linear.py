@@ -123,7 +123,7 @@ N_GP_T, cell_co, cell_long_term, cell_NJ, cell_NNTJ, mark_list, cnt_cell_list, D
 coord_GP_list = get_coord_GP_list(cell_co)
 Dirichlet_list = Dirichlet_list[1]
 
-doping_GP_list = doping(coord_GP_list, zlength_oxide, z_translation,
+doping_GP_list = doping(coord_GP_list, zlength_oxide, z_translation, z_isolation,
                         doping_source, doping_drain, doping_channel, mark_list)
 n_GP_list = [[0.0] * 4] * len(coord_GP_list)
 p_GP_list = [[0.0] * 4] * len(coord_GP_list)

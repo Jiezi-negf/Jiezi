@@ -157,8 +157,8 @@ def func_f_DFD(ef_n, ef_p, Ec, Eg, dos, u, E_list, E_step, zero_index, E_list_n,
     # f_DFD_n = 0.0
     # f_DFD_p = 0.0
     dos_ = np.array(dos)
-    f_DFD = (np.trapz(dos_[zero_index:] * fermi(E_list_n - u - ef_n) * (fermi(E_list_n - u - ef_n) - 1), dx=E_step)
-             + np.trapz(dos_[0:zero_index + 1] * fermi(E_list_p - u - ef_p) * (fermi(E_list_p - u - ef_p) - 1),
+    f_DFD = (np.trapz(2 * dos_[zero_index:] * fermi(E_list_n - u - ef_n) * (fermi(E_list_n - u - ef_n) - 1), dx=E_step)
+             + np.trapz(2 * dos_[0:zero_index + 1] * fermi(E_list_p - u - ef_p) * (fermi(E_list_p - u - ef_p) - 1),
                         dx=E_step)
               ) / KT
     # print("assembly func_f_DFD np.trapz:", f_DFD)
@@ -210,8 +210,8 @@ def func_f_DFD(ef_n, ef_p, Ec, Eg, dos, u, E_list, E_step, zero_index, E_list_n,
 
 def func_f(ef_n, ef_p, Ec, Eg, doping, dos, u, E_list, E_step, zero_index, E_list_n, E_list_p):
     dos_ = np.array(dos)
-    result = - np.trapz(dos_[zero_index:] * fermi(E_list_n - u - ef_n), dx=E_step) \
-              + np.trapz(dos_[0:zero_index + 1] * (1 - fermi(E_list_p - u - ef_p)), dx=E_step) + doping
+    result = - np.trapz(2 * dos_[zero_index:] * fermi(E_list_n - u - ef_n), dx=E_step) \
+              + np.trapz(2 * dos_[0:zero_index + 1] * (1 - fermi(E_list_p - u - ef_p)), dx=E_step) + doping
     # print("assembly func_f np.trapz:", result)
     # result = 0.0
     # compute the first term which is about n

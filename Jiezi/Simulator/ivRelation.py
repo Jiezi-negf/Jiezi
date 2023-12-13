@@ -11,7 +11,7 @@ import sys
 sys.path.append(os.path.abspath(__file__ + "/../../.."))
 
 from multiprocessing import Pool
-from Jiezi.NEGF.normal import normal
+from Jiezi.Simulator.normal import normal
 
 if __name__ == "__main__":
     input_list = []

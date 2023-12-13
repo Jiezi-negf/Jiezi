@@ -13,7 +13,7 @@ import numpy as np
 from Jiezi.FEM import map
 from scipy.optimize import minimize
 
-# from Jiezi.NEGF.tests.fake_potential import fake_potential
+# from Jiezi.Simulator.tests.fake_potential import fake_potential
 # from matplotlib import pyplot as plt
 
 
@@ -430,7 +430,10 @@ def compute_band(Hii, Hi1, L, k_points):
     return band_list
 
 
-def renormal_SanchoRubio(Hii, Hi1, E, eta):
+def renormal_SanchoRubio(Hii, Hi1, E, eta, n):
+    """
+    :param n: times of iteration, size_new = 2^n * size_origin
+    """
     size_H = Hii.get_size()[0]
     w = complex(E, eta)
     eye = matrix_numpy(size_H, size_H)
@@ -440,21 +443,37 @@ def renormal_SanchoRubio(Hii, Hi1, E, eta):
     beta = alpha.dagger()
     epsilon_s = op.addmat(Hii, op.trimatmul(Hi1, g_0, Hi1, "nnc"))
     epsilon = op.addmat(Hii, op.trimatmul(Hi1, g_0, Hi1, "nnc"), op.trimatmul(Hi1, g_0, Hi1, "cnn"))
+    for i in range(n - 1):
+        alpha_new = op.trimatmul(alpha,
+                                 op.inv(op.addmat(op.scamulmat(w, eye), epsilon.nega())),
+                                 alpha, type="nnn")
+        beta_new = op.trimatmul(beta,
+                                op.inv(op.addmat(op.scamulmat(w, eye), epsilon.nega())),
+                                beta, type="nnn")
+        epsilon_new = op.addmat(epsilon,
+                                op.trimatmul(alpha, op.inv(op.addmat(op.scamulmat(w, eye), epsilon.nega())),
+                                             beta, type="nnn"),
+                                op.trimatmul(beta, op.inv(op.addmat(op.scamulmat(w, eye), epsilon.nega())),
+                                             alpha, type="nnn"))
+        epsilon_s_new = op.addmat(epsilon_s,
+                                  op.trimatmul(alpha, op.inv(op.addmat(op.scamulmat(w, eye), epsilon.nega())),
+                                               beta, type="nnn"))
+        alpha.copy(alpha_new.get_value())
+        beta.copy(beta_new.get_value())
+        epsilon.copy(epsilon_new.get_value())
+        epsilon_s.copy(epsilon_s_new.get_value())
     return alpha, beta, epsilon_s, epsilon
 
 
-def dosOfKE_SanchoRubio(Hii, Hi1, E, eta, k, L):
+def dosOfKE_SanchoRubio(Hii_new, Hi1_new, E, eta, k, L):
     w = complex(E, eta)
-    alpha, beta, epsilon_s, epsilon = renormal_SanchoRubio(Hii, Hi1, E, eta)
-    Hii_new = epsilon
-    Hi1_new = alpha
     H_temp = op.addmat(Hii_new, op.scamulmat(np.exp(-k * L * 1j), Hi1_new.dagger()),
                        op.scamulmat(np.exp(k * L * 1j), Hi1_new))
-    size_H = Hii.get_size()[0]
+    size_H = Hii_new.get_size()[0]
     eye = matrix_numpy(size_H, size_H)
     eye.identity()
     GF = op.inv(op.addmat(op.scamulmat(w, eye), H_temp.nega()))
-    dos = min(- 2 * GF.tre().imag, 10)
+    dos = min(- GF.tre().imag / np.pi, 2)
     # dos = - 2 * GF.tre().imag
     return dos
 

@@ -68,10 +68,11 @@ def ef_solver(u_init, N_GP_T, dos_GP_list, n_GP_list, p_GP_list, ef_init_n, ef_i
             u_GP = op.vecdotvec(N_GP_T[GP_index], u_init_vec)
             ef_n_i = brent("n", zero_index, E_list, E_list_n, E_step, Ec, Eg, u_GP,
                            dos_GP_list[cnt_cell_index][GP_index], n_GP_list[cnt_cell_index][GP_index],
-                           E_list[0]-10, E_list[len(E_list) - 1]+10, TOL_ef, TOL_ef)
-            ef_p_i = brent("p", zero_index, E_list, E_list_p, E_step, Ec, Eg, u_GP,
-                           dos_GP_list[cnt_cell_index][GP_index], p_GP_list[cnt_cell_index][GP_index],
-                           E_list[0]-10, E_list[len(E_list) - 1]+10, TOL_ef, TOL_ef)
+                           E_list[0]-10, E_list[len(E_list) - 1]+10, 0, TOL_ef)
+            # ef_p_i = brent("p", zero_index, E_list, E_list_p, E_step, Ec, Eg, u_GP,
+            #                dos_GP_list[cnt_cell_index][GP_index], p_GP_list[cnt_cell_index][GP_index],
+            #                E_list[0]-10, E_list[len(E_list) - 1]+10, TOL_ef, TOL_ef)
+            ef_p_i = 1e2
             # test if the function has root, if there is no root in the interval, break the loop
             if ef_n_i == None:
                 print("ef_solver failed during ef_n solution")
@@ -169,9 +170,9 @@ def func_F(flag_np, zero_index, E_list, E_list_np, E_step, Ec, Eg, phi, dos, den
     dos_np = np.array(dos)
     E_list_np = np.array(E_list_np)
     if flag_np == "n":
-        result = np.trapz(dos_np[zero_index:] * fermi(E_list_np - phi - ef), dx=E_step) - density_np
+        result = np.trapz(2 * dos_np[zero_index:] * fermi(E_list_np - phi - ef), dx=E_step) - density_np
     else:
-        result = np.trapz(dos_np[0:zero_index + 1] * (1 - fermi(E_list_np - phi - ef)), dx=E_step) - density_np
+        result = np.trapz(2 * dos_np[0:zero_index + 1] * (1 - fermi(E_list_np - phi - ef)), dx=E_step) - density_np
     # print("ef_solver func_F np.trapz:", result)
     # if flag_np == "n":
     #     diff = Ec - E_list[0]
@@ -277,7 +278,7 @@ def between(a, b, x):
 
 
 def brent(flag_np, zero_index, E_list, E_list_np, E_step, Ec, Eg, phi, dos, density_np, a, b,
-          tol_brent_residual=1e-5, tol_brent_bisection=1e-5):
+          tol_brent_residual=0, tol_brent_bisection=1e-11):
     """
     a robust algorithm for seeking roots of equation
     """
@@ -285,13 +286,13 @@ def brent(flag_np, zero_index, E_list, E_list_np, E_step, Ec, Eg, phi, dos, dens
     f_b = func_F(flag_np, zero_index, E_list, E_list_np, E_step, Ec, Eg, phi, dos, density_np, b)
     # test if there is root between a and b, i.e. if the equation has solution
     if flag_np == "n" and f_a > 0 and f_b > 0:
-        return a - 10
+        return
     if flag_np == "n" and f_a < 0 and f_b < 0:
-        return b + 10
+        return
     if flag_np == "p" and f_a > 0 and f_b > 0:
-        return b + 10
+        return
     if flag_np == "p" and f_a < 0 and f_b < 0:
-        return a - 10
+        return
     # if f_a * f_b > 0:
     #     print("ERROR: the sign of f(a) and f(b) must be different!", "a:", a, "fa:", f_a, "b:", b, "f_b:", f_b)
     #     # print(phi, dos, density_n)

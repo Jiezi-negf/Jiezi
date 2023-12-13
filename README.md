@@ -697,7 +697,7 @@ The example can be separated into the following steps:
     dict_cell = map.cut(r_oxide, z_total, info_mesh, cut_radius, cut_z)
 ```
 
-7. Set initial guess of and boundary conditions of Poisson equation.
+7. Set initial guess and boundary conditions of Poisson equation.
 
 ```python
     Dirichlet_BC_source = 1.0

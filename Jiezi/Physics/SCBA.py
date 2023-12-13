@@ -18,7 +18,7 @@ import time
 def SCBA(E_list, iter_max: int, TOL, ratio, eta, mul, mur, Hii, Hi1, Sii, S00,
             lead_H00_L, lead_H00_R, lead_H10_L, lead_H10_R,
          sigma_lesser_ph, sigma_r_ph, form_factor, Dac, Dop, omega):
-    print("NEGF solver(SCBA loop) start")
+    print("Simulator solver(SCBA loop) start")
     # initialize
     iter_c = 0
     nz = len(sigma_lesser_ph[0])

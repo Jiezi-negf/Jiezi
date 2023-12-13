@@ -199,12 +199,12 @@ if __name__ == "__main__":
     path_hr = path_Files + "wannier90_hr_new.dat"
     r_set, hr_set = read_hamiltonian(path_hr)
 
-    # test if hr_set[i]^dagger equals hr_set[2*10-i]
-    error = 0.0
-    for i in range(9):
-        addition = op.addmat(hr_set[i], hr_set[2*10 - i])
-        error += ifdagger(addition)
-    print(error)
+    # # test if hr_set[i]^dagger equals hr_set[2*10-i]
+    # error = 0.0
+    # for i in range(9):
+    #     addition = op.addmat(hr_set[i], hr_set[2*10 - i])
+    #     error += ifdagger(addition)
+    # print(error)
 
     # extract hamiltonian matrix of CNT
     hr_cnt_set = [None] * len(hr_set)
@@ -238,21 +238,10 @@ if __name__ == "__main__":
     #     addition = op.addmat(hr_cnt_set[i], hr_cnt_set[2*10 - i])
     #     error += ifdagger(addition)
     # print(error)
+    r_1, r_2, r_3, k_1, k_2, k_3 = latticeVectorInit()
 
 
 
-    r_1 = vector_numpy(3)
-    r_2 = vector_numpy(3)
-    r_3 = vector_numpy(3)
-    r_1.set_value((0, 0), 24.6881123)
-    r_2.set_value((1, 0), 40)
-    r_3.set_value((2, 0), 4.2761526)
-    k_1 = vector_numpy(3)
-    k_2 = vector_numpy(3)
-    k_3 = vector_numpy(3)
-    k_1.set_value((0, 0), 2 * math.pi / 24.6881123)
-    k_2.set_value((1, 0), 2 * math.pi / 40)
-    k_3.set_value((2, 0), 2 * math.pi / 4.2761526)
     # k = [0.3333, 0, -0]
     # eigen_energy_k = subband_k(hr_cnt_set, r_set, r_1, r_2, r_3, k_1, k_2, k_3, k)
     # eigen_energy_k = subband_k(hr_graphene_set, r_set, r_1, r_2, r_3, k_1, k_2, k_3, k)
@@ -269,7 +258,7 @@ if __name__ == "__main__":
     # warnings.filterwarnings("ignore")
     # kz_start = -0.5 / num_cell
     # kz_list = np.linspace(kz_start, -kz_start, int(-2*kz_start/0.003333))
-    # plotBand4Supercell(r_set, hr_graphene_set, kz_list, r_1, r_2, r_3, k_1, k_2, k_3, num_cell)
+    # plotBand4Supercell(r_set, hr_cnt_set, kz_list, r_1, r_2, r_3, k_1, k_2, k_3, num_cell)
 
 
 

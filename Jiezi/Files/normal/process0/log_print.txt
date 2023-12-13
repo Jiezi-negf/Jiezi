@@ -7,3 +7,21 @@ Length of whole device: 256.5648
 Length of gate: 42.8463216
 Thickness of cnt: 3.1433686175136217
 Thickness of oxide: 9.995912203693317
+amount of element: 89397
+amount of dof: 17654
+Dirichlet BC is: [1.0, -0.8, 1.0]
+source electrostatic doping on z axis is from 0 to 96.85923919999999
+drain electrostatic doping on z axis is from 159.7055608 to 256.5648
+mu_l: 0
+mu_r: -0.4
+doping source, channel, drain are: 0 0 0
+total fixed charge in oxide--scope:
+ radius from 4.715052926270433 to 9.713009028117092 
+ coordinate on z axis from 0 to 256.5648 
+ fixed charge in oxide--density: 0
+defect atom: [] 	 defect energy: -10
+
+
+Loop 1
+Energy list: -0.07404174573055045 to 2.27691331923889 Step of energy: 0.001
+NEGF solver(SCBA loop) start

@@ -11,20 +11,17 @@ import sys
 
 sys.path.append(os.path.abspath(__file__ + "/../../.."))
 
-from Jiezi.FEM import constant_parameters
-from Jiezi.FEM import map
+from Jiezi.FEM import constant_parameters, map
 from Jiezi.FEM.mesh import create_dof
 from Jiezi.Graph import builder
-from Jiezi.Physics import hamilton
+from Jiezi.Physics import hamilton, quantity
 from Jiezi.Physics.band import subband, get_EcEg
 from Jiezi.Physics.modespace import mode_space
 from Jiezi.Physics.SCBA import SCBA
 from Jiezi.Physics.common import *
-import Jiezi.Physics.quantity as quantity
 import numpy as np
 from Jiezi.Physics.poisson import poisson
 from Jiezi.Visualization.Data2File import phi2VTK, spectrumXY2Dat, spectrumZ2Dat
-from Jiezi.Physics.common import time_it
 
 
 @time_it
@@ -135,7 +132,7 @@ def NEGFPoisson(mul, mur, Dirichlet_BC_gate, weight_old, tol_loop, process_id):
     fixedChargeDensity = 0
     fixedChargeScope = [r_outer, (r_outer + r_oxide) / 2, 0, z_total]
     # construct doping concentration
-    doping_GP_list = constant_parameters.doping(coord_GP_list, zlength_oxide, z_translation,
+    doping_GP_list = constant_parameters.doping(coord_GP_list, zlength_oxide, z_translation, z_isolation,
                                                 doping_source, doping_drain, doping_channel, mark_list)
     # construct fixed charge in oxide
     fixedCharge_GP_list = constant_parameters.fixedChargeInit(coord_GP_list)
@@ -155,7 +152,7 @@ def NEGFPoisson(mul, mur, Dirichlet_BC_gate, weight_old, tol_loop, process_id):
     H.build_S(base_overlap=0.018)
     Ec, Eg = get_EcEg(H)
 
-    # <<<<<<<<<<<<<<<<<<<<<NEGF-Poisson Loop<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+    # <<<<<<<<<<<<<<<<<<<<<Simulator-Poisson Loop<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
     # set iter_max_big to control the big loop
     iter_big_max = 25
     iter_big = 0
@@ -247,7 +244,7 @@ def NEGFPoisson(mul, mur, Dirichlet_BC_gate, weight_old, tol_loop, process_id):
                  lead_H00_L, lead_H00_R, lead_H10_L, lead_H10_R,
                  sigma_lesser_ph, sigma_r_ph, form_factor, Dac, Dop, omega)
 
-        # <<<<<<<<<<<<<<<<<<<<<physical quantity from NEGF<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+        # <<<<<<<<<<<<<<<<<<<<<physical quantity from Simulator<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
         n_spectrum, p_spectrum = quantity.carrierSpectrum(E_list, G_lesser_fullE, G_greater_fullE, volume_cell)
         n_tol, p_tol = quantity.carrierQuantity(E_list, layer_phi_list, n_spectrum, p_spectrum)
         dos = quantity.densityOfStates(E_list, G_R_fullE, volume_cell)
@@ -295,15 +292,15 @@ def NEGFPoisson(mul, mur, Dirichlet_BC_gate, weight_old, tol_loop, process_id):
             print("current times energy:", JTimesEnergy)
             print("electron:", n_tol)
             print("hole:", p_tol)
-            # phi2VTK(phi[:, 0].real, dof_coord_list, info_mesh, path_process_Files)
-            # spectrumXY2Dat(E_list, length_single_cell, num_cell, num_supercell,
-            #                path_process_Files, "SpectrumXYForCurrent.dat")
-            # spectrumXY2Dat(E_list, length_single_cell, num_cell, num_supercell,
-            #                path_process_Files, "SpectrumXYForOthers.dat")
-            # spectrumZ2Dat(J_spectrum, path_process_Files, "currentSpectrum.dat")
-            # spectrumZ2Dat(dos, path_process_Files, "densityOfState.dat")
-            # spectrumZ2Dat(n_spectrum, path_process_Files, "electronSpectrum.dat")
-            # spectrumZ2Dat(p_spectrum, path_process_Files, "holeSpectrum.dat")
+            phi2VTK(phi[:, 0].real, dof_coord_list, info_mesh, path_process_Files)
+            spectrumXY2Dat(E_list, length_single_cell, num_cell, num_supercell,
+                           path_process_Files, "SpectrumXYForCurrent.dat")
+            spectrumXY2Dat(E_list, length_single_cell, num_cell, num_supercell,
+                           path_process_Files, "SpectrumXYForOthers.dat")
+            spectrumZ2Dat(J_spectrum, path_process_Files, "currentSpectrum.dat")
+            spectrumZ2Dat(dos, path_process_Files, "densityOfState.dat")
+            spectrumZ2Dat(n_spectrum, path_process_Files, "electronSpectrum.dat")
+            spectrumZ2Dat(p_spectrum, path_process_Files, "holeSpectrum.dat")
             print(dos)
             break
         else:

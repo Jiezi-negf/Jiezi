@@ -11,7 +11,7 @@ import sys
 sys.path.append(os.path.abspath(__file__ + "/../../.."))
 import matplotlib.pyplot as plt
 from Jiezi.Graph import builder
-from Jiezi.NEGF.tests.fake_potential import fake_potential
+from Jiezi.Simulator.tests.fake_potential import fake_potential
 from Jiezi.Physics import hamilton
 from Jiezi.Physics.band import subband
 from Jiezi.Physics.modespace import mode_space
@@ -29,7 +29,7 @@ from mpl_toolkits.mplot3d import Axes3D
 from Jiezi.Physics import hamilton, band
 from Jiezi.Graph import builder
 
-cnt = builder.CNT(n=4, m=0, Trepeat=3, nonideal=False)
+cnt = builder.CNT(n=8, m=0, Trepeat=3, nonideal=False)
 cnt.construct()
 phi = 0.0
 mul = 0.0
@@ -63,9 +63,9 @@ max_subband = max(max_temp).real
 # define Energy list that should be computed
 # start = min(mul, mur, min_subband) - 0.26
 # end = max(mul, mur, max_subband) + 0.26
-start = min_subband
-end = max_subband
-step = 0.05
+start = -2
+end = 2
+step = 0.001
 E_list = np.arange(start, end, step)
 print("E_start:", start, "E_end:", end)
 
@@ -208,12 +208,12 @@ for ee in range(len(E_list)):
     for z in range(nz):
         tre = 0.0
         for nn in range(nm):
-            tre += - 2 * G_R_inv.get_value(z * nm + nn, z * nm + nn).imag
+            tre += - G_R_inv.get_value(z * nm + nn, z * nm + nn).imag
         dos_inv[z, ee] = tre
 
     # compute the density of state DOS(E,x) by rgf method
     for z in range(nz):
-        dos_rgf[z, ee] = - 2 * G_R_rgf[z].tre().imag
+        dos_rgf[z, ee] = - G_R_rgf[z].tre().imag
 
     # # store G_lesser[ee][0] to compute n
     # G_lesser_0.append(G_lesser[1].tre())
@@ -234,8 +234,8 @@ for band_k in band:
 
 ax2 = ax1.twiny()
 # ax2.invert_xaxis()
-ax2.plot(dos_inv[0, :], E_list, color='blue', label="inv_1")
-ax2.plot(dos_rgf[0, :], E_list, color='green', label="rgf_1")
+ax2.plot(dos_inv[1, :], E_list, color='blue', label="inv_1")
+ax2.plot(dos_rgf[1, :], E_list, color='green', label="rgf_1")
 plt.legend()
 plt.show()
 
