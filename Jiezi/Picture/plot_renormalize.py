@@ -16,7 +16,7 @@ import numpy as np
 from Jiezi.Physics import hamilton
 from Jiezi.Graph import builder
 
-cnt = builder.CNT(n=4, m=0, Trepeat=6, nonideal=False)
+cnt = builder.CNT(n=10, m=0, Trepeat=6, nonideal=False)
 cnt.construct()
 H = hamilton.hamilton(cnt, onsite=0, hopping=-2.97)
 H.build_H()
@@ -25,7 +25,7 @@ Hii_cell = H.get_Hii()[1]
 Hi1_cell = H.get_Hi1()[1]
 size = Hii_cell.get_size()[0]
 L = 1
-k_points = np.arange(-np.pi / L, np.pi / L, 0.05)
+# k_points = np.arange(-np.pi / L, np.pi / L, 0.05)
 
 # ***** renormalize based on sancho-rubio *****
 eta = 5e-6

@@ -242,7 +242,7 @@ cnt.construct()
 1. Build Hamiltonian matrix based on connections among atoms, on-site value, and hopping value.
 
 ```python
-H = hamilton.hamilton(cnt, onsite=-0.28, hopping=-2.97)
+H = hamilton.hamilton(cnt, onsite=0.0, hopping=-2.97)
 H.build_H()
 H.build_S(base_overlap=0.018)
 Hii = H.get_Hii()
@@ -316,7 +316,7 @@ Mii_cnt, Mi1_cnt = w90_supercell_matrix(r_set, hr_cnt_set, r_1, r_2, r_3, k_1, k
 ```python
 cnt = builder.CNT(n=8, m=0, Trepeat=60, nonideal=False)
 cnt.construct()
-H = hamilton.hamilton(cnt, onsite=-0.28, hopping=-2.97)
+H = hamilton.hamilton(cnt, onsite=0.0, hopping=-2.97)
 H.build_H()
 H.build_S(base_overlap=0.018)
 H.H_readw90(Mii_total, Mi1_total, Mii_cnt, Mi1_cnt, num_supercell)
@@ -349,7 +349,7 @@ import matplotlib.pyplot as plt
 # build CNT and its Hmiltonian matrix
 cnt = builder.CNT(n=4, m=0, Trepeat=3, nonideal=False)
 cnt.construct()
-H = hamilton.hamilton(cnt, onsite=-0.28, hopping=-2.97)
+H = hamilton.hamilton(cnt, onsite=0.0, hopping=-2.97)
 H.build_H()
 H.build_S(base_overlap=0.018)
 # compute subband and eigenvector on specific K point
@@ -361,9 +361,9 @@ Because of quantum confinement in XY plane, the subband can be observed in band 
 For CNT, the minimum conduction band energy value is at the point where k=0. So the energy band gap and the bottom of conduction band can be got by the following code:
 
 ```python
-Ec, Eg = band.get_EcEg(H)
-print("bottom of conduction band is:", Ec)
-print("band gap is:", Eg)
+Ec, Ev, Eg = get_EcEg(Hii, Hi1)
+print("Ec is", Ec)
+print("Ev is", Ev)
 ```
 
 As long as the parameters of the k-point list are set, the band structure can be computed and plotted on the screen:
@@ -495,7 +495,7 @@ cnt = builder.CNT(n=4, m=0, Trepeat=3, nonideal=False)
 cnt.construct()
 mul = 0.0
 mur = 0.0
-H = hamilton.hamilton(cnt, onsite=-0.018, hopping=-2.97)
+H = hamilton.hamilton(cnt, onsite=0.0, hopping=-2.97)
 H.build_H()
 H.build_S(base_overlap=0.018)
 
@@ -732,10 +732,10 @@ The example can be separated into the following steps:
 9. Compute conduction band bottom and band gap.
 
 ```python
-    H = hamilton.hamilton(cnt, onsite=-0.28, hopping=-2.97)
+    H = hamilton.hamilton(cnt, onsite=0.0, hopping=-2.97)
     H.build_H()
     H.build_S(base_overlap=0.018)
-    Ec, Eg = get_EcEg(H)
+    Ec, Ev, Eg = get_EcEg(Hii, Hi1)
 ```
 
    Start the NEGF-Poisson loop:
@@ -759,7 +759,7 @@ while iter_big < iter_big_max:
 11. Build Hamiltonian matrix with the influence of phi.
 
 ```python
-        H = hamilton.hamilton(cnt, onsite=-0.28, hopping=-2.97)
+        H = hamilton.hamilton(cnt, onsite=0.0, hopping=-2.97)
         H.build_H()
         H.build_S(base_overlap=0.018)
         layer_phi_list = H.H_add_phi(dict_cell, phi_cell, cell_co, cut_radius, cut_z, r_oxide, z_total, num_supercell)
@@ -770,6 +770,7 @@ while iter_big < iter_big_max:
 14. Poisson solver starts. Mode 1 is the non-linear solver, mode 2 is the linear solver and mode 3 is the analytical solver which has not been developed. If mode is 1, the quasi-Fermi level solver will be called so the guess value should be initialized. 
 
 ```python
+        # set the initial value of ef
         ef_init_n = np.ones([len(info_mesh), 4]) * (-1e2)
         ef_init_p = np.ones([len(info_mesh), 4]) * 1e2
         TOL_ef = 1e-4
@@ -778,9 +779,8 @@ while iter_big < iter_big_max:
         mode = 1
         phi = poisson(mode, info_mesh, N_GP_T, cell_long_term, cell_NJ, cell_NNTJ, cnt_cell_list,
                       ef_init_n, ef_init_p, mark_list,
-                      Dirichlet_list, Dirichlet_BC, E_list, Ec, Eg, TOL_ef, TOL_du, iter_NonLinearPoisson_max,
+                      Dirichlet_list, Dirichlet_BC, E_list_poi, Ec, Eg, TOL_ef, TOL_du, iter_NonLinearPoisson_max,
                       dos_GP_list, n_GP_list, p_GP_list, doping_GP_list, fixedCharge_GP_list, phi_guess, dof_amount)
-
 ```
 
 15. Test whether the difference between two adjacent iterations is small enough.

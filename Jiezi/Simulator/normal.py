@@ -146,7 +146,7 @@ def normal(mul, mur, Dirichlet_BC_gate, weight_old, tol_loop, process_id):
 
     # set fixed charge parameters in oxide
     fixedChargeDensity = 0
-    fixedChargeScope = [r_outer, (r_outer + r_oxide) / 2, 0, z_total]
+    fixedChargeScope = [r_outer, (r_outer + r_oxide) / 2, z_translation, z_translation + zlength_oxide]
 
     # construct doping concentration
     doping_GP_list = constant_parameters.doping(coord_GP_list, zlength_oxide, z_translation, z_isolation,

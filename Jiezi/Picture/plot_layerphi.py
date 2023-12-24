@@ -15,11 +15,11 @@ import numpy as np
 sys.path.append(os.path.abspath(__file__ + "/../../.."))
 import matplotlib.pyplot as plt
 
-file_path_root = "/home/zjy/slurmfile/gra/"
+file_path_root = "/home/zjy/slurmfile/9718553/"
 # read axis-Z
-nz = 30
-amountFiles = 9
-dataEZ = np.loadtxt(file_path_root + "process9/" + "SpectrumXYForOthers.dat")
+nz = 60
+amountFiles = 2
+dataEZ = np.loadtxt(file_path_root + "process1/" + "SpectrumXYForOthers.dat")
 axisZ = dataEZ[0:nz, 1:2]
 dataPlot = np.zeros((nz, amountFiles + 1))
 EcPlot = np.zeros((nz, amountFiles + 1))
@@ -32,7 +32,7 @@ Ec = 0
 Ev = 0
 # # read axisE
 # axisE = dataEZ[:, 0].take(np.arange(0, dataEZ.shape[0], nz))
-for i in range(9, amountFiles + 1):
+for i in range(1, amountFiles + 1):
     file_path = file_path_root + "process" + str(i) +"/log_print.txt"
     with open(file_path, "r") as f:
         lines = f.readlines()

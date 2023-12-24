@@ -19,7 +19,7 @@ sys.path.append("../../../")
 E_start = -1.66
 nz = 60
 E_step = 0.001
-file_path = "/home/zjy/slurmfile/9627358/process3/currentSpectrum.dat"
+file_path = "/home/zjy/slurmfile/9717404/process7/currentSpectrum.dat"
 # file_path = "/home/zjy/slurmfile/slurm-9576981/process1/electronSpectrum.dat"
 
 with open(file_path, "r") as f:

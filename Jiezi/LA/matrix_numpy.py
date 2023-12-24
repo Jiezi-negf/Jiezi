@@ -155,4 +155,3 @@ class matrix_numpy(matrix):
 
     def get_type(self):
         return self.__type
-

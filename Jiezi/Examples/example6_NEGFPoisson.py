@@ -15,7 +15,7 @@ from Jiezi.FEM import constant_parameters, map
 from Jiezi.FEM.mesh import create_dof
 from Jiezi.Graph import builder
 from Jiezi.Physics import hamilton, quantity
-from Jiezi.Physics.band import subband, get_EcEg
+from Jiezi.Physics.band import subband, get_EcEg, band2dos
 from Jiezi.Physics.modespace import mode_space
 from Jiezi.Physics.SCBA import SCBA
 from Jiezi.Physics.common import *
@@ -27,6 +27,7 @@ from Jiezi.Visualization.Data2File import phi2VTK, spectrumXY2Dat, spectrumZ2Dat
 @time_it
 def NEGFPoisson(mul, mur, Dirichlet_BC_gate, weight_old, tol_loop, process_id):
     # <<<<<<<<<<<<<set the path for Input or output files<<<<<<<<<<<<<<<<<<<<<<<
+    # set the path for writing or reading files
     # path_Files is the path of the shared files among process
     path_Files = os.path.abspath(os.path.join(__file__, "../..", "Files"))
     # path_process_Files is the private files of each process
@@ -65,7 +66,6 @@ def NEGFPoisson(mul, mur, Dirichlet_BC_gate, weight_old, tol_loop, process_id):
     length_single_cell = cnt.get_singlecell_length()
     z_total = cnt.get_length()
     num_supercell = 1
-    volume_cell = math.pi * radius_tube ** 2 * length_single_cell
     print("Amount of atoms in single cell:", num_atom_cell)
     print("Total amount of atoms:", num_atom_total)
     print("Radius of tube:", radius_tube)
@@ -73,7 +73,7 @@ def NEGFPoisson(mul, mur, Dirichlet_BC_gate, weight_old, tol_loop, process_id):
     print("Length of whole device:", z_total)
     width_cnt_scale = 1
     width_oxide_scale = 3.18
-    z_length_oxide_scale = 0.167
+    z_length_oxide_scale = 0.334
     width_cnt = width_cnt_scale * radius_tube
     zlength_oxide = z_length_oxide_scale * z_total
     width_oxide = width_oxide_scale * radius_tube
@@ -86,6 +86,7 @@ def NEGFPoisson(mul, mur, Dirichlet_BC_gate, weight_old, tol_loop, process_id):
     z_translation = 0.5 * (z_total - zlength_oxide)
     z_isolation = 10
     geo_para = [r_inter, r_outer, r_oxide, z_total, zlength_oxide, z_translation, z_isolation]
+    volume_cell = math.pi * length_single_cell * (2 * width_cnt * r_inter + width_cnt ** 2) * num_supercell
 
     # <<<<<<<<<<<<<<<<<<<read mesh information from .dat file<<<<<<<<<<<<<<<<<<<<<
     path_dat = path_Files + "/Mesh_whole.dat"
@@ -147,10 +148,17 @@ def NEGFPoisson(mul, mur, Dirichlet_BC_gate, weight_old, tol_loop, process_id):
     # <<<<<<<<<<<<<<<<<<<<<compute Ec and Eg<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
     # compute the bottom of the conduction band energy Ec and the energy width of the forbidden band Eg(band gap)
     # build hamilton matrix
-    H = hamilton.hamilton(cnt, onsite=-0.28, hopping=-2.97)
+    H = hamilton.hamilton(cnt, onsite=0.0, hopping=-2.97)
     H.build_H()
     H.build_S(base_overlap=0.018)
-    Ec, Eg = get_EcEg(H)
+    Hii = H.get_Hii()[1]
+    Hi1 = H.get_Hi1()[1]
+    L = length_single_cell
+    k_points = np.arange(-np.pi / L, np.pi / L, 2 * np.pi / num_cell / L / 1000)
+    bandArray = hamilton.compute_band(Hii, Hi1, L, k_points)
+    Ec, Ev, Eg = get_EcEg(Hii, Hi1)
+    print("Ec is", Ec)
+    print("Ev is", Ev)
 
     # <<<<<<<<<<<<<<<<<<<<<Simulator-Poisson Loop<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
     # set iter_max_big to control the big loop
@@ -167,7 +175,7 @@ def NEGFPoisson(mul, mur, Dirichlet_BC_gate, weight_old, tol_loop, process_id):
 
 
         # <<<<<<<<<<<<<<<<<build hamilton matrix with phi<<<<<<<<<<<<<<<<<<<<<<<<<<
-        H = hamilton.hamilton(cnt, onsite=-0.28, hopping=-2.97)
+        H = hamilton.hamilton(cnt, onsite=0.0, hopping=-2.97)
         H.build_H()
         H.build_S(base_overlap=0.018)
         layer_phi_list = H.H_add_phi(dict_cell, phi_cell, cell_co, cut_radius, cut_z, r_oxide, z_total, num_supercell)
@@ -196,8 +204,8 @@ def NEGFPoisson(mul, mur, Dirichlet_BC_gate, weight_old, tol_loop, process_id):
         max_subband = max(max_temp).real
 
         # define Energy list that should be computed
-        E_start = min(mul, mur, min_subband) - 10 * KT + 9
-        E_end = max(mul, mur, max_subband) + 10 * KT - 7
+        E_start = min(mul, mur) - 10 * KT - 0.0005 - 1
+        E_end = max(mul, mur) + 10 * KT + 1
         E_step = 0.001
         E_list = np.arange(E_start, E_end, E_step)
         print("Energy list:", E_start, "to", E_end, "Step of energy:", E_step)
@@ -247,7 +255,16 @@ def NEGFPoisson(mul, mur, Dirichlet_BC_gate, weight_old, tol_loop, process_id):
         # <<<<<<<<<<<<<<<<<<<<<physical quantity from Simulator<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
         n_spectrum, p_spectrum = quantity.carrierSpectrum(E_list, G_lesser_fullE, G_greater_fullE, volume_cell)
         n_tol, p_tol = quantity.carrierQuantity(E_list, layer_phi_list, n_spectrum, p_spectrum)
-        dos = quantity.densityOfStates(E_list, G_R_fullE, volume_cell)
+
+        E_start_poi = -1 - 0.0005
+        E_end_poi = 3
+        E_step_poi = 0.01
+        E_list_poi = np.arange(E_start_poi, E_end_poi, E_step_poi)
+        dos0 = band2dos(bandArray, E_list_poi)
+        dos0 = list(dos0[:, 1] / volume_cell / 1000 / num_cell / E_step_poi)
+        dos = [list] * len(E_list_poi)
+        for ee in range(len(E_list_poi)):
+            dos[ee] = [dos0[ee]] * nz
 
         print("layer_phi:", layer_phi_list)
         print("n_tol:", n_tol)
@@ -259,6 +276,7 @@ def NEGFPoisson(mul, mur, Dirichlet_BC_gate, weight_old, tol_loop, process_id):
 
         # <<<<<<<<<<<<<<<<<<<<<<solve poisson equation<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
         # set the initial value of ef
+        # set the initial value of ef
         ef_init_n = np.ones([len(info_mesh), 4]) * (-1e2)
         ef_init_p = np.ones([len(info_mesh), 4]) * 1e2
         TOL_ef = 1e-4
@@ -267,7 +285,7 @@ def NEGFPoisson(mul, mur, Dirichlet_BC_gate, weight_old, tol_loop, process_id):
         mode = 1
         phi = poisson(mode, info_mesh, N_GP_T, cell_long_term, cell_NJ, cell_NNTJ, cnt_cell_list,
                       ef_init_n, ef_init_p, mark_list,
-                      Dirichlet_list, Dirichlet_BC, E_list, Ec, Eg, TOL_ef, TOL_du, iter_NonLinearPoisson_max,
+                      Dirichlet_list, Dirichlet_BC, E_list_poi, Ec, Eg, TOL_ef, TOL_du, iter_NonLinearPoisson_max,
                       dos_GP_list, n_GP_list, p_GP_list, doping_GP_list, fixedCharge_GP_list, phi_guess, dof_amount)
 
         # test if phi is convergence

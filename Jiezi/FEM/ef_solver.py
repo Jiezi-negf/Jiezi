@@ -67,12 +67,12 @@ def ef_solver(u_init, N_GP_T, dos_GP_list, n_GP_list, p_GP_list, ef_init_n, ef_i
             u_init_vec.copy(u_init[cnt_cell_index].reshape(u_init[cnt_cell_index].shape[0], 1))
             u_GP = op.vecdotvec(N_GP_T[GP_index], u_init_vec)
             ef_n_i = brent("n", zero_index, E_list, E_list_n, E_step, Ec, Eg, u_GP,
-                           dos_GP_list[cnt_cell_index][GP_index], n_GP_list[cnt_cell_index][GP_index],
+                           dos_GP_list[cnt_cell_index][GP_index], max((1e-22, n_GP_list[cnt_cell_index][GP_index])),
                            E_list[0]-10, E_list[len(E_list) - 1]+10, 0, TOL_ef)
-            # ef_p_i = brent("p", zero_index, E_list, E_list_p, E_step, Ec, Eg, u_GP,
-            #                dos_GP_list[cnt_cell_index][GP_index], p_GP_list[cnt_cell_index][GP_index],
-            #                E_list[0]-10, E_list[len(E_list) - 1]+10, TOL_ef, TOL_ef)
-            ef_p_i = 1e2
+            ef_p_i = brent("p", zero_index, E_list, E_list_p, E_step, Ec, Eg, u_GP,
+                           dos_GP_list[cnt_cell_index][GP_index], max((1e-22, p_GP_list[cnt_cell_index][GP_index])),
+                           E_list[0]-10, E_list[len(E_list) - 1]+10, 0, TOL_ef)
+            # ef_p_i = 1e2
             # test if the function has root, if there is no root in the interval, break the loop
             if ef_n_i == None:
                 print("ef_solver failed during ef_n solution")
@@ -372,6 +372,5 @@ def brent(flag_np, zero_index, E_list, E_list_np, E_step, Ec, Eg, phi, dos, dens
             b = copy.deepcopy(m)
             iter_brent += 1
             continue
-
 
 

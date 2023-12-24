@@ -14,7 +14,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # build CNT and its Hmiltonian matrix
-cnt = builder.CNT(n=5, m=5, Trepeat=3, nonideal=False)
+cnt = builder.CNT(n=10, m=0, Trepeat=3, nonideal=False)
 cnt.construct()
 amountAtomsSingle = cnt.get_nn()
 lengthSingleCell = cnt.get_singlecell_length()

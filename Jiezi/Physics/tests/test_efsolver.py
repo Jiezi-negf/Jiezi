@@ -25,7 +25,7 @@ Hii_0 = H.get_Hii()[1]
 Hi1_0 = H.get_Hi1()[1]
 
 
-phi = 0.7
+phi = 1
 mul = 0.0
 mur = -0.4
 H = hamilton.hamilton(cnt, onsite=-phi-0, hopping=-2.97)
@@ -82,7 +82,7 @@ for ee in range(len(E_list)):
     G_greater_fullE[ee] = G_greater
 n_spectrum_rgf, p_spectrum_rgf = quantity.carrierSpectrum(E_list, G_lesser_fullE, G_greater_fullE, volume_cell)
 n_tol_rgf, p_tol_rgf = quantity.carrierQuantity(E_list, layer_phi_list, n_spectrum_rgf, p_spectrum_rgf)
-print(n_tol_rgf)
+print(p_tol_rgf)
 
 E_start_poi = -1
 E_end_poi = 3
@@ -111,3 +111,8 @@ for ef_i in ef_set:
     result = np.trapz(2 * np.asarray(dos)[zero_index:] * fermi(E_list_n - ef_i), dx=E_step_poi)
     print(ef, result)
 print(ef)
+
+ef_p = brent("p", zero_index, E_list, E_list_p, E_step_poi, 0, 0, phi,
+                           dos, 1e-22,
+                           E_list[0]-10, E_list[len(E_list) - 1]+10, 0, TOL_ef)
+print(ef_p)

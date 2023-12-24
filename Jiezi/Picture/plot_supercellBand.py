@@ -17,11 +17,11 @@ import matplotlib.pyplot as plt
 from Jiezi.Physics import hamilton
 from Jiezi.Graph import builder
 
-cnt = builder.CNT(n=4, m=0, Trepeat=6, nonideal=False)
+cnt = builder.CNT(n=16, m=0, Trepeat=6, nonideal=False)
 cnt.construct()
 H = hamilton.hamilton(cnt, onsite=0, hopping=-2.97)
 H.build_H()
-H.build_S(base_overlap=0.0)
+H.build_S(base_overlap=0.018)
 Hii_cell = H.get_Hii()[1]
 Hi1_cell = H.get_Hi1()[1]
 size = Hii_cell.get_size()[0]
@@ -34,8 +34,8 @@ k_points_2 = k_points / 2
 k_points_4 = k_points / 4
 
 # plot band structure
-Hii_double, Hi1_double = hamilton.H_extendSize(Hii_cell, Hi1_cell, 2)
-band = hamilton.compute_band(Hii_double, Hi1_double, L_2, k_points_2)
+Hii_double, Hi1_double = hamilton.H_extendSize(Hii_cell, Hi1_cell, 4)
+band = hamilton.compute_band(Hii_double, Hi1_double, L_4, k_points_4)
 num_kpoints = band.shape[0]
 num_bands = band.shape[1]
 k_points_X = k_points.reshape((num_kpoints, 1))
@@ -43,6 +43,6 @@ dataXY = np.zeros((num_kpoints, num_bands + 1))
 dataXY[0:, 0:1] = k_points_X
 dataXY[0:, 1:] = band
 path_Files = os.path.abspath(os.path.join(__file__, "../..", "Files"))
-fileName = "/40CNTbandsupercell2.dat"
+fileName = "/160CNTbandsupercell4.dat"
 fname = path_Files + fileName
 np.savetxt(fname, dataXY, fmt='%.18e', delimiter=' ', newline='\n')

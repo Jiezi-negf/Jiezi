@@ -16,16 +16,18 @@ import matplotlib.pyplot as plt
 # build CNT and its Hmiltonian matrix
 cnt = builder.CNT(n=4, m=0, Trepeat=3, nonideal=False)
 cnt.construct()
-H = hamilton.hamilton(cnt, onsite=-0.28, hopping=-2.97)
+H = hamilton.hamilton(cnt, onsite=0.0, hopping=-2.97)
 H.build_H()
 H.build_S(base_overlap=0.018)
+Hii = H.get_Hii()[1]
+Hi1 = H.get_Hi1()[1]
 # compute subband and eigenvector on specific K point
 E_subband, U = band.subband(H, k=0)
 
 # compute the bottom of conduction band and the band gap
-Ec, Eg = band.get_EcEg(H)
-print("bottom of conduction band is:", Ec)
-print("band gap is:", Eg)
+Ec, Ev, Eg = band.get_EcEg(Hii, Hi1)
+print("Ec is", Ec)
+print("Ev is", Ev)
 
 # plot band structure on the given k path
 k_total, energy_band = band.band_structure(H, -np.pi, np.pi, 0.1)
