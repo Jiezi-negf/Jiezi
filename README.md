@@ -6,7 +6,7 @@
 
 In the current version, most of the examples and modules are designed to be convenient for simulating gate-all-around carbon Nanotube Field-effect transistor (CNTFET), but it's extendable to more general cases with tiny changes.
 
-The feasibility of Jieziis was only verified on Linux system.
+The feasibility of Jiezi was only verified on Linux system.
 
 ## Getting started
 
@@ -104,7 +104,7 @@ All unit test files are in the directory `Jiezi/Jiezi/tests` . After the install
 
 Below we describe how to build the carbon nanotube structure.
 
-0. Import necessary module, especially `duilder`:
+0. Import necessary module, especially `builder`:
 
 ```python
 import sys
@@ -521,8 +521,8 @@ for energy in E_subband:
 min_subband = min(min_temp).real
 max_subband = max(max_temp).real
 
-E_start = min(mul, mur, min_subband) - 10 * KT + 7
-E_end = max(mul, mur, max_subband) + 10 * KT - 6.5
+E_start = min(mul, mur) - 10 * KT - 0.0005 - 1
+E_end = max(mul, mur) + 10 * KT + 1
 E_step = 0.001
 E_list = np.arange(E_start, E_end, E_step)
 print("Energy list:", E_start, "to", E_end, "Step of energy:", E_step)
@@ -556,7 +556,7 @@ G_R, G_lesser, G_greater, G1i_lesser, Sigma_left_lesser, Sigma_left_greater, \
 
 ### PhysicalQuantity
 
-Example "SingleEnergyGF" shows Green's function computation on one specific energy, which is the basis to get physical quantities such as carrier density and local density of states. This example loops over the interested energy range and obtains the values of the physical quantity at each energy point. Although the code about "Self-consistent Born Approximation(SCBA)" has been written, in this version the code of phonon part in SCBA loop is annotated. User can enable this function by uncommenting relevant lines.
+Example "SingleEnergyGF" shows Green's function computation on one specific energy, which is the basis to get physical quantities such as carrier density and local density of states. This example loops over the interested energy range and obtains the values of the physical quantity at each energy point. 
 
 The first three steps are the same as example "SingleEnergyGF". After that, the SCBA  loop can be started:
 
@@ -565,12 +565,6 @@ iter_SCBA_max = 10
 TOL_SCBA = 1e-100
 ratio_SCBA = 0.5
 eta = 5e-6
-ac = 2.5
-op = 1.0e8
-v_s = 5.0e5
-omega = 4
-# Dac = ac ** 2 * KT / (cnt.get_mass_density() * v_s ** 2)
-# Dop = (h_bar * op) ** 2 / (2 * cnt.get_mass_density() * omega * E_step)
 Dac = 0
 Dop = 0
 G_R_fullE, G_lesser_fullE, G_greater_fullE, G1i_lesser_fullE, \
@@ -580,7 +574,17 @@ G_R_fullE, G_lesser_fullE, G_greater_fullE, G1i_lesser_fullE, \
          sigma_lesser_ph, sigma_r_ph, form_factor, Dac, Dop, omega)
 ```
 
-The output matrix contains $\Sigma_{R,L}^{>,<}$, the diagonal element of  $G^R,G^<,G^>$, and the off-diagonal element of $G^<$, which can be used to obtain the carrier density and density of states.
+Although the code about "Self-consistent Born Approximation(SCBA)" has been written, in this version the code of phonon part in SCBA loop is annotated. User can enable this function by replacing `SCBA` with `SCBAopen`.
+
+```python
+energyOP, coupleOP, coupleAC = phononPara(cnt)
+G_R_fullE, G_lesser_fullE, G_greater_fullE, G1i_lesser_fullE, \
+Sigma_left_lesser_fullE, Sigma_left_greater_fullE, Sigma_right_lesser_fullE, Sigma_right_greater_fullE = \
+SCBAopen(E_list, iter_SCBA_max, TOL_SCBA, ratio_SCBA, eta, mul, mur, Hii_new, Hi1_new, Sii_new, S00,lead_H00_L, lead_H00_R, lead_H10_L, lead_H10_R,
+sigma_lesser_ph, sigma_r_ph, form_factor, coupleAC, coupleOP, energyOP)
+```
+
+The output matrix contains $\Sigma_{R,L}^{>,<}$, the diagonal element of  $G^R,G^<,G^>$, and the off-diagonal element of $G^<$, which can be used to obtain the carrier density and density of states. It should be noticed that although the name of these variable are lesser or greater, they indicates the $\Sigma^{in/out}$ and $G^{n/p}$.
 
 ```python
 n_spectrum, p_spectrum = quantity.carrierSpectrum(E_list, G_lesser_fullE, G_greater_fullE, volume_cell)

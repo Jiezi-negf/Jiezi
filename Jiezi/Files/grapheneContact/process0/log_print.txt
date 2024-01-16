@@ -4,8 +4,7 @@ Total amount of atoms: 1920
 Radius of tube: 3.1433686175136217
 Length of single cell: 4.276079999999999
 Length of whole device: 256.5648
-Length of gate: 42.8463216
+Length of gate: 85.6926432
 Thickness of cnt: 3.1433686175136217
 Thickness of oxide: 9.995912203693317
-amount of element: 89397
-amount of dof: 17654
+Backend TkAgg is interactive backend. Turning interactive mode on.

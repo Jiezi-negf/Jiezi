@@ -17,10 +17,12 @@ import time
 h = 4.1357e-15
 h_bar = h/(2 * math.pi)
 q_unit = 1.6e-19
+h_bar_J = h_bar * q_unit
 # mul = -1.0
 # mur = -2.0
 KT = 0.026
-
+KB_J = 1.38e-23
+T = 300
 
 # geometric parameters
 r_inter, r_oxide, cnt_radius, width_cnt, width_oxide, z_total, zlength_oxide = 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
@@ -46,7 +48,7 @@ def time_it(func):
     return inner
 
 
-def bose(E, BOSE=1.0, TEMP=1.0):
+def bose(E):
     return 1.0 / (math.exp(E /KT) - 1.0)
 
 
@@ -84,3 +86,4 @@ def ifdagger(mat: matrix_numpy):
         for j in range(col):
             error += np.sqrt(delta.get_value(i, j).imag ** 2 + delta.get_value(i, j).real ** 2)
     return error
+

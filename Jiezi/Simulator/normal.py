@@ -181,7 +181,7 @@ def normal(mul, mur, Dirichlet_BC_gate, weight_old, tol_loop, process_id):
     print("defect atom:", defect_index, '\t', "defect energy:", defect_energy)
 
     # set iter_max_big to control the big loop
-    iter_big_max = 25
+    iter_big_max = 1
     iter_big = 0
     while iter_big < iter_big_max:
         iter_big += 1
@@ -256,12 +256,7 @@ def normal(mul, mur, Dirichlet_BC_gate, weight_old, tol_loop, process_id):
         TOL_SCBA = 1e-100
         ratio_SCBA = 0.5
         eta = 5e-6
-        ac = 2.5
-        op = 1.0e8
-        v_s = 5.0e5
         omega = 4
-        # Dac = ac ** 2 * KT / (cnt.get_mass_density() * v_s ** 2)
-        # Dop = (h_bar * op) ** 2 / (2 * cnt.get_mass_density() * omega * E_step)
         Dac = 0
         Dop = 0
         G_R_fullE, G_lesser_fullE, G_greater_fullE, G1i_lesser_fullE, \

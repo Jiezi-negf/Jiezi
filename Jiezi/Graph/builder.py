@@ -161,8 +161,9 @@ class CNT:
     def get_singlecell_length(self):
         return self.__Tlength
 
-    def get_mass_density(self):
-        # the unit is g/cm^3
-        rho = self.__nn * 1.993e-23 / (math.pi * (self.__radius * 1e-8) ** 2 * self.__Tlength * 1e-8)
+    def get_mass(self):
+        rho = self.__nn * 1.993e-26
         return rho
 
+    def get_chirality(self):
+        return self.__n, self.__m
