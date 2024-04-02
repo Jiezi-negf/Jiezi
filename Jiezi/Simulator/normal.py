@@ -385,16 +385,14 @@ def normal(mul, mur, Dirichlet_BC_gate, weight_old, tol_loop, process_id):
         print("big loop reach iteration times limit:", iter_big_max)
     return
 
+if __name__ == "__main__":
+    mul = float(sys.argv[1])
+    mur = float(sys.argv[2])
+    V_gate = float(sys.argv[3])
+    weight_old = float(sys.argv[4])
+    tol_loop = float(sys.argv[5])
+    process_id = int(sys.argv[6])
+    normal(mul, mur, V_gate, weight_old, tol_loop, process_id)
 
-# if __name__ == "__main__":
-#     mul = float(sys.argv[1])
-#     mur = float(sys.argv[2])
-#     V_gate = float(sys.argv[3])
-#     weight_old = float(sys.argv[4])
-#     tol_loop = float(sys.argv[5])
-#     process_id = int(sys.argv[6])
-#     normal(mul, mur, V_gate, weight_old, tol_loop, process_id)
-
-normal(0, -0.4, 1, 0.1, 0.0, 1)
 
 
