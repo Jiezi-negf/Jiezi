@@ -67,8 +67,16 @@ def phononPara(cnt):
     energyIntraRBM = float(format(0.028 / diameter_nm, '.3f'))
     energyInterLOTA = 0.18
     energyOP = [energyIntraLO, energyIntraRBM, energyInterLOTA]
+<<<<<<< HEAD
     DopIntraLO = 9.8e-3 * 16 / n * 8
     DopIntraRBM = 0.54e-3 * 16 / n * 8
     DopInterLOTA = 19.3e-3 * 16 / n * 8
     Dop = [DopIntraLO, DopIntraRBM, DopInterLOTA]
     return energyOP, Dop, Dac
+=======
+    DopIntraLO = 9.8e-3 * 16 / n
+    DopIntraRBM = 0.54e-3 * 16 / n
+    DopInterLOTA = 19.3e-3 * 16 / n
+    Dop = [DopIntraLO, DopIntraRBM, DopInterLOTA]
+    return energyOP, Dop, Dac
+>>>>>>> 4a04ebaf72dc14a26e08205ee24ded2a97f1b2cc

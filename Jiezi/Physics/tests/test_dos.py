@@ -11,7 +11,7 @@ import sys
 sys.path.append(os.path.abspath(__file__ + "/../../.."))
 import matplotlib.pyplot as plt
 from Jiezi.Graph import builder
-from Jiezi.NEGF.tests.fake_potential import fake_potential
+from Jiezi.Simulator.tests.fake_potential import fake_potential
 from Jiezi.Physics import hamilton
 from Jiezi.Physics.band import subband
 from Jiezi.Physics.modespace import mode_space

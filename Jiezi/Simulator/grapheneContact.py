@@ -384,12 +384,12 @@ def grapheneContact(mul, mur, Dirichlet_BC_gate, weight_old, tol_loop, process_i
     return
 
 
-if __name__ == "__main__":
-    mul = float(sys.argv[1])
-    mur = float(sys.argv[2])
-    V_gate = float(sys.argv[3])
-    weight_old = float(sys.argv[4])
-    tol_loop = float(sys.argv[5])
-    process_id = int(sys.argv[6])
-    grapheneContact(mul, mur, V_gate, weight_old, tol_loop, process_id)
-# grapheneContact(0, -0.4, -0.8, 0.5, 1e-4, 0)
+# if __name__ == "__main__":
+#     mul = float(sys.argv[1])
+#     mur = float(sys.argv[2])
+#     V_gate = float(sys.argv[3])
+#     weight_old = float(sys.argv[4])
+#     tol_loop = float(sys.argv[5])
+#     process_id = int(sys.argv[6])
+#     grapheneContact(mul, mur, V_gate, weight_old, tol_loop, process_id)
+grapheneContact(0, -0.4, -0.8, 0.5, 1e-4, 0)

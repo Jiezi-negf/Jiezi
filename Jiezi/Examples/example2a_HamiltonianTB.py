@@ -13,7 +13,7 @@ from Jiezi.Graph import builder
 
 cnt = builder.CNT(n=8, m=0, Trepeat=3, nonideal=False)
 cnt.construct()
-H = hamilton.hamilton(cnt, onsite=-0.28, hopping=-2.97)
+H = hamilton.hamilton(cnt, onsite=0.0, hopping=-2.97)
 H.build_H()
 H.build_S(base_overlap=0.018)
 Hii = H.get_Hii()

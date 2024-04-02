@@ -47,7 +47,7 @@ def SCBAopen(E_list, iter_max: int, TOL, ratio, eta, mul, mur, Hii, Hi1, Sii, S0
         for ee in range(len(E_list)):
             G_R_ee, G_lesser_ee, G_greater_ee, G1i_lesser_ee, \
             Sigma_left_lesser_ee, Sigma_left_greater_ee, Sigma_right_lesser_ee, Sigma_right_greater_ee = \
-                rgf(ee, E_list, eta, mul, mur, Hii, Hi1, Sii, 
+                rgf(ee, E_list, eta, mul, mur, Hii, Hi1, Sii,
                     sigma_lesser_ph_fullE, sigma_r_ph_fullE)
             # G_R_fullE, G_lesser_fullE, G_greater_fullE, G1i_lesser_fullE : [[], [], ...]
             # for example, length of G_lesser_fullE is len(E_list)
@@ -80,7 +80,7 @@ def SCBAopen(E_list, iter_max: int, TOL, ratio, eta, mul, mur, Hii, Hi1, Sii, S0
         for ee in range(len(E_list)):
             for zz in range(nz):
                 error = error + np.sum(np.absolute(sigma_lesser_ph_fullE[ee][zz].get_value()
-                                    - sigma_lesser_ph_fullE_new[ee][zz].get_value())) 
+                                    - sigma_lesser_ph_fullE_new[ee][zz].get_value()))
         error = error/(len(E_list) * nz * nm * nm)
 
         # store the error

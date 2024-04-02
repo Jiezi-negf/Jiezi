@@ -12,7 +12,7 @@ sys.path.append("../../../")
 import Jiezi.Graph.builder as builder
 from Jiezi.Visualization.Data2File import atomPos2XYZ
 
-cnt = builder.CNT(8, 0, 1, a_cc=1.42536)
+cnt = builder.CNT(8, 0, 2, a_cc=1.42536)
 cnt.construct()
 cnt.data_print()
 # cnt.data_plot()

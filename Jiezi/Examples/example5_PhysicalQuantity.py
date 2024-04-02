@@ -22,7 +22,7 @@ z_total = cnt.get_length()
 volume_cell = math.pi * radius_tube ** 2 * length_single_cell
 mul = 0.0
 mur = 0.0
-H = hamilton.hamilton(cnt, onsite=-0.018, hopping=-2.97)
+H = hamilton.hamilton(cnt, onsite=0.0, hopping=-2.97)
 H.build_H()
 H.build_S(base_overlap=0.018)
 

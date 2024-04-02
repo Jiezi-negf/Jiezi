@@ -415,3 +415,4 @@ def ef_solver_degenerate(u_init, N_GP_T, Nc, Nv, n_GP_list, p_GP_list, cnt_cell_
                     ef_init_p[cnt_cell_index, i] = ef_p_i
             break
     return ef_init_n, ef_init_p
+

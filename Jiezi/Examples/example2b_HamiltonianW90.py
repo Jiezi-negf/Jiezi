@@ -43,7 +43,7 @@ Mii_cnt, Mi1_cnt = w90_supercell_matrix(r_set, hr_cnt_set, r_1, r_2, r_3, k_1, k
 # build hamilton matrix
 cnt = builder.CNT(n=8, m=0, Trepeat=60, nonideal=False)
 cnt.construct()
-H = hamilton.hamilton(cnt, onsite=-0.28, hopping=-2.97)
+H = hamilton.hamilton(cnt, onsite=0.0, hopping=-2.97)
 H.build_H()
 H.build_S(base_overlap=0.018)
 H.H_readw90(Mii_total, Mi1_total, Mii_cnt, Mi1_cnt, num_supercell)

@@ -474,7 +474,6 @@ def dosOfKE_SanchoRubio(Hii_new, Hi1_new, E, eta, k, L):
     eye.identity()
     GF = op.inv(op.addmat(op.scamulmat(w, eye), H_temp.nega()))
     dos = min(- GF.tre().imag / np.pi, 2)
-    # dos = - GF.tre().imag / np.pi
     return dos
 
 

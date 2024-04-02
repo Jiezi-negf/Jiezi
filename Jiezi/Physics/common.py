@@ -86,3 +86,4 @@ def ifdagger(mat: matrix_numpy):
         for j in range(col):
             error += np.sqrt(delta.get_value(i, j).imag ** 2 + delta.get_value(i, j).real ** 2)
     return error
+

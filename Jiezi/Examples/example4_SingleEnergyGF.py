@@ -18,7 +18,7 @@ cnt = builder.CNT(n=4, m=0, Trepeat=3, nonideal=False)
 cnt.construct()
 mul = 0.0
 mur = 0.0
-H = hamilton.hamilton(cnt, onsite=-0.018, hopping=-2.97)
+H = hamilton.hamilton(cnt, onsite=0.0, hopping=-2.97)
 H.build_H()
 H.build_S(base_overlap=0.018)
 

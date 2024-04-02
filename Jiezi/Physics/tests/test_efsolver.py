@@ -1,5 +1,6 @@
 import os
 import sys
+
 sys.path.append(os.path.abspath(__file__ + "/../../../.."))
 from Jiezi.Physics.band import subband, band2dos
 from Jiezi.Physics.rgf_origin import rgf
@@ -18,7 +19,7 @@ nz = 30
 cnt = builder.CNT(n=19, m=0, Trepeat=nz, nonideal=False)
 cnt.construct()
 L = cnt.get_singlecell_length()
-H = hamilton.hamilton(cnt, onsite=0, hopping=-2.7)
+H = hamilton.hamilton(cnt, onsite=0, hopping=-2.97)
 H.build_H()
 H.build_S(base_overlap=0.018)
 Hii_0 = H.get_Hii()[1]
@@ -121,3 +122,5 @@ print("ef is:", ef)
 #                            dos, 1e-22,
 #                            E_list[0]-10, E_list[len(E_list) - 1]+10, 0, TOL_ef)
 # print(ef_p)
+
+

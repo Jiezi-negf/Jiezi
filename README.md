@@ -6,7 +6,7 @@
 
 In the current version, most of the examples and modules are designed to be convenient for simulating gate-all-around carbon Nanotube Field-effect transistor (CNTFET), but it's extendable to more general cases with tiny changes.
 
-The feasibility of Jieziis was only verified on Linux system.
+The feasibility of Jiezi was only verified on Linux system.
 
 ## Getting started
 
@@ -104,7 +104,7 @@ All unit test files are in the directory `Jiezi/Jiezi/tests` . After the install
 
 Below we describe how to build the carbon nanotube structure.
 
-0. Import necessary module, especially `duilder`:
+0. Import necessary module, especially `builder`:
 
 ```python
 import sys
@@ -242,7 +242,7 @@ cnt.construct()
 1. Build Hamiltonian matrix based on connections among atoms, on-site value, and hopping value.
 
 ```python
-H = hamilton.hamilton(cnt, onsite=-0.28, hopping=-2.97)
+H = hamilton.hamilton(cnt, onsite=0.0, hopping=-2.97)
 H.build_H()
 H.build_S(base_overlap=0.018)
 Hii = H.get_Hii()
@@ -316,7 +316,7 @@ Mii_cnt, Mi1_cnt = w90_supercell_matrix(r_set, hr_cnt_set, r_1, r_2, r_3, k_1, k
 ```python
 cnt = builder.CNT(n=8, m=0, Trepeat=60, nonideal=False)
 cnt.construct()
-H = hamilton.hamilton(cnt, onsite=-0.28, hopping=-2.97)
+H = hamilton.hamilton(cnt, onsite=0.0, hopping=-2.97)
 H.build_H()
 H.build_S(base_overlap=0.018)
 H.H_readw90(Mii_total, Mi1_total, Mii_cnt, Mi1_cnt, num_supercell)
@@ -349,7 +349,7 @@ import matplotlib.pyplot as plt
 # build CNT and its Hmiltonian matrix
 cnt = builder.CNT(n=4, m=0, Trepeat=3, nonideal=False)
 cnt.construct()
-H = hamilton.hamilton(cnt, onsite=-0.28, hopping=-2.97)
+H = hamilton.hamilton(cnt, onsite=0.0, hopping=-2.97)
 H.build_H()
 H.build_S(base_overlap=0.018)
 # compute subband and eigenvector on specific K point
@@ -361,9 +361,9 @@ Because of quantum confinement in XY plane, the subband can be observed in band 
 For CNT, the minimum conduction band energy value is at the point where k=0. So the energy band gap and the bottom of conduction band can be got by the following code:
 
 ```python
-Ec, Eg = band.get_EcEg(H)
-print("bottom of conduction band is:", Ec)
-print("band gap is:", Eg)
+Ec, Ev, Eg = get_EcEg(Hii, Hi1)
+print("Ec is", Ec)
+print("Ev is", Ev)
 ```
 
 As long as the parameters of the k-point list are set, the band structure can be computed and plotted on the screen:
@@ -495,7 +495,7 @@ cnt = builder.CNT(n=4, m=0, Trepeat=3, nonideal=False)
 cnt.construct()
 mul = 0.0
 mur = 0.0
-H = hamilton.hamilton(cnt, onsite=-0.018, hopping=-2.97)
+H = hamilton.hamilton(cnt, onsite=0.0, hopping=-2.97)
 H.build_H()
 H.build_S(base_overlap=0.018)
 
@@ -521,8 +521,8 @@ for energy in E_subband:
 min_subband = min(min_temp).real
 max_subband = max(max_temp).real
 
-E_start = min(mul, mur, min_subband) - 10 * KT + 7
-E_end = max(mul, mur, max_subband) + 10 * KT - 6.5
+E_start = min(mul, mur) - 10 * KT - 0.0005 - 1
+E_end = max(mul, mur) + 10 * KT + 1
 E_step = 0.001
 E_list = np.arange(E_start, E_end, E_step)
 print("Energy list:", E_start, "to", E_end, "Step of energy:", E_step)
@@ -556,7 +556,7 @@ G_R, G_lesser, G_greater, G1i_lesser, Sigma_left_lesser, Sigma_left_greater, \
 
 ### PhysicalQuantity
 
-Example "SingleEnergyGF" shows Green's function computation on one specific energy, which is the basis to get physical quantities such as carrier density and local density of states. This example loops over the interested energy range and obtains the values of the physical quantity at each energy point. Although the code about "Self-consistent Born Approximation(SCBA)" has been written, in this version the code of phonon part in SCBA loop is annotated. User can enable this function by uncommenting relevant lines.
+Example "SingleEnergyGF" shows Green's function computation on one specific energy, which is the basis to get physical quantities such as carrier density and local density of states. This example loops over the interested energy range and obtains the values of the physical quantity at each energy point. 
 
 The first three steps are the same as example "SingleEnergyGF". After that, the SCBA  loop can be started:
 
@@ -565,12 +565,6 @@ iter_SCBA_max = 10
 TOL_SCBA = 1e-100
 ratio_SCBA = 0.5
 eta = 5e-6
-ac = 2.5
-op = 1.0e8
-v_s = 5.0e5
-omega = 4
-# Dac = ac ** 2 * KT / (cnt.get_mass_density() * v_s ** 2)
-# Dop = (h_bar * op) ** 2 / (2 * cnt.get_mass_density() * omega * E_step)
 Dac = 0
 Dop = 0
 G_R_fullE, G_lesser_fullE, G_greater_fullE, G1i_lesser_fullE, \
@@ -580,7 +574,17 @@ G_R_fullE, G_lesser_fullE, G_greater_fullE, G1i_lesser_fullE, \
          sigma_lesser_ph, sigma_r_ph, form_factor, Dac, Dop, omega)
 ```
 
-The output matrix contains $\Sigma_{R,L}^{>,<}$, the diagonal element of  $G^R,G^<,G^>$, and the off-diagonal element of $G^<$, which can be used to obtain the carrier density and density of states.
+Although the code about "Self-consistent Born Approximation(SCBA)" has been written, in this version the code of phonon part in SCBA loop is annotated. User can enable this function by replacing `SCBA` with `SCBAopen`.
+
+```python
+energyOP, coupleOP, coupleAC = phononPara(cnt)
+G_R_fullE, G_lesser_fullE, G_greater_fullE, G1i_lesser_fullE, \
+Sigma_left_lesser_fullE, Sigma_left_greater_fullE, Sigma_right_lesser_fullE, Sigma_right_greater_fullE = \
+SCBAopen(E_list, iter_SCBA_max, TOL_SCBA, ratio_SCBA, eta, mul, mur, Hii_new, Hi1_new, Sii_new, S00,lead_H00_L, lead_H00_R, lead_H10_L, lead_H10_R,
+sigma_lesser_ph, sigma_r_ph, form_factor, coupleAC, coupleOP, energyOP)
+```
+
+The output matrix contains $\Sigma_{R,L}^{>,<}$, the diagonal element of  $G^R,G^<,G^>$, and the off-diagonal element of $G^<$, which can be used to obtain the carrier density and density of states. It should be noticed that although the name of these variable are lesser or greater, they indicates the $\Sigma^{in/out}$ and $G^{n/p}$.
 
 ```python
 n_spectrum, p_spectrum = quantity.carrierSpectrum(E_list, G_lesser_fullE, G_greater_fullE, volume_cell)
@@ -732,10 +736,10 @@ The example can be separated into the following steps:
 9. Compute conduction band bottom and band gap.
 
 ```python
-    H = hamilton.hamilton(cnt, onsite=-0.28, hopping=-2.97)
+    H = hamilton.hamilton(cnt, onsite=0.0, hopping=-2.97)
     H.build_H()
     H.build_S(base_overlap=0.018)
-    Ec, Eg = get_EcEg(H)
+    Ec, Ev, Eg = get_EcEg(Hii, Hi1)
 ```
 
    Start the NEGF-Poisson loop:
@@ -759,7 +763,7 @@ while iter_big < iter_big_max:
 11. Build Hamiltonian matrix with the influence of phi.
 
 ```python
-        H = hamilton.hamilton(cnt, onsite=-0.28, hopping=-2.97)
+        H = hamilton.hamilton(cnt, onsite=0.0, hopping=-2.97)
         H.build_H()
         H.build_S(base_overlap=0.018)
         layer_phi_list = H.H_add_phi(dict_cell, phi_cell, cell_co, cut_radius, cut_z, r_oxide, z_total, num_supercell)
@@ -770,6 +774,7 @@ while iter_big < iter_big_max:
 14. Poisson solver starts. Mode 1 is the non-linear solver, mode 2 is the linear solver and mode 3 is the analytical solver which has not been developed. If mode is 1, the quasi-Fermi level solver will be called so the guess value should be initialized. 
 
 ```python
+        # set the initial value of ef
         ef_init_n = np.ones([len(info_mesh), 4]) * (-1e2)
         ef_init_p = np.ones([len(info_mesh), 4]) * 1e2
         TOL_ef = 1e-4
@@ -778,9 +783,8 @@ while iter_big < iter_big_max:
         mode = 1
         phi = poisson(mode, info_mesh, N_GP_T, cell_long_term, cell_NJ, cell_NNTJ, cnt_cell_list,
                       ef_init_n, ef_init_p, mark_list,
-                      Dirichlet_list, Dirichlet_BC, E_list, Ec, Eg, TOL_ef, TOL_du, iter_NonLinearPoisson_max,
+                      Dirichlet_list, Dirichlet_BC, E_list_poi, Ec, Eg, TOL_ef, TOL_du, iter_NonLinearPoisson_max,
                       dos_GP_list, n_GP_list, p_GP_list, doping_GP_list, fixedCharge_GP_list, phi_guess, dof_amount)
-
 ```
 
 15. Test whether the difference between two adjacent iterations is small enough.

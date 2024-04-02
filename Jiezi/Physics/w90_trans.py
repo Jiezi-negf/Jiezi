@@ -30,7 +30,8 @@ def subband_k(hr_set, r_set, r_1, r_2, r_3, k_1, k_2, k_3, k):
         k_vec = lattice_vector(k, k_1, k_2, k_3)
         hk = op.addmat(hk, op.scamulmat(np.exp(1j * op.vecdotvec(k_vec.trans(), r_vec)), hr_set[i]))
     eigen_energy_k = hk.eigenvalue()
-    return eigen_energy_k
+    eigen_vec_k = hk.eigenvec()
+    return eigen_energy_k, eigen_vec_k
 
 
 def read_hamiltonian(path_hr):
@@ -154,7 +155,7 @@ def computeEKonKpath(kptList, hr_set, r_set, r_1, r_2, r_3, k_1, k_2, k_3):
     matrixWholeEK = matrix_numpy(num_kpt, num_band)
     for i in range(num_kpt):
         k = kptList[i]
-        eigen_energy_k = subband_k(hr_set, r_set, r_1, r_2, r_3, k_1, k_2, k_3, k)
+        eigen_energy_k, eigen_vec_k = subband_k(hr_set, r_set, r_1, r_2, r_3, k_1, k_2, k_3, k)
         matrixWholeEK.set_block_value(i, i+1, 0, num_band, eigen_energy_k)
     return matrixWholeEK
 

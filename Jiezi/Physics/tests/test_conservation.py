@@ -16,10 +16,12 @@ sys.path.append("../../../")
 # nz = 51
 # file_path = "/home/zjy/slurmfile/slurm-8775385-8780746/normal/process6/currentSpectrum.dat"
 
+
 E_start = -0.66
 nz = 60
 E_step = 0.001
 file_path = "/home/zjy/slurmfile/slurm-9582861/process2/currentSpectrum.dat"
+
 # file_path = "/home/zjy/slurmfile/slurm-9576981/process1/electronSpectrum.dat"
 
 with open(file_path, "r") as f:
@@ -41,16 +43,18 @@ for i in range(nz):
     JEspectrumWhole.append(JEspectrum)
 plt.subplot(2, 2, 1)
 plt.title("J_0")
-plt.plot(E_list, JspectrumWhole[0])
+plt.plot(E_list, JspectrumWhole[1])
 plt.subplot(2, 2, 3)
 plt.title("JE_0")
-plt.plot(E_list, JEspectrumWhole[0])
+plt.plot(E_list, JspectrumWhole[2])
 plt.subplot(2, 2, 2)
 plt.title("J_14")
+
 plt.plot(E_list, JspectrumWhole[20])
 plt.subplot(2, 2, 4)
 plt.title("JE_14")
 plt.plot(E_list, JEspectrumWhole[20])
+
 plt.show()
 
 
