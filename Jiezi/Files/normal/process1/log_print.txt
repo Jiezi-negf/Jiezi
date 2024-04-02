@@ -1,0 +1,26 @@
+0 -0.4 1 0.1 0.0 1
+temprature: 300
+Amount of atoms in single cell: 32
+Total amount of atoms: 1920
+Radius of tube: 3.1433686175136217
+Length of single cell: 4.276079999999999
+Length of whole device: 256.5648
+Length of gate: 85.6926432
+Thickness of cnt: 3.1433686175136217
+Thickness of oxide: 9.995912203693317
+amount of element: 113298
+amount of dof: 20848
+Dirichlet BC is: [1.0, 1, 1.0]
+z isolation is: 10
+source electrostatic doping on z axis is from 0 to 75.43607839999999
+drain electrostatic doping on z axis is from 181.1287216 to 256.5648
+mu_l: 0
+mu_r: -0.4
+doping source, channel, drain are: 0 0 0
+init guess is: 1e-05 1e-05
+total fixed charge in oxide--scope:
+ radius from 4.715052926270433 to 9.713009028117092 
+ coordinate on z axis from 85.43607839999999 to 171.1287216 
+ fixed charge in oxide--density: 0
+Ec is 0.6968604117513667
+Ev is -0.6968604117513657

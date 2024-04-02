@@ -10,7 +10,7 @@ import numpy as np
 from Jiezi.LA.vector_numpy import vector_numpy
 from Jiezi.LA.matrix_numpy import matrix_numpy
 from Jiezi.LA import operator as op
-from Jiezi.Physics.hamilton import hamilton
+from Jiezi.Physics.hamilton import hamilton, compute_band
 
 
 def subband(H: hamilton, k):
@@ -56,31 +56,12 @@ def subband_defect(H: hamilton, k, cell_start, cell_repeat):
     return sub_band, U
 
 
-def get_EcEg(H: hamilton):
-    """
-    compute bottom of conduction band energy Ec and band gap Eg
-    :param H: hamilton object
-    :return: Ec and Eg
-    """
-    Hii = H.get_Hii()
-    Hi1 = H.get_Hi1()
-    Sii = H.get_Sii()
-    Si1 = H.get_Si1()
-    H_temp = op.addmat(Hii[0], Hi1[0].dagger(), Hi1[1])
-    S_temp = op.addmat(Sii[0], Si1[0].dagger(), Si1[1])
-    H_temp = op.matmulmat(op.inv(S_temp), H_temp)
-    energy_list = H_temp.eigenvalue().get_value()
-    Ec = 0.0
-    Eg = 0.0
-    for i in range(len(energy_list)):
-        energy = energy_list[i]
-        if energy < 0:
-            continue
-        else:
-            Ec = energy
-            Eg = energy - energy_list[i-1]
-            break
-    return Ec, Eg
+def get_EcEg(Hii, Hi1):
+    bandGamma = compute_band(Hii, Hi1, 1, [0])[0, :]
+    Ev = bandGamma[int(len(bandGamma) / 2) - 1]
+    Ec = bandGamma[int(len(bandGamma) / 2)]
+    Eg = Ec - Ev
+    return Ec, Ev, Eg
 
 
 def band_structure(H: hamilton, start, end, step):
@@ -114,3 +95,20 @@ def band_structure_defect(H: hamilton, start, end, step, cell_start, cell_repeat
         band.append(sub_band)
     return k_total, band
 
+def band2dos(arrayEK, E_list):
+    """
+    compute density of states (DOS) from band structure
+    :param arrayEK: matrix, each column or row stores the eigenvalues on each k-point
+    :param E_list: sampling point on energy axis
+    :return: DOS(E)
+    """
+    length = len(E_list)
+    step = E_list[1] - E_list[0]
+    arrayDOS = np.zeros((length, 2))
+    # the first column of arrayDOS is the energy value
+    arrayDOS[:, 0:1] = E_list.reshape((length, 1))
+    for eigenvaluerow in arrayEK:
+        for eigenvalue in eigenvaluerow:
+            if E_list[0] <= eigenvalue <= E_list[length - 1] + step:
+                arrayDOS[int((eigenvalue - E_list[0]) // step), 1] += 1
+    return arrayDOS

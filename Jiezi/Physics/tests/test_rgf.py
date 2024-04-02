@@ -22,9 +22,10 @@ import matplotlib.pyplot as plt
 from Jiezi.Physics import hamilton, band
 from Jiezi.Graph import builder
 
-cnt = builder.CNT(n=6, m=3, Trepeat=6, nonideal=False)
+cnt = builder.CNT(n=8, m=0, Trepeat=3, nonideal=False)
 cnt.construct()
-H = hamilton.hamilton(cnt, onsite=-0.28, hopping=-2.97)
+phi = 0.1
+H = hamilton.hamilton(cnt, onsite=-phi, hopping=-2.97)
 H.build_H()
 H.build_S(base_overlap=0.018)
 
@@ -38,9 +39,9 @@ Si1 = H.get_Si1()
 S00 = H.get_S00()
 lead_H00_L, lead_H00_R = H.get_lead_H00()
 lead_H10_L, lead_H10_R = H.get_lead_H10()
-E_list = [-0.3]
+E_list = [-0.0]
 mul = 0.0
-mur = 0.0
+mur = -0.4
 ee = 0
 eta_rgf = 5e-6
 eta_sg = 5e-6
@@ -56,10 +57,7 @@ for i in range(len(E_list)):
         sigma_ph_ee.append(sigma_ph_element)
     sigma_ph.append(sigma_ph_ee)
 
-# this is the output of rgf method
-G_R_rgf, G_lesser, G_greater, G1i_lesser, Sigma_left_lesser, Sigma_left_greater, \
-    Sigma_right_lesser, Sigma_right_greater = \
-    rgf(ee, E_list, eta_rgf, mul, mur, Hii, Hi1, Sii, sigma_ph, sigma_ph)
+
 # G_R_rgf, G_lesser, G_greater, G1i_lesser, \
 #             Sigma_left_lesser, Sigma_left_greate, Sigma_right_lesser, Sigma_right_greater = \
 #                 rgf(ee, E_list, eta_rgf, mul, mur, Hii, Hi1, Sii, S00,
@@ -120,10 +118,17 @@ Sigma_greater_total.set_block_value((nz - 1) * nm, nz * nm, (nz - 1) * nm, nz * 
 
 # compute the GF of the whole system directly
 G_R_inv = op.inv(op.addmat(op.scamulmat(w, S_total), H_total.nega(), Sigma_total.nega()))
+G_R_inv_imag = G_R_inv.imaginary()
 G_lesser_inv = op.trimatmul(G_R_inv, Sigma_lesser_total, G_R_inv, type="nnc")
 G_greater_inv = op.addmat(G_lesser_inv.nega(),
                           op.scamulmat(complex(0.0, 1.0),
                                        op.addmat(G_R_inv, G_R_inv.dagger().nega())))
+
+# this is the output of rgf method
+G_R_rgf, G_lesser, G_greater, G1i_lesser, Sigma_left_lesser, Sigma_left_greater, \
+    Sigma_right_lesser, Sigma_right_greater = \
+    rgf(ee, E_list, eta_rgf, mul, mur, Hii, Hi1, Sii, sigma_ph, sigma_ph)
+
 
 # only reserve the diagonal block, set the other blocks to be zero
 G_R_inv_total = matrix_numpy(nz * nm, nz * nm)
@@ -136,6 +141,7 @@ G_R_rgf_total = matrix_numpy(nz * nm, nz * nm)
 for i in range(nz):
     G_R_rgf_total.set_block_value(i * nm, (i + 1) * nm, i * nm, (i + 1) * nm, G_R_rgf[i])
 
+G_R_rgf_total_imag = G_R_rgf_total.imaginary()
 # compute the difference between the result got from two methods
 delta_G_R = op.addmat(G_R_inv_total, G_R_rgf_total.nega())
 

@@ -69,7 +69,7 @@ def densityOfStates(E_list, G_R_fullE, volume_cell):
     for ee in range(num_energy):
         dos_ee = [None] * num_layer
         for zz in range(num_layer):
-            dos_ee[zz] = (- 2 * G_R_fullE[ee][zz].imaginary().tre() / volume_cell / math.pi).real
+            dos_ee[zz] = (- 1 * G_R_fullE[ee][zz].imaginary().tre() / volume_cell / math.pi).real
         dos[ee] = dos_ee
     return dos
 

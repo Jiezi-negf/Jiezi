@@ -16,10 +16,12 @@ sys.path.append("../../../")
 # nz = 51
 # file_path = "/home/zjy/slurmfile/slurm-8775385-8780746/normal/process6/currentSpectrum.dat"
 
-E_start = -2.58
-nz = 26
+E_start = -0.66
+nz = 60
 E_step = 0.001
-file_path = "/home/zjy/slurmfile/slurm-8828772/grapheneContact/process2/currentSpectrum.dat"
+file_path = "/home/zjy/slurmfile/slurm-9582861/process2/currentSpectrum.dat"
+# file_path = "/home/zjy/slurmfile/slurm-9576981/process1/electronSpectrum.dat"
+
 with open(file_path, "r") as f:
     lines = f.readlines()
 length_lines = len(lines)
@@ -45,12 +47,11 @@ plt.title("JE_0")
 plt.plot(E_list, JEspectrumWhole[0])
 plt.subplot(2, 2, 2)
 plt.title("J_14")
-plt.plot(E_list, JspectrumWhole[25])
+plt.plot(E_list, JspectrumWhole[20])
 plt.subplot(2, 2, 4)
 plt.title("JE_14")
-plt.plot(E_list, JEspectrumWhole[25])
+plt.plot(E_list, JEspectrumWhole[20])
 plt.show()
-print(123)
 
 
 

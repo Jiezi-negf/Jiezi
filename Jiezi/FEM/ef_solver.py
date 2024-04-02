@@ -12,6 +12,7 @@ from Jiezi.LA.vector_numpy import vector_numpy
 from Jiezi.LA import operator as op
 from Jiezi.Physics.common import *
 import numpy as np
+from Jiezi.FEM import fermiIntegral
 # import matplotlib.pyplot as plt
 
 
@@ -67,11 +68,12 @@ def ef_solver(u_init, N_GP_T, dos_GP_list, n_GP_list, p_GP_list, ef_init_n, ef_i
             u_init_vec.copy(u_init[cnt_cell_index].reshape(u_init[cnt_cell_index].shape[0], 1))
             u_GP = op.vecdotvec(N_GP_T[GP_index], u_init_vec)
             ef_n_i = brent("n", zero_index, E_list, E_list_n, E_step, Ec, Eg, u_GP,
-                           dos_GP_list[cnt_cell_index][GP_index], n_GP_list[cnt_cell_index][GP_index],
-                           E_list[0]-10, E_list[len(E_list) - 1]+10, TOL_ef, TOL_ef)
+                           dos_GP_list[cnt_cell_index][GP_index], max((1e-22, n_GP_list[cnt_cell_index][GP_index])),
+                           E_list[0]-10, E_list[len(E_list) - 1]+10, 0, TOL_ef)
             ef_p_i = brent("p", zero_index, E_list, E_list_p, E_step, Ec, Eg, u_GP,
-                           dos_GP_list[cnt_cell_index][GP_index], p_GP_list[cnt_cell_index][GP_index],
-                           E_list[0]-10, E_list[len(E_list) - 1]+10, TOL_ef, TOL_ef)
+                           dos_GP_list[cnt_cell_index][GP_index], max((1e-22, p_GP_list[cnt_cell_index][GP_index])),
+                           E_list[0]-10, E_list[len(E_list) - 1]+10, 0, TOL_ef)
+            # ef_p_i = 1e2
             # test if the function has root, if there is no root in the interval, break the loop
             if ef_n_i == None:
                 print("ef_solver failed during ef_n solution")
@@ -169,9 +171,9 @@ def func_F(flag_np, zero_index, E_list, E_list_np, E_step, Ec, Eg, phi, dos, den
     dos_np = np.array(dos)
     E_list_np = np.array(E_list_np)
     if flag_np == "n":
-        result = np.trapz(dos_np[zero_index:] * fermi(E_list_np - phi - ef), dx=E_step) - density_np
+        result = np.trapz(2 * dos_np[zero_index:] * fermi(E_list_np - phi - ef), dx=E_step) - density_np
     else:
-        result = np.trapz(dos_np[0:zero_index + 1] * (1 - fermi(E_list_np - phi - ef)), dx=E_step) - density_np
+        result = np.trapz(2 * dos_np[0:zero_index + 1] * (1 - fermi(E_list_np - phi - ef)), dx=E_step) - density_np
     # print("ef_solver func_F np.trapz:", result)
     # if flag_np == "n":
     #     diff = Ec - E_list[0]
@@ -277,7 +279,7 @@ def between(a, b, x):
 
 
 def brent(flag_np, zero_index, E_list, E_list_np, E_step, Ec, Eg, phi, dos, density_np, a, b,
-          tol_brent_residual=1e-5, tol_brent_bisection=1e-5):
+          tol_brent_residual=0, tol_brent_bisection=1e-11):
     """
     a robust algorithm for seeking roots of equation
     """
@@ -285,13 +287,13 @@ def brent(flag_np, zero_index, E_list, E_list_np, E_step, Ec, Eg, phi, dos, dens
     f_b = func_F(flag_np, zero_index, E_list, E_list_np, E_step, Ec, Eg, phi, dos, density_np, b)
     # test if there is root between a and b, i.e. if the equation has solution
     if flag_np == "n" and f_a > 0 and f_b > 0:
-        return a - 10
+        return
     if flag_np == "n" and f_a < 0 and f_b < 0:
-        return b + 10
+        return
     if flag_np == "p" and f_a > 0 and f_b > 0:
-        return b + 10
+        return
     if flag_np == "p" and f_a < 0 and f_b < 0:
-        return a - 10
+        return
     # if f_a * f_b > 0:
     #     print("ERROR: the sign of f(a) and f(b) must be different!", "a:", a, "fa:", f_a, "b:", b, "f_b:", f_b)
     #     # print(phi, dos, density_n)
@@ -372,5 +374,44 @@ def brent(flag_np, zero_index, E_list, E_list_np, E_step, Ec, Eg, phi, dos, dens
             iter_brent += 1
             continue
 
+@time_it
+def ef_solver_analytical(u_init, N_GP_T, Nc, Nv, n_GP_list, p_GP_list, cnt_cell_list, Ec, Ev, ef_init_n, ef_init_p):
+    for cnt_cell_index in cnt_cell_list:
+        for GP_index in range(4):
+            # u_GP_cell is a list, the length of which is 4, which stores the phi value on the four GP of cell_index
+            u_init_vec = vector_numpy(4, "float")
+            u_init_vec.copy(u_init[cnt_cell_index].reshape(u_init[cnt_cell_index].shape[0], 1))
+            u_GP = op.vecdotvec(N_GP_T[GP_index], u_init_vec)
+            ef_n_i = Ec - u_GP + KT * np.log(max((1e-22, n_GP_list[cnt_cell_index][GP_index])) / Nc)
+            ef_p_i = Ev - u_GP - KT * np.log(max((1e-22, p_GP_list[cnt_cell_index][GP_index])) / Nv)
+            ef_init_n[cnt_cell_index, GP_index] = ef_n_i
+            ef_init_p[cnt_cell_index, GP_index] = ef_p_i
+            # only compute the first point of every cell, reduce the amount of computation
+            if GP_index == 0:
+                for i in range(1, 4):
+                    ef_init_n[cnt_cell_index, i] = ef_n_i
+                    ef_init_p[cnt_cell_index, i] = ef_p_i
+            break
+    return ef_init_n, ef_init_p
 
-
+@time_it
+def ef_solver_degenerate(u_init, N_GP_T, Nc, Nv, n_GP_list, p_GP_list, cnt_cell_list, Ec, Ev, ef_init_n, ef_init_p):
+    for cnt_cell_index in cnt_cell_list:
+        for GP_index in range(4):
+            # u_GP_cell is a list, the length of which is 4, which stores the phi value on the four GP of cell_index
+            u_init_vec = vector_numpy(4, "float")
+            u_init_vec.copy(u_init[cnt_cell_index].reshape(u_init[cnt_cell_index].shape[0], 1))
+            u_GP = op.vecdotvec(N_GP_T[GP_index], u_init_vec)
+            ef_n_i = Ec - u_GP + KT * fermiIntegral.inverseFermiIntegral(
+                max((1e-22, n_GP_list[cnt_cell_index][GP_index])) / Nc)
+            ef_p_i = Ev - u_GP - KT * fermiIntegral.inverseFermiIntegral(
+                max((1e-22, p_GP_list[cnt_cell_index][GP_index])) / Nv)
+            ef_init_n[cnt_cell_index, GP_index] = ef_n_i
+            ef_init_p[cnt_cell_index, GP_index] = ef_p_i
+            # only compute the first point of every cell, reduce the amount of computation
+            if GP_index == 0:
+                for i in range(1, 4):
+                    ef_init_n[cnt_cell_index, i] = ef_n_i
+                    ef_init_p[cnt_cell_index, i] = ef_p_i
+            break
+    return ef_init_n, ef_init_p

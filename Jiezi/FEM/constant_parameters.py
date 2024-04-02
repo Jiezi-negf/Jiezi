@@ -361,7 +361,7 @@ def get_dos_GP_list(coord_GP_list, dos, z_length, mark_list):
             # if this cell is not in CNT region, then set dos to zero
             dos_GP_list_i = [[0.0] * num_energy] * 4
         else:
-            # if this cell is in CNT region, then set dos value based on NEGF output
+            # if this cell is in CNT region, then set dos value based on Simulator output
             dos_GP_list_i = [None] * 4
             for GP_index in range(4):
                 dos_GP_list_i[GP_index] = find_dos(coord_GP_list[cell_index][GP_index], dos, z_length)
@@ -389,7 +389,7 @@ def get_np_GP_list(coord_GP_list, density_np, z_length, mark_list):
     return np_GP_list
 
 
-def doping(coord_GP_list, zlength_oxide, z_translation, doping_source, doping_drain, doping_channel, mark_list):
+def doping(coord_GP_list, zlength_oxide, z_translation, z_iso, doping_source, doping_drain, doping_channel, mark_list):
     """
     set doping concentration of every Gauss Point of every cell
     :param coord_GP_list: coord_GP_list[cell_index] = [GP1[x, y, z], GP2[x, y, z]...]
@@ -408,9 +408,9 @@ def doping(coord_GP_list, zlength_oxide, z_translation, doping_source, doping_dr
             doping_GP_list_i = [float] * 4
             for GP_index in range(4):
                 x, y, z = coord_GP_list[cell_index][GP_index]
-                if z.real < z_translation:
+                if z.real < z_translation - z_iso:
                     doping_GP_list_i[GP_index] = doping_source
-                elif z.real < z_translation + zlength_oxide:
+                elif z.real < z_translation + zlength_oxide + z_iso:
                     doping_GP_list_i[GP_index] = doping_channel
                 else:
                     doping_GP_list_i[GP_index] = doping_drain
