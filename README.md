@@ -819,3 +819,9 @@ The contribution of each author is shown in  [AUTHORS.md](AUTHORS.md) file.
 ## License
 
 This project is licensed under the GPL-3.0 License - see the [LICENSE.md](LICENSE.md) file for details.
+
+## Citing
+
+We would appreciate it when using the Jiezi code you cite the following paper: 
+Zhu J, Cao J, Song C, et al. Jiezi: An open-source Python software for simulating quantum transport based on non-equilibrium Green's function formalism[J]. Computer Physics Communications, 2024, 302: 109251.
+DOI: https://doi.org/10.1016/j.cpc.2024.109251
